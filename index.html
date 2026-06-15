@@ -1558,117 +1558,93 @@
         <!-- DRE -->
         <div id="dre" class="page">
             <div class="page-header">
-                <h1>Demonstração de Resultado do Exercício (DRE)</h1>
+                <h1>📊 DRE — Demonstração do Resultado</h1>
             </div>
-
             <div id="dreAviso" style="display:none;"></div>
-
             <div class="filter-container">
-                <div class="filter-row" style="align-items:flex-end;">
+                <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
                     <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoDRE" onchange="carregarDRE()">
                             <option value="">Todos os anos</option>
                         </select>
                     </div>
-                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
-                        <label style="font-size:12px;color:#666;font-style:italic;">Selecione um ano para ver o detalhamento mensal Jan–Dez</label>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesDRE" onchange="carregarDRE()">
+                            <option value="">Acumulado do ano</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px;">
+                        <button class="btn btn-primary btn-small" onclick="abrirModalLancDRE()">+ Lançar</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportarDRE()">📥 Exportar</button>
                     </div>
                 </div>
             </div>
-
-            <!-- Tabela mensal Jan-Dez DRE -->
-            <div class="card" id="cardDREMensal" style="display:none;">
+            <div class="dashboard-grid" style="margin-bottom:16px;">
+                <div class="stat-card" style="border-left-color:#28a745;">
+                    <div class="stat-label">💰 Receita Bruta</div>
+                    <div class="stat-value" id="dreCardReceita" style="color:#28a745;font-size:20px;">R$ 0,00</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#17a2b8;">
+                    <div class="stat-label">🧾 Deduções</div>
+                    <div class="stat-value" id="dreCardDeducoes" style="color:#17a2b8;font-size:20px;">R$ 0,00</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#FF7A42;">
+                    <div class="stat-label">📈 Receita Líquida</div>
+                    <div class="stat-value" id="dreCardRecLiq" style="color:#FF7A42;font-size:20px;">R$ 0,00</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">🏭 CPV/CSP</div>
+                    <div class="stat-value" id="dreCardCPV" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
+                </div>
+                <div class="stat-card" id="dreCardLucroBrutoBox">
+                    <div class="stat-label">📊 Lucro Bruto</div>
+                    <div class="stat-value" id="dreCardLucroBruto" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="dreCardMargemBruta">Margem: 0%</div>
+                </div>
+                <div class="stat-card" id="dreCardResultadoBox">
+                    <div class="stat-label">🏆 Resultado Líquido</div>
+                    <div class="stat-value" id="dreCardResultado" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="dreCardMargemLiq">Margem: 0%</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title" id="dreTituloPeriodo">DRE por Competência</div>
+                <div class="table-container">
+                    <table id="tabelaDRE" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th style="width:55%;">Descrição</th>
+                                <th style="width:20%;text-align:right;">Valor (R$)</th>
+                                <th style="width:15%;text-align:right;">AV %</th>
+                                <th style="width:10%;text-align:center;">Ver</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dreCorpo"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card" id="cardDREMensal" style="display:none;margin-top:16px;">
                 <div class="card-title" id="tituloDREMensal">📅 DRE Mensal</div>
-                <div class="table-container">
-                    <table id="tabelaDREMensal">
-                        <thead>
-                            <tr>
-                                <th>Mês</th>
-                                <th style="color:#28a745;">Receita</th>
-                                <th style="color:#dc3545;">Custos</th>
-                                <th>Lucro Bruto</th>
-                                <th>Margem %</th>
-                            </tr>
-                        </thead>
+                <div style="overflow-x:auto;">
+                    <table id="tabelaDREMensal" style="font-size:12px;min-width:900px;">
+                        <thead><tr id="dreHeaderMeses"><th style="min-width:180px;">Descrição</th></tr></thead>
                         <tbody></tbody>
-                        <tfoot>
-                            <tr style="font-weight:700;background:#f5f5f5;">
-                                <td>TOTAL ANO</td>
-                                <td id="dreMensalTotalRec" style="color:#28a745;">R$ 0,00</td>
-                                <td id="dreMensalTotalCus" style="color:#dc3545;">R$ 0,00</td>
-                                <td id="dreMensalTotalLuc">R$ 0,00</td>
-                                <td id="dreMensalTotalMar">0%</td>
-                            </tr>
-                        </tfoot>
                     </table>
                 </div>
             </div>
-
-            <div class="card">
-                <div class="card-title">DRE por Competência</div>
-                <div class="table-container">
-                    <table id="tabelaDRE">
-                        <thead>
-                            <tr>
-                                <th>Descrição</th>
-                                <th>Período Atual</th>
-                                <th>% da Receita</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="font-weight: 600; background-color: #f0f0f0;">
-                                <td colspan="3">RECEITAS</td>
-                            </tr>
-                            <tr>
-                                <td style="padding-left: 40px;">Receita Bruta</td>
-                                <td id="dreReceita">R$ 0,00</td>
-                                <td id="drePctReceita">0%</td>
-                            </tr>
-                            <tr style="font-weight: 600; background-color: #f0f0f0;">
-                                <td colspan="3">CUSTOS</td>
-                            </tr>
-                            <tr>
-                                <td style="padding-left: 40px;">Custo de Produtos/Serviços</td>
-                                <td id="dreCusto">R$ 0,00</td>
-                                <td id="drePctCusto">0%</td>
-                            </tr>
-                            <tr style="font-weight: 600; background-color: #f0f0f0;">
-                                <td colspan="3">LUCRO BRUTO</td>
-                            </tr>
-                            <tr style="font-weight: 600;">
-                                <td style="padding-left: 40px;">Lucro Bruto</td>
-                                <td id="dreLucroBruto">R$ 0,00</td>
-                                <td id="drePctLucroBruto">0%</td>
-                            </tr>
-                            <tr style="font-weight: 600; background-color: #f0f0f0; margin-top: 20px;">
-                                <td colspan="3">DESPESAS OPERACIONAIS</td>
-                            </tr>
-                            <tr>
-                                <td style="padding-left: 40px;">Despesas Gerais</td>
-                                <td id="dreDespesas">R$ 0,00</td>
-                                <td id="drePctDespesas">0%</td>
-                            </tr>
-                            <tr style="font-weight: 600; background-color: var(--cor-primaria); color: white;">
-                                <td>RESULTADO LÍQUIDO</td>
-                                <td id="dreResultado">R$ 0,00</td>
-                                <td id="drePctResultado">0%</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">Análise da DRE</div>
-                <div class="chart-container">
-                    <canvas id="chartDRE"></canvas>
-                </div>
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">Evolução Mensal — Receita x Resultado</div>
+                <div class="chart-container"><canvas id="chartDRE"></canvas></div>
             </div>
         </div>
-    </div>
-</div>
-
 <!-- MODAL BANCO -->
 <div class="modal" id="modalBanco">
     <div class="modal-content" style="max-width:480px;">
@@ -1958,7 +1934,7 @@
 
 <!-- MODAIS -->
 <div class="modal" id="modalCategoria">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width:500px;">
         <div class="modal-header">
             <span id="modalCategoriaTitulo">Nova Categoria</span>
             <button class="modal-close" onclick="closeModal('modalCategoria')">&times;</button>
@@ -1968,15 +1944,44 @@
                 <label>Nome*</label>
                 <input type="text" id="nomeCategoria" required>
             </div>
-            <div class="form-group">
-                <label>Descrição</label>
-                <textarea id="descricaoCategoria" rows="3"></textarea>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Grupo DRE</label>
+                    <select id="categoriaGrupoDRE">
+                        <option value="">Nenhum</option>
+                        <option value="RECEITA_BRUTA">Receita Bruta</option>
+                        <option value="DEDUCOES">Deduções / Impostos s/ Receita</option>
+                        <option value="CPV">CPV / Custo dos Serviços</option>
+                        <option value="DESP_COMERCIAL">Despesas Comerciais</option>
+                        <option value="DESP_ADMIN">Despesas Administrativas</option>
+                        <option value="DESP_FINANCEIRA">Despesas Financeiras</option>
+                        <option value="RECEITA_FINANCEIRA">Receitas Financeiras</option>
+                        <option value="EMPRESTIMO">Empréstimos e Financiamentos</option>
+                        <option value="INVESTIMENTO">Investimentos</option>
+                        <option value="OUTRAS_RECEITAS">Outras Receitas</option>
+                        <option value="OUTRAS_DESPESAS">Outras Despesas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select id="categoriaTipo">
+                        <option value="">-</option>
+                        <option value="Receita">Receita</option>
+                        <option value="Custo">Custo</option>
+                        <option value="Despesa">Despesa</option>
+                        <option value="Imposto">Imposto</option>
+                        <option value="Investimento">Investimento</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
             </div>
             <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ativoCategoria" checked>
-                    Ativo
-                </label>
+                <label>Descrição</label>
+                <textarea id="descricaoCategoria" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="ativoCategoria" checked> Ativo</label>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">Salvar</button>
@@ -2295,6 +2300,7 @@
         await carregarContasReceber();
         await carregarContasPagar();
         await atualizarDashboard();
+        inicializarFiltrosCalendario();
     }
 
     // CATEGORIAS
@@ -2307,22 +2313,30 @@
         }
     }
 
+    const _GRUPOS_DRE_LABELS = {
+        'RECEITA_BRUTA':'Receita Bruta','DEDUCOES':'Deduções/Impostos','CPV':'CPV/CSP',
+        'DESP_COMERCIAL':'Desp. Comerciais','DESP_ADMIN':'Desp. Administrativas',
+        'DESP_FINANCEIRA':'Desp. Financeiras','RECEITA_FINANCEIRA':'Rec. Financeiras',
+        'EMPRESTIMO':'Empréstimos','INVESTIMENTO':'Investimentos',
+        'OUTRAS_RECEITAS':'Outras Receitas','OUTRAS_DESPESAS':'Outras Despesas'
+    };
+
     function atualizarTabelaCategorias() {
         const tbody = document.querySelector('#tabelaCategorias tbody');
         tbody.innerHTML = '';
-
         dadosCache.categorias.forEach(cat => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${cat.nome}</td>
-                    <td>${cat.descricao || '-'}</td>
-                    <td><span class="status-badge ${cat.ativo ? 'status-recebido' : 'status-atrasado'}">${cat.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small" onclick="editarCategoria(${cat.id})">Editar</button>
-                        <button class="btn btn-danger btn-small" onclick="deletarCategoria(${cat.id})">Deletar</button>
-                    </td>
-                </tr>
-            `;
+            const grupoLabel = cat.grupo_dre ? (_GRUPOS_DRE_LABELS[cat.grupo_dre] || cat.grupo_dre) : '-';
+            tbody.innerHTML += `<tr>
+                <td><b>${cat.nome}</b></td>
+                <td><span style="background:#e8f4fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-size:11px;">${grupoLabel}</span></td>
+                <td>${cat.tipo || '-'}</td>
+                <td>${cat.descricao || '-'}</td>
+                <td><span class="status-badge ${cat.ativo ? 'status-recebido' : 'status-atrasado'}">${cat.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                <td>
+                    <button class="btn btn-secondary btn-small" onclick="editarCategoria(${cat.id})">Editar</button>
+                    <button class="btn btn-danger btn-small" onclick="deletarCategoria(${cat.id})">Deletar</button>
+                </td>
+            </tr>`;
         });
     }
 
@@ -2348,6 +2362,8 @@
         editandoId = null;
         editandoTipo = null;
         document.getElementById('nomeCategoria').value = '';
+        document.getElementById('categoriaGrupoDRE').value = '';
+        document.getElementById('categoriaTipo').value = '';
         document.getElementById('descricaoCategoria').value = '';
         document.getElementById('ativoCategoria').checked = true;
         document.getElementById('modalCategoriaTitulo').textContent = 'Nova Categoria';
@@ -2360,6 +2376,8 @@
             editandoId = id;
             editandoTipo = 'categoria';
             document.getElementById('nomeCategoria').value = categoria.nome;
+            document.getElementById('categoriaGrupoDRE').value = categoria.grupo_dre || '';
+            document.getElementById('categoriaTipo').value = categoria.tipo || '';
             document.getElementById('descricaoCategoria').value = categoria.descricao || '';
             document.getElementById('ativoCategoria').checked = categoria.ativo;
             document.getElementById('modalCategoriaTitulo').textContent = 'Editar Categoria';
@@ -2369,11 +2387,12 @@
 
     async function salvarCategoria(event) {
         event.preventDefault();
-
         const dados = {
-            nome: document.getElementById('nomeCategoria').value,
+            nome:      document.getElementById('nomeCategoria').value,
+            grupo_dre: document.getElementById('categoriaGrupoDRE').value || null,
+            tipo:      document.getElementById('categoriaTipo').value || null,
             descricao: document.getElementById('descricaoCategoria').value,
-            ativo: document.getElementById('ativoCategoria').checked
+            ativo:     document.getElementById('ativoCategoria').checked
         };
 
         let resultado;
@@ -4451,138 +4470,631 @@
         });
     }
 
-    // DRE
+    // ================================================================
+    // DRE COMPLETA — por Competência
+    // ================================================================
+
+    const DRE_GRUPOS = [
+        { id: 'RECEITA_BRUTA',      label: '1. Receita Bruta de Vendas/Serviços', sinal: 1  },
+        { id: 'DEDUCOES',           label: '  (-) Deduções / Impostos s/ Receita', sinal: -1 },
+        { id: 'CPV',                label: '  (-) CPV / Custo dos Serviços',       sinal: -1 },
+        { id: 'DESP_COMERCIAL',     label: '  (-) Despesas Comerciais',            sinal: -1 },
+        { id: 'DESP_ADMIN',         label: '  (-) Despesas Administrativas',       sinal: -1 },
+        { id: 'RECEITA_FINANCEIRA', label: '  (+) Receitas Financeiras',           sinal:  1 },
+        { id: 'DESP_FINANCEIRA',    label: '  (-) Despesas Financeiras',           sinal: -1 },
+        { id: 'EMPRESTIMO',         label: '  (-) Amortiz. Empréstimos/Financ.',   sinal: -1 },
+        { id: 'INVESTIMENTO',       label: '  (-) Investimentos',                  sinal: -1 },
+        { id: 'OUTRAS_RECEITAS',    label: '  (+) Outras Receitas',                sinal:  1 },
+        { id: 'OUTRAS_DESPESAS',    label: '  (-) Outras Despesas',                sinal: -1 },
+    ];
+
     async function carregarDRE() {
-        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
-        if (!contasReceber || !contasPagar) return;
+        // Buscar lançamentos DRE diretos + contas recebidas/pagas por competência
+        const lancsDRE = await fetchSupabase('lancamentos_dre', 'GET');
+        const contasRec = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        if (contasRec === null || contasPag === null) return;
 
         const filtroAno = document.getElementById('filtroAnoDRE');
-        const anoSel    = filtroAno ? filtroAno.value : '';
+        const filtroMes = document.getElementById('filtroMesDRE');
+        const anoSel = filtroAno ? filtroAno.value : '';
+        const mesSel = filtroMes ? filtroMes.value : '';
 
-        // DRE usa data de recebimento/pagamento
-        let recebidos = contasReceber.filter(c => c.status === 'recebido');
-        let pagos     = contasPagar.filter(c => c.status === 'pago');
+        const dreLancs = lancsDRE || [];
 
-        if (anoSel) {
-            recebidos = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(anoSel));
-            pagos     = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(anoSel));
+        // Filtrar por competência
+        function filtrarComp(arr, campoData) {
+            return arr.filter(c => {
+                if (!c[campoData]) return false;
+                const d = c[campoData].substring(0, 7); // YYYY-MM
+                if (anoSel && !d.startsWith(anoSel)) return false;
+                if (mesSel && !d.endsWith('-' + mesSel)) return false;
+                return true;
+            });
         }
 
-        // ⚠️ Aviso: DRE só mostra lançamentos pagos/recebidos
-        const pendentes = contasReceber.filter(c => c.status === 'pendente').length
-                        + contasPagar.filter(c => c.status === 'pendente').length;
+        // Lançamentos DRE diretos filtrados por competência
+        let dreF = dreLancs.filter(l => {
+            if (!l.competencia) return false;
+            const comp = l.competencia.substring(0, 7);
+            if (anoSel && !comp.startsWith(anoSel)) return false;
+            if (mesSel && !comp.endsWith('-' + mesSel)) return false;
+            return true;
+        });
+
+        // Contas recebidas por competência (status recebido, usa data_competencia ou data_recebimento)
+        const recComp = filtrarComp(
+            contasRec.filter(c => c.status === 'recebido'),
+            'data_competencia'
+        );
+        // Contas pagas por competência
+        const pagComp = filtrarComp(
+            contasPag.filter(c => c.status === 'pago'),
+            'data_competencia'
+        );
+
+        // Aviso pendentes
+        const pendentes = contasRec.filter(c => c.status === 'pendente').length
+                        + contasPag.filter(c => c.status === 'pendente').length;
         const avisoEl = document.getElementById('dreAviso');
         if (avisoEl) {
             avisoEl.textContent = pendentes > 0
-                ? '⚠️ Há ' + pendentes + ' lançamento(s) pendentes que NÃO aparecem aqui. DRE e DFC consideram apenas lançamentos com status Recebido/Pago.'
-                : '✅ Todos os lançamentos estão registrados na DRE.';
-            avisoEl.style.display = 'block';
-            avisoEl.style.background = pendentes > 0 ? '#fff3cd' : '#d4edda';
-            avisoEl.style.color = pendentes > 0 ? '#856404' : '#155724';
-            avisoEl.style.border = pendentes > 0 ? '1px solid #ffc107' : '1px solid #c3e6cb';
-            avisoEl.style.padding = '10px 14px';
-            avisoEl.style.borderRadius = '6px';
-            avisoEl.style.marginBottom = '16px';
-            avisoEl.style.fontSize = '13px';
+                ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
+                : '✅ Todos os lançamentos confirmados estão na DRE.';
+            avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
+                (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
         }
 
-        const receita    = recebidos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const custo      = pagos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const lucroBruto = receita - custo;
-        const margem     = receita > 0 ? ((lucroBruto / receita) * 100).toFixed(1) : '0';
-
-        const pct = v => receita > 0 ? ((v / receita) * 100).toFixed(1) + '%' : '0%';
-        const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
-
-        document.getElementById('dreReceita').textContent    = fmt(receita);    document.getElementById('drePctReceita').textContent    = '100%';
-        document.getElementById('dreCusto').textContent      = fmt(custo);      document.getElementById('drePctCusto').textContent      = pct(custo);
-        document.getElementById('dreLucroBruto').textContent = fmt(lucroBruto); document.getElementById('drePctLucroBruto').textContent = pct(lucroBruto);
-        document.getElementById('dreDespesas').textContent   = '-';             document.getElementById('drePctDespesas').textContent   = '-';
-        document.getElementById('dreResultado').textContent  = fmt(lucroBruto); document.getElementById('drePctResultado').textContent  = margem + '%';
-
-        // Tabela mensal Jan-Dez
-        const cardMensal = document.getElementById('cardDREMensal');
-        if (anoSel && cardMensal) {
-            cardMensal.style.display = '';
-            document.getElementById('tituloDREMensal').textContent = '📅 DRE Mensal — ' + anoSel;
-            gerarTabelaMensalDRE(recebidos, pagos, anoSel);
-        } else if (cardMensal) {
-            cardMensal.style.display = 'none';
+        // Título do período
+        const tit = document.getElementById('dreTituloPeriodo');
+        if (tit) {
+            const mNomes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            tit.textContent = 'DRE por Competência' +
+                (anoSel ? ' — ' + anoSel : '') +
+                (mesSel ? ' / ' + mNomes[parseInt(mesSel)] : '');
         }
 
-        criarGraficoDRE(receita, custo, lucroBruto);
+        // Agregar valores por grupo
+        // DRE diretos
+        const porGrupo = {};
+        DRE_GRUPOS.forEach(g => { porGrupo[g.id] = { total: 0, itens: [] }; });
+
+        dreF.forEach(l => {
+            if (!porGrupo[l.grupo]) return;
+            const cat = dadosCache.categorias.find(c => c.id === l.categoria_id);
+            porGrupo[l.grupo].total += parseFloat(l.valor || 0);
+            porGrupo[l.grupo].itens.push({ ...l, catNome: cat ? cat.nome : '-', fonte: 'dre' });
+        });
+
+        // Contas recebidas → RECEITA_BRUTA (se categoria tiver grupo DRE = RECEITA_BRUTA)
+        // Contas recebidas sem grupo específico → RECEITA_BRUTA por padrão
+        recComp.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
+            if (!porGrupo[grupo]) return;
+            porGrupo[grupo].total += parseFloat(c.valor || 0);
+            const comp = c.data_competencia || c.data_recebimento || '';
+            porGrupo[grupo].itens.push({
+                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
+                catNome: cat ? cat.nome : 'Receita', fonte: 'receber'
+            });
+        });
+
+        // Contas pagas → grupo conforme categoria.grupo_dre
+        pagComp.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
+            if (!porGrupo[grupo]) return;
+            porGrupo[grupo].total += parseFloat(c.valor || 0);
+            const comp = c.data_competencia || c.data_pagamento || '';
+            porGrupo[grupo].itens.push({
+                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
+                catNome: cat ? cat.nome : 'Custo', fonte: 'pagar'
+            });
+        });
+
+        // Calcular totais estruturais
+        const recBruta  = porGrupo['RECEITA_BRUTA'].total;
+        const deducoes  = porGrupo['DEDUCOES'].total;
+        const recLiq    = recBruta - deducoes;
+        const cpv       = porGrupo['CPV'].total;
+        const lucroBruto = recLiq - cpv;
+        const despCom   = porGrupo['DESP_COMERCIAL'].total;
+        const despAdm   = porGrupo['DESP_ADMIN'].total;
+        const recFin    = porGrupo['RECEITA_FINANCEIRA'].total;
+        const despFin   = porGrupo['DESP_FINANCEIRA'].total;
+        const ebitda    = lucroBruto - despCom - despAdm + recFin - despFin;
+        const emprest   = porGrupo['EMPRESTIMO'].total;
+        const invest    = porGrupo['INVESTIMENTO'].total;
+        const outRec    = porGrupo['OUTRAS_RECEITAS'].total;
+        const outDesp   = porGrupo['OUTRAS_DESPESAS'].total;
+        const resultLiq = ebitda - emprest - invest + outRec - outDesp;
+
+        // Atualizar cards
+        const setCard = (id, v, positivo) => {
+            const el = document.getElementById(id);
+            if (el) { el.textContent = fmtValSig(v); el.style.color = positivo ? '#28a745' : '#dc3545'; }
+        };
+        const pct = v => recBruta > 0 ? (v / recBruta * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('dreCardReceita').textContent = fmtBRL(recBruta);
+        document.getElementById('dreCardDeducoes').textContent = fmtBRL(deducoes);
+        document.getElementById('dreCardRecLiq').textContent = fmtValSig(recLiq);
+        document.getElementById('dreCardCPV').textContent = fmtBRL(cpv);
+        const elLB = document.getElementById('dreCardLucroBruto');
+        if (elLB) { elLB.textContent = fmtValSig(lucroBruto); elLB.style.color = lucroBruto >= 0 ? '#28a745' : '#dc3545'; }
+        const elLBBox = document.getElementById('dreCardLucroBrutoBox');
+        if (elLBBox) elLBBox.style.borderLeftColor = lucroBruto >= 0 ? '#28a745' : '#dc3545';
+        const elRes = document.getElementById('dreCardResultado');
+        if (elRes) { elRes.textContent = fmtValSig(resultLiq); elRes.style.color = resultLiq >= 0 ? '#28a745' : '#dc3545'; }
+        const elResBox = document.getElementById('dreCardResultadoBox');
+        if (elResBox) elResBox.style.borderLeftColor = resultLiq >= 0 ? '#28a745' : '#dc3545';
+        const elMB = document.getElementById('dreCardMargemBruta');
+        if (elMB) elMB.textContent = 'Margem Bruta: ' + pct(lucroBruto);
+        const elML = document.getElementById('dreCardMargemLiq');
+        if (elML) elML.textContent = 'Margem Líquida: ' + pct(resultLiq);
+
+        // Renderizar tabela DRE estruturada
+        renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq);
+
+        // Tabela mensal e gráfico
+        if (anoSel) {
+            const cardMensal = document.getElementById('cardDREMensal');
+            if (cardMensal) {
+                cardMensal.style.display = '';
+                document.getElementById('tituloDREMensal').textContent = '📅 DRE Mensal — ' + anoSel;
+                gerarTabelaMensalDRE(dreLancs, contasRec, contasPag, anoSel);
+            }
+        } else {
+            const cardMensal = document.getElementById('cardDREMensal');
+            if (cardMensal) cardMensal.style.display = 'none';
+        }
+
+        criarGraficoDRE(dreLancs, contasRec, contasPag, anoSel);
     }
 
-    function gerarTabelaMensalDRE(recebidos, pagos, ano) {
-        const tbody = document.querySelector('#tabelaDREMensal tbody');
+    function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
+        const tbody = document.getElementById('dreCorpo');
         if (!tbody) return;
-        const mesesNome = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const fmtV = v => v.toFixed(2).replace('.', ',');
+        const pct  = v => recBruta > 0 ? (v / recBruta * 100).toFixed(1) + '%' : '-';
+        const cor  = v => v >= 0 ? '#28a745' : '#dc3545';
+
+        const linhaGrupo = (g, valor, grupo_id) => {
+            const itens = porGrupo[grupo_id] ? porGrupo[grupo_id].itens : [];
+            const temItens = itens.length > 0;
+            return `<tr style="font-size:13px;">
+                <td style="padding-left:16px;">${g}</td>
+                <td style="text-align:right;color:${valor < 0 ? '#dc3545' : '#333'};">${valor !== 0 ? 'R$ ' + fmtV(Math.abs(valor)) : '-'}</td>
+                <td style="text-align:right;color:#777;">${valor !== 0 ? pct(Math.abs(valor)) : '-'}</td>
+                <td style="text-align:center;">${temItens ? `<button onclick="verDetalheDRE('${grupo_id}')" style="background:none;border:1px solid #ddd;border-radius:4px;padding:2px 8px;cursor:pointer;font-size:11px;">+${itens.length}</button>` : ''}</td>
+            </tr>`;
+        };
+
+        const linhaSubtotal = (label, valor, destaque) => {
+            const bg = destaque ? 'var(--cor-primaria)' : '#f0f0f0';
+            const fc = destaque ? 'white' : '#333';
+            return `<tr style="font-weight:700;background:${bg};color:${fc};">
+                <td style="padding:8px 12px;">${label}</td>
+                <td style="text-align:right;padding:8px;color:${destaque ? 'white' : cor(valor)};">R$ ${fmtV(Math.abs(valor))} ${!destaque ? '' : ''}</td>
+                <td style="text-align:right;color:${destaque?'rgba(255,255,255,0.8)':'#777'};">${pct(Math.abs(valor))}</td>
+                <td></td>
+            </tr><tr><td colspan="4" style="height:4px;background:#f9f9f9;"></td></tr>`;
+        };
+
+        const linhaSecao = (label) =>
+            `<tr style="background:#f5f5f5;"><td colspan="4" style="font-weight:700;font-size:12px;color:#555;padding:6px 12px;text-transform:uppercase;letter-spacing:0.5px;">${label}</td></tr>`;
+
+        let html = '';
+        html += linhaSecao('RECEITAS');
+        html += linhaGrupo(DRE_GRUPOS[0].label, porGrupo['RECEITA_BRUTA'].total, 'RECEITA_BRUTA');
+        html += linhaGrupo(DRE_GRUPOS[1].label, -porGrupo['DEDUCOES'].total, 'DEDUCOES');
+        html += linhaSubtotal('= Receita Líquida', recLiq, false);
+
+        html += linhaSecao('CUSTOS');
+        html += linhaGrupo(DRE_GRUPOS[2].label, -porGrupo['CPV'].total, 'CPV');
+        html += linhaSubtotal('= Lucro Bruto', lucroBruto, false);
+
+        html += linhaSecao('DESPESAS OPERACIONAIS');
+        html += linhaGrupo(DRE_GRUPOS[3].label, -porGrupo['DESP_COMERCIAL'].total, 'DESP_COMERCIAL');
+        html += linhaGrupo(DRE_GRUPOS[4].label, -porGrupo['DESP_ADMIN'].total, 'DESP_ADMIN');
+
+        html += linhaSecao('RESULTADO FINANCEIRO');
+        html += linhaGrupo(DRE_GRUPOS[5].label, porGrupo['RECEITA_FINANCEIRA'].total, 'RECEITA_FINANCEIRA');
+        html += linhaGrupo(DRE_GRUPOS[6].label, -porGrupo['DESP_FINANCEIRA'].total, 'DESP_FINANCEIRA');
+        html += linhaSubtotal('= EBITDA (Resultado Operacional)', ebitda, false);
+
+        html += linhaSecao('OUTROS');
+        html += linhaGrupo(DRE_GRUPOS[7].label, -porGrupo['EMPRESTIMO'].total, 'EMPRESTIMO');
+        html += linhaGrupo(DRE_GRUPOS[8].label, -porGrupo['INVESTIMENTO'].total, 'INVESTIMENTO');
+        html += linhaGrupo(DRE_GRUPOS[9].label, porGrupo['OUTRAS_RECEITAS'].total, 'OUTRAS_RECEITAS');
+        html += linhaGrupo(DRE_GRUPOS[10].label, -porGrupo['OUTRAS_DESPESAS'].total, 'OUTRAS_DESPESAS');
+        html += linhaSubtotal('= RESULTADO LÍQUIDO DO EXERCÍCIO', resultLiq, true);
+
+        tbody.innerHTML = html;
+    }
+
+    let _dreDetalheCache = {};
+
+    function verDetalheDRE(grupoId) {
+        const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
+        if (!grupo) return;
+        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+        const tbody = document.querySelector('#tabelaDetalheDRE tbody');
+        const itens = (_dreDetalheCache[grupoId] || []);
+        if (!tbody) return;
         tbody.innerHTML = '';
-        let totRec = 0, totCus = 0, totLuc = 0;
-        mesesNome.forEach((nome, idx) => {
-            const mm = String(idx + 1).padStart(2, '0');
-            const prefixo = ano + '-' + mm;
-            const rec = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(prefixo))
-                                  .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-            const cus = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(prefixo))
-                              .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-            const luc = rec - cus;
-            const mar = rec > 0 ? ((luc / rec) * 100).toFixed(1) + '%' : '-';
-            totRec += rec; totCus += cus; totLuc += luc;
-            const hasData = rec > 0 || cus > 0;
-            const lucCor  = luc >= 0 ? '#28a745' : '#dc3545';
-            tbody.innerHTML += `<tr style="${hasData ? '' : 'color:#ccc;'}">
-                <td style="font-weight:${hasData?'600':'400'};">${nome}</td>
-                <td style="color:${hasData?'#28a745':'#ccc'};">${rec > 0 ? 'R$ '+rec.toFixed(2).replace('.',',') : '-'}</td>
-                <td style="color:${hasData?'#dc3545':'#ccc'};">${cus > 0 ? 'R$ '+cus.toFixed(2).replace('.',',') : '-'}</td>
-                <td style="color:${hasData?lucCor:'#ccc'};font-weight:${hasData?'600':'400'};">${hasData ? fmtValSig(luc) : '-'}</td>
-                <td style="color:${hasData?lucCor:'#ccc'};">${hasData ? mar : '-'}</td>
+        itens.forEach(item => {
+            const val = parseFloat(item.valor || 0);
+            tbody.innerHTML += `<tr>
+                <td>${item.competencia || '-'}</td>
+                <td>${item.descricao || '-'}</td>
+                <td>${item.catNome || '-'}</td>
+                <td>${item.parte || '-'}</td>
+                <td>${item.centro || '-'}</td>
+                <td style="text-align:right;font-weight:600;">R$ ${val.toFixed(2).replace('.',',')}</td>
+                <td>${item.fonte === 'dre' && item.id ? '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️</button> <button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>' : '<span style="color:#aaa;font-size:11px;">automático</span>'}</td>
             </tr>`;
         });
-        const totMar = totRec > 0 ? ((totLuc / totRec) * 100).toFixed(1) + '%' : '0%';
-        document.getElementById('dreMensalTotalRec').textContent = 'R$ ' + totRec.toFixed(2).replace('.',',');
-        document.getElementById('dreMensalTotalCus').textContent = 'R$ ' + totCus.toFixed(2).replace('.',',');
-        const elLuc = document.getElementById('dreMensalTotalLuc');
-        elLuc.textContent = fmtValSig(totLuc);
-        elLuc.style.color = totLuc >= 0 ? '#28a745' : '#dc3545';
-        document.getElementById('dreMensalTotalMar').textContent = totMar;
-        document.getElementById('dreMensalTotalMar').style.color = totLuc >= 0 ? '#28a745' : '#dc3545';
+        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px;">Nenhum lançamento</td></tr>';
+        document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
-    function criarGraficoDRE(receita, custo, lucroBruto) {
+    function gerarTabelaMensalDRE(dreLancs, contasRec, contasPag, ano) {
+        const headerRow = document.getElementById('dreHeaderMeses');
+        const tbody = document.querySelector('#tabelaDREMensal tbody');
+        if (!headerRow || !tbody) return;
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+        // Cabeçalho com meses
+        headerRow.innerHTML = '<th style="min-width:180px;text-align:left;">Descrição</th>' +
+            mNomes.map(m => '<th style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
+            '<th style="text-align:right;min-width:100px;">Total</th>';
+
+        // Para cada mês, calcular valores por grupo
+        const dados = {};
+        DRE_GRUPOS.forEach(g => { dados[g.id] = Array(12).fill(0); });
+
+        // DRE diretos
+        (dreLancs || []).filter(l => l.competencia && l.competencia.startsWith(ano)).forEach(l => {
+            const m = parseInt(l.competencia.substring(5,7)) - 1;
+            if (m < 0 || m > 11 || !dados[l.grupo]) return;
+            dados[l.grupo][m] += parseFloat(l.valor || 0);
+        });
+
+        // Contas recebidas
+        contasRec.filter(c => c.status === 'recebido' && c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
+            const m = parseInt(c.data_competencia.substring(5,7)) - 1;
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
+            if (m < 0 || m > 11 || !dados[g]) return;
+            dados[g][m] += parseFloat(c.valor || 0);
+        });
+
+        // Contas pagas
+        contasPag.filter(c => c.status === 'pago' && c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
+            const m = parseInt(c.data_competencia.substring(5,7)) - 1;
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
+            if (m < 0 || m > 11 || !dados[g]) return;
+            dados[g][m] += parseFloat(c.valor || 0);
+        });
+
+        // Calcular subtotais por mês
+        const calcMes = (m) => {
+            const rb = dados['RECEITA_BRUTA'][m];
+            const ded = dados['DEDUCOES'][m];
+            const rl = rb - ded;
+            const cpv = dados['CPV'][m];
+            const lb = rl - cpv;
+            const dc = dados['DESP_COMERCIAL'][m];
+            const da = dados['DESP_ADMIN'][m];
+            const rf = dados['RECEITA_FINANCEIRA'][m];
+            const df = dados['DESP_FINANCEIRA'][m];
+            const ebt = lb - dc - da + rf - df;
+            const emp = dados['EMPRESTIMO'][m];
+            const inv = dados['INVESTIMENTO'][m];
+            const or = dados['OUTRAS_RECEITAS'][m];
+            const od = dados['OUTRAS_DESPESAS'][m];
+            const res = ebt - emp - inv + or - od;
+            return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, emp, inv, or, od, res };
+        };
+
+        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toFixed(2).replace('.',',') : '-';
+        const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
+
+        const linhas = [
+            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '' },
+            { label: '(-) Deduções',              fn: m => -calcMes(m).ded, bg: '' },
+            { label: '= Receita Líquida',         fn: m => calcMes(m).rl,   bg: '#f5f5f5', bold: true },
+            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '' },
+            { label: '= Lucro Bruto',             fn: m => calcMes(m).lb,   bg: '#f5f5f5', bold: true },
+            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '' },
+            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '' },
+            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '' },
+            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '' },
+            { label: '= EBITDA',                  fn: m => calcMes(m).ebt,  bg: '#e8f4fd', bold: true },
+            { label: '(-) Empréstimos',           fn: m => -calcMes(m).emp, bg: '' },
+            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '' },
+            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '' },
+            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '' },
+            { label: '= Resultado Líquido',       fn: m => calcMes(m).res,  bg: 'var(--cor-primaria)', cor: 'white', bold: true },
+        ];
+
+        tbody.innerHTML = '';
+        linhas.forEach(linha => {
+            const vals = Array.from({length: 12}, (_, m) => linha.fn(m));
+            const total = vals.reduce((s, v) => s + v, 0);
+            const rowBg = linha.bg ? 'background:' + linha.bg + ';' : '';
+            const rowFc = linha.cor ? 'color:' + linha.cor + ';' : '';
+            const bold  = linha.bold ? 'font-weight:700;' : '';
+            tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
+                '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
+                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (linha.cor ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
+                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (linha.cor ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
+                '</tr>';
+        });
+    }
+
+    function criarGraficoDRE(dreLancs, contasRec, contasPag, anoSel) {
         const ctx = document.getElementById('chartDRE');
         if (!ctx) return;
         if (charts.dre) { charts.dre.destroy(); }
+
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const labels = [];
+        const receitasData = [];
+        const resultadosData = [];
+
+        if (anoSel) {
+            for (let m = 0; m < 12; m++) {
+                const mm = String(m + 1).padStart(2, '0');
+                const pref = anoSel + '-' + mm;
+                labels.push(mNomes[m] + '/' + String(anoSel).slice(2));
+
+                let rb = (dreLancs || []).filter(l => l.grupo === 'RECEITA_BRUTA' && l.competencia && l.competencia.startsWith(pref))
+                                          .reduce((s,l) => s + parseFloat(l.valor||0), 0);
+                rb += contasRec.filter(c => c.status === 'recebido' && c.data_competencia && c.data_competencia.startsWith(pref))
+                               .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+
+                let costs = (dreLancs || []).filter(l => l.grupo !== 'RECEITA_BRUTA' && l.grupo !== 'RECEITA_FINANCEIRA' && l.grupo !== 'OUTRAS_RECEITAS' && l.competencia && l.competencia.startsWith(pref))
+                                             .reduce((s,l) => s + parseFloat(l.valor||0), 0);
+                costs += contasPag.filter(c => c.status === 'pago' && c.data_competencia && c.data_competencia.startsWith(pref))
+                                   .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+
+                receitasData.push(rb);
+                resultadosData.push(rb - costs);
+            }
+        } else {
+            // Últimos 12 meses
+            for (let i = 11; i >= 0; i--) {
+                const d = new Date(); d.setMonth(d.getMonth() - i);
+                const pref = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+                labels.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
+                let rb = contasRec.filter(c => c.status === 'recebido' && (c.data_competencia || c.data_recebimento || '').startsWith(pref))
+                                   .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                let costs = contasPag.filter(c => c.status === 'pago' && (c.data_competencia || c.data_pagamento || '').startsWith(pref))
+                                      .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                receitasData.push(rb); resultadosData.push(rb - costs);
+            }
+        }
+
         charts.dre = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Receita Total', 'Total de Custos', 'Lucro Bruto'],
-                datasets: [{
-                    label: 'Valor (R$)',
-                    data: [receita, custo, lucroBruto],
-                    backgroundColor: ['rgba(40,167,69,0.75)', 'rgba(220,53,69,0.75)', lucroBruto >= 0 ? 'rgba(255,122,66,0.75)' : 'rgba(220,53,69,0.5)'],
-                    borderColor: ['#28a745', '#dc3545', lucroBruto >= 0 ? '#FF7A42' : '#dc3545'],
-                    borderWidth: 1, borderRadius: 6
-                }]
+                labels,
+                datasets: [
+                    { label: 'Receita Bruta', data: receitasData, backgroundColor: 'rgba(40,167,69,0.6)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
+                    { label: 'Resultado Líquido', data: resultadosData, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.08)',
+                      borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false }
+                ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: ctx => 'R$ ' + Math.abs(ctx.parsed.y).toFixed(2).replace('.',',') }}
+                    legend: { display: true, position: 'top' },
+                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toFixed(2).replace('.',',') }}
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' }},
-                    x: { grid: { display: false }}
+                    y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                    x: { grid: { display: false } }
                 }
             }
         });
     }
+
+    // Lançamentos DRE diretos
+    function abrirModalLancDRE(id) {
+        const hoje = new Date();
+        const comp = hoje.getFullYear() + '-' + String(hoje.getMonth()+1).padStart(2,'0');
+        document.getElementById('lancDREId').value = id || '';
+        document.getElementById('lancDREDescricao').value = '';
+        document.getElementById('lancDREValor').value = '';
+        document.getElementById('lancDRECompetencia').value = comp;
+        document.getElementById('lancDREGrupo').value = '';
+        document.getElementById('lancDRECategoria').innerHTML = '<option value="">Selecione o grupo primeiro</option>';
+        document.getElementById('lancDREParte').value = '';
+        document.getElementById('lancDRECentro').value = '';
+        document.getElementById('lancDREObs').value = '';
+
+        if (id) {
+            // Edição: carregar dados
+            fetchSupabase('lancamentos_dre', 'GET', null, 'id=eq.' + id).then(r => {
+                if (!r || !r[0]) return;
+                const l = r[0];
+                document.getElementById('lancDREGrupo').value = l.grupo;
+                filtrarCatsDRE();
+                setTimeout(() => { document.getElementById('lancDRECategoria').value = l.categoria_id; }, 100);
+                document.getElementById('lancDREDescricao').value = l.descricao || '';
+                document.getElementById('lancDREValor').value = l.valor || '';
+                document.getElementById('lancDRECompetencia').value = (l.competencia || comp).substring(0,7);
+                document.getElementById('lancDREParte').value = l.parte || '';
+                document.getElementById('lancDRECentro').value = l.centro || '';
+                document.getElementById('lancDREObs').value = l.observacoes || '';
+            });
+            document.getElementById('tituloModalLancDRE').textContent = '✏️ Editar Lançamento DRE';
+        } else {
+            document.getElementById('tituloModalLancDRE').textContent = '📊 Lançar na DRE por Competência';
+        }
+        document.getElementById('modalLancDRE').classList.add('active');
+    }
+
+    function filtrarCatsDRE() {
+        const grupo = document.getElementById('lancDREGrupo').value;
+        const select = document.getElementById('lancDRECategoria');
+        select.innerHTML = '<option value="">Selecione...</option>';
+        dadosCache.categorias
+            .filter(c => c.grupo_dre === grupo || !c.grupo_dre)
+            .forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.nome;
+                select.appendChild(opt);
+            });
+    }
+
+    async function salvarLancDRE(event) {
+        event.preventDefault();
+        const id = document.getElementById('lancDREId').value;
+        const dados = {
+            grupo:       document.getElementById('lancDREGrupo').value,
+            categoria_id: parseInt(document.getElementById('lancDRECategoria').value) || null,
+            descricao:   document.getElementById('lancDREDescricao').value,
+            valor:       parseFloat(document.getElementById('lancDREValor').value),
+            competencia: document.getElementById('lancDRECompetencia').value + '-01',
+            parte:       document.getElementById('lancDREParte').value || null,
+            centro:      document.getElementById('lancDRECentro').value || null,
+            observacoes: document.getElementById('lancDREObs').value || null,
+        };
+        const r = id
+            ? await fetchSupabase('lancamentos_dre', 'PATCH', dados, 'id=eq.' + id)
+            : await fetchSupabase('lancamentos_dre', 'POST', dados);
+        if (r !== null) {
+            closeModal('modalLancDRE');
+            await carregarDRE();
+        }
+    }
+
+    async function deletarLancDRE(id) {
+        if (!confirm('Deletar este lançamento da DRE?')) return;
+        const r = await fetchSupabase('lancamentos_dre', 'DELETE', null, 'id=eq.' + id);
+        if (r !== null) {
+            closeModal('modalDetalheDRE');
+            await carregarDRE();
+        }
+    }
+
+    function editarLancDRE(id) {
+        closeModal('modalDetalheDRE');
+        abrirModalLancDRE(id);
+    }
+
+    function exportarDRE() {
+        const rows = [['Descrição','Valor','AV%']];
+        document.querySelectorAll('#dreCorpo tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length >= 3) rows.push([tds[0].textContent.trim(), tds[1].textContent.trim(), tds[2].textContent.trim()]);
+        });
+        const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g,'""') + '"').join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        a.download = 'DRE_' + (document.getElementById('filtroAnoDRE').value || 'completo') + '.csv';
+        a.click();
+    }
+
+
 </script>
 
 
 <!-- MODAL EDITAR LANÇAMENTO -->
+<div class="modal" id="modalLancDRE">
+    <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+            <span id="tituloModalLancDRE">📊 Lançar na DRE por Competência</span>
+            <button class="modal-close" onclick="closeModal('modalLancDRE')">&times;</button>
+        </div>
+        <form onsubmit="salvarLancDRE(event)">
+            <input type="hidden" id="lancDREId">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Grupo DRE*</label>
+                    <select id="lancDREGrupo" required onchange="filtrarCatsDRE()">
+                        <option value="">Selecione...</option>
+                        <option value="RECEITA_BRUTA">Receita Bruta (+)</option>
+                        <option value="DEDUCOES">Deduções / Impostos s/ Receita (-)</option>
+                        <option value="CPV">CPV / CSP (-)</option>
+                        <option value="DESP_COMERCIAL">Despesas Comerciais (-)</option>
+                        <option value="DESP_ADMIN">Despesas Administrativas (-)</option>
+                        <option value="DESP_FINANCEIRA">Despesas Financeiras (-)</option>
+                        <option value="RECEITA_FINANCEIRA">Receitas Financeiras (+)</option>
+                        <option value="EMPRESTIMO">Empréstimos e Financiamentos (-)</option>
+                        <option value="INVESTIMENTO">Investimentos (-)</option>
+                        <option value="OUTRAS_RECEITAS">Outras Receitas (+)</option>
+                        <option value="OUTRAS_DESPESAS">Outras Despesas (-)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria*</label>
+                    <select id="lancDRECategoria" required>
+                        <option value="">Selecione o grupo primeiro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Descrição / Histórico*</label>
+                <input type="text" id="lancDREDescricao" required placeholder="Ex: Vendas de produtos Loja 1">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor*</label>
+                    <input type="number" id="lancDREValor" step="0.01" min="0.01" required placeholder="0,00">
+                </div>
+                <div class="form-group">
+                    <label>Competência (mês/ano)*</label>
+                    <input type="month" id="lancDRECompetencia" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fornecedor / Cliente</label>
+                    <input type="text" id="lancDREParte" placeholder="Nome opcional">
+                </div>
+                <div class="form-group">
+                    <label>Centro de Custo</label>
+                    <input type="text" id="lancDRECentro" placeholder="Ex: Filial SP">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Observações</label>
+                <textarea id="lancDREObs" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalLancDRE')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalDetalheDRE">
+    <div class="modal-content" style="max-width:700px;">
+        <div class="modal-header">
+            <span id="tituloDetalheDRE">Detalhes</span>
+            <button class="modal-close" onclick="closeModal('modalDetalheDRE')">&times;</button>
+        </div>
+        <div class="table-container">
+            <table id="tabelaDetalheDRE">
+                <thead><tr><th>Competência</th><th>Descrição</th><th>Categoria</th><th>Parte</th><th>Centro</th><th style="text-align:right;">Valor</th><th>Ações</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="form-actions" style="margin-top:12px;">
+            <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modalEditarLancamento">
     <div class="modal-content" style="max-width:500px;">
         <div class="modal-header">
