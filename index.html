@@ -1,0 +1,3356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão Financeira CAP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --cor-primaria: #FF7A42;
+            --cor-secundaria: #333;
+            --cor-fundo: #f5f5f5;
+            --cor-texto: #333;
+            --cor-borda: #ddd;
+            --cor-sucesso: #28a745;
+            --cor-erro: #dc3545;
+            --cor-aviso: #ffc107;
+            --cor-info: #17a2b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+        }
+
+        /* LOGIN SCREEN */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--cor-primaria) 0%, var(--cor-secundaria) 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo h1 {
+            color: var(--cor-primaria);
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .login-logo p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--cor-secundaria);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 5px rgba(255, 122, 66, 0.3);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--cor-primaria);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #ff6b2e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 122, 66, 0.3);
+        }
+
+        .error-message {
+            color: var(--cor-erro);
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #ffe5e5;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex;
+            height: 100vh;
+            display: none;
+        }
+
+        .main-container.active {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--cor-secundaria);
+            color: white;
+            overflow-y: auto;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .logo-sidebar {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo-sidebar h2 {
+            color: var(--cor-primaria);
+            font-size: 16px;
+        }
+
+        .menu-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 122, 66, 0.1);
+            border-left-color: var(--cor-primaria);
+        }
+
+        .menu-item.active {
+            background-color: rgba(255, 122, 66, 0.2);
+            border-left-color: var(--cor-primaria);
+            font-weight: 600;
+        }
+
+        .menu-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .menu-section-title {
+            padding: 0 20px;
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: var(--cor-erro);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            width: calc(100% - 40px);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* HEADER */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--cor-primaria);
+        }
+
+        .page-header h1 {
+            color: var(--cor-primaria);
+            font-size: 28px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--cor-primaria);
+            margin-bottom: 15px;
+        }
+
+        /* FORMS */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--cor-borda);
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--cor-primaria);
+            box-shadow: 0 0 5px rgba(255, 122, 66, 0.3);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            background-color: #666;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #555;
+        }
+
+        .btn-danger {
+            background-color: var(--cor-erro);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .btn-success {
+            background-color: var(--cor-sucesso);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* TABELAS */
+        .table-container {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--cor-primaria);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--cor-borda);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 122, 66, 0.05);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pendente {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-recebido,
+        .status-pago {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-atrasado {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* FILTROS */
+        .filter-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* DASHBOARD */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--cor-primaria);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--cor-primaria);
+        }
+
+        .stat-change {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* GRÁFICOS */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--cor-primaria);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 200px;
+                overflow-x: auto;
+                display: flex;
+            }
+
+            .menu-item {
+                white-space: nowrap;
+                flex: 1;
+                padding: 15px 10px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* MENSAGENS */
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* LOADING */
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--cor-primaria);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-container">
+    <div class="login-box">
+        <div class="login-logo">
+            <h1>CAP</h1>
+            <p>Gestão Financeira</p>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Usuário</label>
+                <input type="text" id="username" name="username" required placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <div class="password-wrapper">
+                    <input type="password" id="password" name="password" required placeholder="Sua senha">
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="remember" name="remember">
+                <label for="remember">Lembrar-me neste navegador</label>
+            </div>
+            <button type="submit" class="btn btn-primary">ENTRAR</button>
+        </form>
+    </div>
+</div>
+
+<!-- MAIN APPLICATION -->
+<div class="main-container" id="mainContainer">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="logo-sidebar">
+            <h2>CAP Financeiro</h2>
+        </div>
+
+        <div class="menu-section-title">Menu</div>
+        
+        <div class="menu-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
+
+        <div class="menu-section">
+            <div class="menu-section-title">Cadastros</div>
+            <div class="menu-item" onclick="showPage('categorias')">📁 Categorias</div>
+            <div class="menu-item" onclick="showPage('produtos')">📦 Produtos</div>
+            <div class="menu-item" onclick="showPage('fornecedores')">🏭 Fornecedores</div>
+            <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-section-title">Lançamentos</div>
+            <div class="menu-item" onclick="showPage('lancar-receber')">📥 Lançar Contas a Receber</div>
+            <div class="menu-item" onclick="showPage('lancar-pagar')">📤 Lançar Contas a Pagar</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-section-title">Consultas</div>
+            <div class="menu-item" onclick="showPage('contas-recebidas')">✅ Contas Recebidas</div>
+            <div class="menu-item" onclick="showPage('contas-pagas')">✅ Contas Pagas</div>
+            <div class="menu-item" onclick="showPage('calendario')">📅 Calendário</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-section-title">Análises</div>
+            <div class="menu-item" onclick="showPage('relatorio-receber')">📈 Resumo Recebimentos</div>
+            <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
+            <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
+            <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
+        </div>
+
+        <button class="logout-btn" onclick="handleLogout()">Sair</button>
+    </div>
+
+    <!-- CONTENT AREA -->
+    <div class="content">
+        <!-- DASHBOARD -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h1>Dashboard</h1>
+                <div class="user-info">
+                    <p id="userGreeting">Bem-vindo!</p>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-label">A Receber</div>
+                    <div class="stat-value" id="totalReceber">R$ 0,00</div>
+                    <div class="stat-change" id="countReceber">0 pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">A Pagar</div>
+                    <div class="stat-value" id="totalPagar">R$ 0,00</div>
+                    <div class="stat-change" id="countPagar">0 pendentes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Recebido (Este Mês)</div>
+                    <div class="stat-value" id="recebidoMes">R$ 0,00</div>
+                    <div class="stat-change" id="countRecebidoMes">0 transações</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pago (Este Mês)</div>
+                    <div class="stat-value" id="pagoMes">R$ 0,00</div>
+                    <div class="stat-change" id="countPagoMes">0 transações</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Fluxo de Caixa (Últimos 30 dias)</div>
+                <div class="chart-container">
+                    <canvas id="chartFluxo"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Maiores Devedores</div>
+                <div class="chart-container">
+                    <canvas id="chartDevedores"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div id="categorias" class="page">
+            <div class="page-header">
+                <h1>Categorias</h1>
+                <button class="btn btn-primary btn-small" onclick="openModalCategoria()">+ Nova Categoria</button>
+            </div>
+
+            <div class="alert alert-success" id="alertCategorias"></div>
+
+            <div class="table-container">
+                <table id="tabelaCategorias">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- PRODUTOS -->
+        <div id="produtos" class="page">
+            <div class="page-header">
+                <h1>Produtos</h1>
+                <button class="btn btn-primary btn-small" onclick="openModalProduto()">+ Novo Produto</button>
+            </div>
+
+            <div class="alert alert-success" id="alertProdutos"></div>
+
+            <div class="table-container">
+                <table id="tabelaProdutos">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FORNECEDORES -->
+        <div id="fornecedores" class="page">
+            <div class="page-header">
+                <h1>Fornecedores</h1>
+                <button class="btn btn-primary btn-small" onclick="openModalFornecedor()">+ Novo Fornecedor</button>
+            </div>
+
+            <div class="alert alert-success" id="alertFornecedores"></div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Pesquisar</label>
+                        <input type="text" id="filtroFornecedor" placeholder="Nome ou CNPJ" onchange="carregarFornecedores()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabelaFornecedores">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CNPJ</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CLIENTES -->
+        <div id="clientes" class="page">
+            <div class="page-header">
+                <h1>Clientes</h1>
+                <button class="btn btn-primary btn-small" onclick="openModalCliente()">+ Novo Cliente</button>
+            </div>
+
+            <div class="alert alert-success" id="alertClientes"></div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Pesquisar</label>
+                        <input type="text" id="filtroCliente" placeholder="Nome ou CPF/CNPJ" onchange="carregarClientes()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabelaClientes">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>CPF/CNPJ</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- LANÇAR CONTAS A RECEBER -->
+        <div id="lancar-receber" class="page">
+            <div class="page-header">
+                <h1>Lançar Contas a Receber</h1>
+            </div>
+
+            <div class="alert alert-success" id="alertLancarReceber"></div>
+
+            <div class="card">
+                <div class="card-title">Novo Lançamento</div>
+                <form onsubmit="salvarContaReceber(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cliente*</label>
+                            <select id="clienteReceber" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição*</label>
+                            <input type="text" id="descricaoReceber" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor*</label>
+                            <input type="number" id="valorReceber" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Vencimento*</label>
+                            <input type="date" id="vencimentoReceber" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea id="observacoesReceber" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                        <button type="reset" class="btn btn-secondary">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Contas a Receber Pendentes</div>
+                
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Cliente</label>
+                            <select id="filtroClienteReceber" onchange="carregarContasReceber()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ano</label>
+                            <select id="filtroAnoReceber" onchange="carregarContasReceber()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mês</label>
+                            <select id="filtroMesReceber" onchange="carregarContasReceber()">
+                                <option value="">Todos</option>
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="tabelaPendentesReceber">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- LANÇAR CONTAS A PAGAR -->
+        <div id="lancar-pagar" class="page">
+            <div class="page-header">
+                <h1>Lançar Contas a Pagar</h1>
+            </div>
+
+            <div class="alert alert-success" id="alertLancarPagar"></div>
+
+            <div class="card">
+                <div class="card-title">Novo Lançamento</div>
+                <form onsubmit="salvarContaPagar(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fornecedor*</label>
+                            <select id="fornecedorPagar" required onchange="preencherProdutosPagar()">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria*</label>
+                            <select id="categoriaPagar" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Produto</label>
+                            <select id="produtoPagar">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descrição*</label>
+                            <input type="text" id="descricaoPagar" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor*</label>
+                            <input type="number" id="valorPagar" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Data de Vencimento*</label>
+                            <input type="date" id="vencimentoPagar" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea id="observacoesPagar" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success">Salvar</button>
+                        <button type="reset" class="btn btn-secondary">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Contas a Pagar Pendentes</div>
+                
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label>Fornecedor</label>
+                            <select id="filtroFornecedorPagar" onchange="carregarContasPagar()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="filtroCategoriaPagar" onchange="carregarContasPagar()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ano</label>
+                            <select id="filtroAnoPagar" onchange="carregarContasPagar()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mês</label>
+                            <select id="filtroMesPagar" onchange="carregarContasPagar()">
+                                <option value="">Todos</option>
+                                <option value="01">Janeiro</option>
+                                <option value="02">Fevereiro</option>
+                                <option value="03">Março</option>
+                                <option value="04">Abril</option>
+                                <option value="05">Maio</option>
+                                <option value="06">Junho</option>
+                                <option value="07">Julho</option>
+                                <option value="08">Agosto</option>
+                                <option value="09">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table id="tabelaPendentesPagar">
+                        <thead>
+                            <tr>
+                                <th>Fornecedor</th>
+                                <th>Categoria</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Vencimento</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTAS RECEBIDAS -->
+        <div id="contas-recebidas" class="page">
+            <div class="page-header">
+                <h1>Contas Recebidas</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <select id="filtroClienteRecebida" onchange="carregarContasRecebidas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoRecebida" onchange="carregarContasRecebidas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesRecebida" onchange="carregarContasRecebidas()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dia</label>
+                        <select id="filtroDialRecebida" onchange="carregarContasRecebidas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabelaRecebidas">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Recebimento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CONTAS PAGAS -->
+        <div id="contas-pagas" class="page">
+            <div class="page-header">
+                <h1>Contas Pagas</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorPaga" onchange="carregarContasPagas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoPaga" onchange="carregarContasPagas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesPaga" onchange="carregarContasPagas()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dia</label>
+                        <select id="filtroDiaPaga" onchange="carregarContasPagas()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="tabelaPagas">
+                    <thead>
+                        <tr>
+                            <th>Fornecedor</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Vencimento</th>
+                            <th>Pagamento</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CALENDÁRIO -->
+        <div id="calendario" class="page">
+            <div class="page-header">
+                <h1>Calendário de Pagamentos e Recebimentos</h1>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Visualizar Pendências</div>
+                <div id="calendarContainer" style="padding: 20px;">
+                    <!-- Calendário será renderizado aqui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- RELATÓRIO RECEBER -->
+        <div id="relatorio-receber" class="page">
+            <div class="page-header">
+                <h1>Resumo de Recebimentos</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoRelReceber" onchange="carregarRelatorioReceber()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesRelReceber" onchange="carregarRelatorioReceber()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dia</label>
+                        <select id="filtroDialRelReceber" onchange="carregarRelatorioReceber()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Recebido</div>
+                    <div class="stat-value" id="totalRecebidoRel">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Quantidade</div>
+                    <div class="stat-value" id="qtdRecebidoRel">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ticket Médio</div>
+                    <div class="stat-value" id="ticketRecebidoRel">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Top 10 Clientes - Maiores Recebimentos</div>
+                <div class="chart-container">
+                    <canvas id="chartTopClientesReceber"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Ranking de Clientes</div>
+                <div class="table-container">
+                    <table id="tabelaRankingClientes">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                                <th>% do Total</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- RELATÓRIO PAGAR -->
+        <div id="relatorio-pagar" class="page">
+            <div class="page-header">
+                <h1>Resumo de Pagamentos</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoRelPagar" onchange="carregarRelatorioPagar()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesRelPagar" onchange="carregarRelatorioPagar()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Dia</label>
+                        <select id="filtroDiaRelPagar" onchange="carregarRelatorioPagar()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Pago</div>
+                    <div class="stat-value" id="totalPagoRel">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Quantidade</div>
+                    <div class="stat-value" id="qtdPagoRel">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ticket Médio</div>
+                    <div class="stat-value" id="ticketPagoRel">R$ 0,00</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Top 10 Fornecedores - Maiores Pagamentos</div>
+                <div class="chart-container">
+                    <canvas id="chartTopFornecedoresPagar"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Ranking de Fornecedores</div>
+                <div class="table-container">
+                    <table id="tabelaRankingFornecedores">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fornecedor</th>
+                                <th>Quantidade</th>
+                                <th>Valor Total</th>
+                                <th>% do Total</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- DFC -->
+        <div id="dfc" class="page">
+            <div class="page-header">
+                <h1>Demonstração de Fluxo de Caixa (DFC)</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoDFC" onchange="carregarDFC()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesDFC" onchange="carregarDFC()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Análise de Fluxo de Caixa</div>
+                <div class="table-container">
+                    <table id="tabelaDFC">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Período Atual</th>
+                                <th>% Mudança</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="font-weight: 600; background-color: #f0f0f0;">
+                                <td colspan="3">ENTRADAS DE CAIXA</td>
+                            </tr>
+                            <tr>
+                                <td>Contas a Receber</td>
+                                <td id="dfcEntradaReceber">R$ 0,00</td>
+                                <td id="dfcPctReceber">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: #f0f0f0;">
+                                <td colspan="3">SAÍDAS DE CAIXA</td>
+                            </tr>
+                            <tr>
+                                <td>Contas a Pagar</td>
+                                <td id="dfcSaidaPagar">R$ 0,00</td>
+                                <td id="dfcPctPagar">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: var(--cor-primaria); color: white;">
+                                <td>FLUXO LÍQUIDO</td>
+                                <td id="dfcFluxoLiquido">R$ 0,00</td>
+                                <td id="dfcPctFluxo">0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Fluxo de Caixa Acumulado</div>
+                <div class="chart-container">
+                    <canvas id="chartDFC"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- DRE -->
+        <div id="dre" class="page">
+            <div class="page-header">
+                <h1>Demonstração de Resultado do Exercício (DRE)</h1>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoDRE" onchange="carregarDRE()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesDRE" onchange="carregarDRE()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">DRE por Competência</div>
+                <div class="table-container">
+                    <table id="tabelaDRE">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Período Atual</th>
+                                <th>% da Receita</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="font-weight: 600; background-color: #f0f0f0;">
+                                <td colspan="3">RECEITAS</td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 40px;">Receita Bruta</td>
+                                <td id="dreReceita">R$ 0,00</td>
+                                <td id="drePctReceita">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: #f0f0f0;">
+                                <td colspan="3">CUSTOS</td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 40px;">Custo de Produtos/Serviços</td>
+                                <td id="dreCusto">R$ 0,00</td>
+                                <td id="drePctCusto">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: #f0f0f0;">
+                                <td colspan="3">LUCRO BRUTO</td>
+                            </tr>
+                            <tr style="font-weight: 600;">
+                                <td style="padding-left: 40px;">Lucro Bruto</td>
+                                <td id="dreLucroBruto">R$ 0,00</td>
+                                <td id="drePctLucroBruto">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: #f0f0f0; margin-top: 20px;">
+                                <td colspan="3">DESPESAS OPERACIONAIS</td>
+                            </tr>
+                            <tr>
+                                <td style="padding-left: 40px;">Despesas Gerais</td>
+                                <td id="dreDespesas">R$ 0,00</td>
+                                <td id="drePctDespesas">0%</td>
+                            </tr>
+                            <tr style="font-weight: 600; background-color: var(--cor-primaria); color: white;">
+                                <td>RESULTADO LÍQUIDO</td>
+                                <td id="dreResultado">R$ 0,00</td>
+                                <td id="drePctResultado">0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Análise da DRE</div>
+                <div class="chart-container">
+                    <canvas id="chartDRE"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAIS -->
+<div class="modal" id="modalCategoria">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalCategoriaTitulo">Nova Categoria</span>
+            <button class="modal-close" onclick="closeModal('modalCategoria')">&times;</button>
+        </div>
+        <form onsubmit="salvarCategoria(event)">
+            <div class="form-group">
+                <label>Nome*</label>
+                <input type="text" id="nomeCategoria" required>
+            </div>
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="descricaoCategoria" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="ativoCategoria" checked>
+                    Ativo
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCategoria')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalProduto">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalProdutoTitulo">Novo Produto</span>
+            <button class="modal-close" onclick="closeModal('modalProduto')">&times;</button>
+        </div>
+        <form onsubmit="salvarProduto(event)">
+            <div class="form-group">
+                <label>Nome*</label>
+                <input type="text" id="nomeProduto" required>
+            </div>
+            <div class="form-group">
+                <label>Categoria*</label>
+                <select id="categoriaProduto" required>
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descrição</label>
+                <textarea id="descricaoProduto" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="ativoProduto" checked>
+                    Ativo
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalProduto')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalFornecedor">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalFornecedorTitulo">Novo Fornecedor</span>
+            <button class="modal-close" onclick="closeModal('modalFornecedor')">&times;</button>
+        </div>
+        <form onsubmit="salvarFornecedor(event)">
+            <div class="form-group">
+                <label>Nome*</label>
+                <input type="text" id="nomeFornecedor" required>
+            </div>
+            <div class="form-group">
+                <label>CNPJ</label>
+                <input type="text" id="cnpjFornecedor" placeholder="XX.XXX.XXX/XXXX-XX">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="emailFornecedor">
+            </div>
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" id="telefoneFornecedor">
+            </div>
+            <div class="form-group">
+                <label>Endereço</label>
+                <textarea id="enderecoFornecedor" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="ativoFornecedor" checked>
+                    Ativo
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalFornecedor')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal" id="modalCliente">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalClienteTitulo">Novo Cliente</span>
+            <button class="modal-close" onclick="closeModal('modalCliente')">&times;</button>
+        </div>
+        <form onsubmit="salvarCliente(event)">
+            <div class="form-group">
+                <label>Nome*</label>
+                <input type="text" id="nomeCliente" required>
+            </div>
+            <div class="form-group">
+                <label>CPF/CNPJ</label>
+                <input type="text" id="cpfcnpjCliente" placeholder="XXX.XXX.XXX-XX">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="emailCliente">
+            </div>
+            <div class="form-group">
+                <label>Telefone</label>
+                <input type="text" id="telefoneCliente">
+            </div>
+            <div class="form-group">
+                <label>Endereço</label>
+                <textarea id="enderecoCliente" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="ativoCliente" checked>
+                    Ativo
+                </label>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCliente')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // CONFIG SUPABASE
+    const SUPABASE_URL = 'https://tigjibtprqvrbjhqeqld.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpZ2ppYnRwcnF2cmJqaHFlcWxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE0NzgyNjEsImV4cCI6MjA5NzA1NDI2MX0.l9Ro5_UxVnFKgrazmC-uUJ_r5jt7I052UAz8NXzIrZg';
+    const API_URL = 'https://tigjibtprqvrbjhqeqld.supabase.co/rest/v1';
+
+    // VARIÁVEIS GLOBAIS
+    let usuarioAtual = null;
+    let dadosCache = {
+        categorias: [],
+        produtos: [],
+        fornecedores: [],
+        clientes: [],
+        contasReceber: [],
+        contasPagar: [],
+        contasRecebidas: [],
+        contasPagas: []
+    };
+
+    let charts = {};
+    let editandoId = null;
+    let editandoTipo = null;
+
+    // INICIALIZAÇÃO
+    document.addEventListener('DOMContentLoaded', function() {
+        verificarLogin();
+        inicializarPing();
+        preencherAnos();
+        preencherDias();
+    });
+
+    // LOGIN
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.querySelector('.toggle-password');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleBtn.textContent = '🙈';
+        } else {
+            passwordInput.type = 'password';
+            toggleBtn.textContent = '👁️';
+        }
+    }
+
+    function handleLogin(event) {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember').checked;
+
+        // Validação simples
+        if (username === 'admin' && password === 'C@pbr_2026') {
+            usuarioAtual = { email: username, nome: 'Administrador' };
+            
+            if (remember) {
+                localStorage.setItem('cap_usuario', JSON.stringify(usuarioAtual));
+                localStorage.setItem('cap_lembrar', 'true');
+            }
+
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContainer').classList.add('active');
+            document.getElementById('userGreeting').textContent = `Bem-vindo, ${usuarioAtual.nome}!`;
+            
+            carregarDadosIniciais();
+        } else {
+            document.getElementById('errorMessage').textContent = 'Usuário ou senha incorretos!';
+            document.getElementById('errorMessage').style.display = 'block';
+        }
+    }
+
+    function verificarLogin() {
+        const usuarioSalvo = localStorage.getItem('cap_usuario');
+        const lembrar = localStorage.getItem('cap_lembrar');
+
+        if (usuarioSalvo && lembrar === 'true') {
+            usuarioAtual = JSON.parse(usuarioSalvo);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContainer').classList.add('active');
+            document.getElementById('userGreeting').textContent = `Bem-vindo, ${usuarioAtual.nome}!`;
+            carregarDadosIniciais();
+        }
+    }
+
+    function handleLogout() {
+        if (confirm('Tem certeza que deseja sair?')) {
+            usuarioAtual = null;
+            localStorage.removeItem('cap_usuario');
+            localStorage.removeItem('cap_lembrar');
+            document.getElementById('mainContainer').classList.remove('active');
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginForm').reset();
+        }
+    }
+
+    // REQUISIÇÕES SUPABASE
+    async function fetchSupabase(tabela, metodo = 'GET', dados = null, filtros = '') {
+        try {
+            const url = filtros 
+                ? `${API_URL}/${tabela}?${filtros}`
+                : `${API_URL}/${tabela}`;
+
+            const opcoes = {
+                method: metodo,
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                }
+            };
+
+            if (dados) {
+                opcoes.body = JSON.stringify(dados);
+            }
+
+            const resposta = await fetch(url, opcoes);
+            
+            if (!resposta.ok) {
+                const erro = await resposta.json();
+                console.error('Erro Supabase:', erro);
+                return null;
+            }
+
+            return await resposta.json();
+        } catch (erro) {
+            console.error('Erro na requisição:', erro);
+            return null;
+        }
+    }
+
+    // PING PARA MANTER SUPABASE ATIVO
+    function inicializarPing() {
+        // Ping a cada 5 minutos
+        setInterval(() => {
+            fetchSupabase('categorias', 'GET', null, 'limit=1');
+        }, 5 * 60 * 1000);
+    }
+
+    // CARREGAMENTO INICIAL
+    async function carregarDadosIniciais() {
+        await carregarCategorias();
+        await carregarProdutos();
+        await carregarFornecedores();
+        await carregarClientes();
+        await carregarContasReceber();
+        await carregarContasPagar();
+        await atualizarDashboard();
+    }
+
+    // CATEGORIAS
+    async function carregarCategorias() {
+        const dados = await fetchSupabase('categorias', 'GET');
+        if (dados) {
+            dadosCache.categorias = dados;
+            atualizarTabelaCategorias();
+            atualizarSelectCategorias();
+        }
+    }
+
+    function atualizarTabelaCategorias() {
+        const tbody = document.querySelector('#tabelaCategorias tbody');
+        tbody.innerHTML = '';
+
+        dadosCache.categorias.forEach(cat => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${cat.nome}</td>
+                    <td>${cat.descricao || '-'}</td>
+                    <td><span class="status-badge ${cat.ativo ? 'status-recebido' : 'status-atrasado'}">${cat.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editarCategoria(${cat.id})">Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarCategoria(${cat.id})">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function atualizarSelectCategorias() {
+        const selects = document.querySelectorAll('select[id$="Categoria"]');
+        selects.forEach(select => {
+            const optionSelecionada = select.value;
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dadosCache.categorias.forEach(cat => {
+                select.innerHTML += `<option value="${cat.id}">${cat.nome}</option>`;
+            });
+            select.value = optionSelecionada;
+        });
+    }
+
+    function openModalCategoria() {
+        editandoId = null;
+        editandoTipo = null;
+        document.getElementById('nomeCategoria').value = '';
+        document.getElementById('descricaoCategoria').value = '';
+        document.getElementById('ativoCategoria').checked = true;
+        document.getElementById('modalCategoriaTitulo').textContent = 'Nova Categoria';
+        document.getElementById('modalCategoria').classList.add('active');
+    }
+
+    function editarCategoria(id) {
+        const categoria = dadosCache.categorias.find(c => c.id === id);
+        if (categoria) {
+            editandoId = id;
+            editandoTipo = 'categoria';
+            document.getElementById('nomeCategoria').value = categoria.nome;
+            document.getElementById('descricaoCategoria').value = categoria.descricao || '';
+            document.getElementById('ativoCategoria').checked = categoria.ativo;
+            document.getElementById('modalCategoriaTitulo').textContent = 'Editar Categoria';
+            document.getElementById('modalCategoria').classList.add('active');
+        }
+    }
+
+    async function salvarCategoria(event) {
+        event.preventDefault();
+
+        const dados = {
+            nome: document.getElementById('nomeCategoria').value,
+            descricao: document.getElementById('descricaoCategoria').value,
+            ativo: document.getElementById('ativoCategoria').checked
+        };
+
+        let resultado;
+        if (editandoId) {
+            resultado = await fetchSupabase('categorias', 'PATCH', dados, `id=eq.${editandoId}`);
+        } else {
+            resultado = await fetchSupabase('categorias', 'POST', dados);
+        }
+
+        if (resultado) {
+            showAlert('Categoria salva com sucesso!', 'alertCategorias', 'success');
+            closeModal('modalCategoria');
+            carregarCategorias();
+        }
+    }
+
+    async function deletarCategoria(id) {
+        if (confirm('Tem certeza que deseja deletar esta categoria?')) {
+            const resultado = await fetchSupabase('categorias', 'DELETE', null, `id=eq.${id}`);
+            if (resultado !== null) {
+                showAlert('Categoria deletada com sucesso!', 'alertCategorias', 'success');
+                carregarCategorias();
+            }
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // PRODUTOS
+    async function carregarProdutos() {
+        const dados = await fetchSupabase('produtos', 'GET');
+        if (dados) {
+            dadosCache.produtos = dados;
+            atualizarTabelaProdutos();
+            atualizarSelectProdutos();
+        }
+    }
+
+    function atualizarTabelaProdutos() {
+        const tbody = document.querySelector('#tabelaProdutos tbody');
+        tbody.innerHTML = '';
+
+        dadosCache.produtos.forEach(prod => {
+            const categoria = dadosCache.categorias.find(c => c.id === prod.categoria_id);
+            tbody.innerHTML += `
+                <tr>
+                    <td>${prod.nome}</td>
+                    <td>${categoria ? categoria.nome : '-'}</td>
+                    <td>${prod.descricao || '-'}</td>
+                    <td><span class="status-badge ${prod.ativo ? 'status-recebido' : 'status-atrasado'}">${prod.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editarProduto(${prod.id})">Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarProduto(${prod.id})">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function atualizarSelectProdutos() {
+        const selects = document.querySelectorAll('select[id$="Produto"]');
+        selects.forEach(select => {
+            const optionSelecionada = select.value;
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dadosCache.produtos.forEach(prod => {
+                select.innerHTML += `<option value="${prod.id}">${prod.nome}</option>`;
+            });
+            select.value = optionSelecionada;
+        });
+    }
+
+    function openModalProduto() {
+        editandoId = null;
+        editandoTipo = null;
+        document.getElementById('nomeProduto').value = '';
+        document.getElementById('categoriaProduto').value = '';
+        document.getElementById('descricaoProduto').value = '';
+        document.getElementById('ativoProduto').checked = true;
+        document.getElementById('modalProdutoTitulo').textContent = 'Novo Produto';
+        document.getElementById('modalProduto').classList.add('active');
+    }
+
+    function editarProduto(id) {
+        const produto = dadosCache.produtos.find(p => p.id === id);
+        if (produto) {
+            editandoId = id;
+            editandoTipo = 'produto';
+            document.getElementById('nomeProduto').value = produto.nome;
+            document.getElementById('categoriaProduto').value = produto.categoria_id;
+            document.getElementById('descricaoProduto').value = produto.descricao || '';
+            document.getElementById('ativoProduto').checked = produto.ativo;
+            document.getElementById('modalProdutoTitulo').textContent = 'Editar Produto';
+            document.getElementById('modalProduto').classList.add('active');
+        }
+    }
+
+    async function salvarProduto(event) {
+        event.preventDefault();
+
+        const dados = {
+            nome: document.getElementById('nomeProduto').value,
+            categoria_id: parseInt(document.getElementById('categoriaProduto').value),
+            descricao: document.getElementById('descricaoProduto').value,
+            ativo: document.getElementById('ativoProduto').checked
+        };
+
+        let resultado;
+        if (editandoId) {
+            resultado = await fetchSupabase('produtos', 'PATCH', dados, `id=eq.${editandoId}`);
+        } else {
+            resultado = await fetchSupabase('produtos', 'POST', dados);
+        }
+
+        if (resultado) {
+            showAlert('Produto salvo com sucesso!', 'alertProdutos', 'success');
+            closeModal('modalProduto');
+            carregarProdutos();
+        }
+    }
+
+    async function deletarProduto(id) {
+        if (confirm('Tem certeza que deseja deletar este produto?')) {
+            const resultado = await fetchSupabase('produtos', 'DELETE', null, `id=eq.${id}`);
+            if (resultado !== null) {
+                showAlert('Produto deletado com sucesso!', 'alertProdutos', 'success');
+                carregarProdutos();
+            }
+        }
+    }
+
+    // FORNECEDORES
+    async function carregarFornecedores() {
+        const filtro = document.getElementById('filtroFornecedor');
+        let filtros = '';
+        
+        if (filtro && filtro.value) {
+            filtros = `or=(nome.ilike.%${filtro.value}%,cnpj.ilike.%${filtro.value}%)`;
+        }
+
+        const dados = await fetchSupabase('fornecedores', 'GET', null, filtros);
+        if (dados) {
+            dadosCache.fornecedores = dados;
+            atualizarTabelaFornecedores();
+            atualizarSelectFornecedores();
+        }
+    }
+
+    function atualizarTabelaFornecedores() {
+        const tbody = document.querySelector('#tabelaFornecedores tbody');
+        tbody.innerHTML = '';
+
+        dadosCache.fornecedores.forEach(forn => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${forn.nome}</td>
+                    <td>${forn.cnpj || '-'}</td>
+                    <td>${forn.email || '-'}</td>
+                    <td>${forn.telefone || '-'}</td>
+                    <td><span class="status-badge ${forn.ativo ? 'status-recebido' : 'status-atrasado'}">${forn.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editarFornecedor(${forn.id})">Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarFornecedor(${forn.id})">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function atualizarSelectFornecedores() {
+        const selects = document.querySelectorAll('select[id$="Fornecedor"]');
+        selects.forEach(select => {
+            const optionSelecionada = select.value;
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dadosCache.fornecedores.forEach(forn => {
+                select.innerHTML += `<option value="${forn.id}">${forn.nome}</option>`;
+            });
+            select.value = optionSelecionada;
+        });
+    }
+
+    function openModalFornecedor() {
+        editandoId = null;
+        editandoTipo = null;
+        document.getElementById('nomeFornecedor').value = '';
+        document.getElementById('cnpjFornecedor').value = '';
+        document.getElementById('emailFornecedor').value = '';
+        document.getElementById('telefoneFornecedor').value = '';
+        document.getElementById('enderecoFornecedor').value = '';
+        document.getElementById('ativoFornecedor').checked = true;
+        document.getElementById('modalFornecedorTitulo').textContent = 'Novo Fornecedor';
+        document.getElementById('modalFornecedor').classList.add('active');
+    }
+
+    function editarFornecedor(id) {
+        const fornecedor = dadosCache.fornecedores.find(f => f.id === id);
+        if (fornecedor) {
+            editandoId = id;
+            editandoTipo = 'fornecedor';
+            document.getElementById('nomeFornecedor').value = fornecedor.nome;
+            document.getElementById('cnpjFornecedor').value = fornecedor.cnpj || '';
+            document.getElementById('emailFornecedor').value = fornecedor.email || '';
+            document.getElementById('telefoneFornecedor').value = fornecedor.telefone || '';
+            document.getElementById('enderecoFornecedor').value = fornecedor.endereco || '';
+            document.getElementById('ativoFornecedor').checked = fornecedor.ativo;
+            document.getElementById('modalFornecedorTitulo').textContent = 'Editar Fornecedor';
+            document.getElementById('modalFornecedor').classList.add('active');
+        }
+    }
+
+    async function salvarFornecedor(event) {
+        event.preventDefault();
+
+        const dados = {
+            nome: document.getElementById('nomeFornecedor').value,
+            cnpj: document.getElementById('cnpjFornecedor').value || null,
+            email: document.getElementById('emailFornecedor').value || null,
+            telefone: document.getElementById('telefoneFornecedor').value || null,
+            endereco: document.getElementById('enderecoFornecedor').value || null,
+            ativo: document.getElementById('ativoFornecedor').checked
+        };
+
+        let resultado;
+        if (editandoId) {
+            resultado = await fetchSupabase('fornecedores', 'PATCH', dados, `id=eq.${editandoId}`);
+        } else {
+            resultado = await fetchSupabase('fornecedores', 'POST', dados);
+        }
+
+        if (resultado) {
+            showAlert('Fornecedor salvo com sucesso!', 'alertFornecedores', 'success');
+            closeModal('modalFornecedor');
+            carregarFornecedores();
+        }
+    }
+
+    async function deletarFornecedor(id) {
+        if (confirm('Tem certeza que deseja deletar este fornecedor?')) {
+            const resultado = await fetchSupabase('fornecedores', 'DELETE', null, `id=eq.${id}`);
+            if (resultado !== null) {
+                showAlert('Fornecedor deletado com sucesso!', 'alertFornecedores', 'success');
+                carregarFornecedores();
+            }
+        }
+    }
+
+    // CLIENTES
+    async function carregarClientes() {
+        const filtro = document.getElementById('filtroCliente');
+        let filtros = '';
+        
+        if (filtro && filtro.value) {
+            filtros = `or=(nome.ilike.%${filtro.value}%,cpf_cnpj.ilike.%${filtro.value}%)`;
+        }
+
+        const dados = await fetchSupabase('clientes', 'GET', null, filtros);
+        if (dados) {
+            dadosCache.clientes = dados;
+            atualizarTabelaClientes();
+            atualizarSelectClientes();
+        }
+    }
+
+    function atualizarTabelaClientes() {
+        const tbody = document.querySelector('#tabelaClientes tbody');
+        tbody.innerHTML = '';
+
+        dadosCache.clientes.forEach(cli => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${cli.nome}</td>
+                    <td>${cli.cpf_cnpj || '-'}</td>
+                    <td>${cli.email || '-'}</td>
+                    <td>${cli.telefone || '-'}</td>
+                    <td><span class="status-badge ${cli.ativo ? 'status-recebido' : 'status-atrasado'}">${cli.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-secondary btn-small" onclick="editarCliente(${cli.id})">Editar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarCliente(${cli.id})">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function atualizarSelectClientes() {
+        const selects = document.querySelectorAll('select[id$="Cliente"]');
+        selects.forEach(select => {
+            const optionSelecionada = select.value;
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dadosCache.clientes.forEach(cli => {
+                select.innerHTML += `<option value="${cli.id}">${cli.nome}</option>`;
+            });
+            select.value = optionSelecionada;
+        });
+    }
+
+    function openModalCliente() {
+        editandoId = null;
+        editandoTipo = null;
+        document.getElementById('nomeCliente').value = '';
+        document.getElementById('cpfcnpjCliente').value = '';
+        document.getElementById('emailCliente').value = '';
+        document.getElementById('telefoneCliente').value = '';
+        document.getElementById('enderecoCliente').value = '';
+        document.getElementById('ativoCliente').checked = true;
+        document.getElementById('modalClienteTitulo').textContent = 'Novo Cliente';
+        document.getElementById('modalCliente').classList.add('active');
+    }
+
+    function editarCliente(id) {
+        const cliente = dadosCache.clientes.find(c => c.id === id);
+        if (cliente) {
+            editandoId = id;
+            editandoTipo = 'cliente';
+            document.getElementById('nomeCliente').value = cliente.nome;
+            document.getElementById('cpfcnpjCliente').value = cliente.cpf_cnpj || '';
+            document.getElementById('emailCliente').value = cliente.email || '';
+            document.getElementById('telefoneCliente').value = cliente.telefone || '';
+            document.getElementById('enderecoCliente').value = cliente.endereco || '';
+            document.getElementById('ativoCliente').checked = cliente.ativo;
+            document.getElementById('modalClienteTitulo').textContent = 'Editar Cliente';
+            document.getElementById('modalCliente').classList.add('active');
+        }
+    }
+
+    async function salvarCliente(event) {
+        event.preventDefault();
+
+        const dados = {
+            nome: document.getElementById('nomeCliente').value,
+            cpf_cnpj: document.getElementById('cpfcnpjCliente').value || null,
+            email: document.getElementById('emailCliente').value || null,
+            telefone: document.getElementById('telefoneCliente').value || null,
+            endereco: document.getElementById('enderecoCliente').value || null,
+            ativo: document.getElementById('ativoCliente').checked
+        };
+
+        let resultado;
+        if (editandoId) {
+            resultado = await fetchSupabase('clientes', 'PATCH', dados, `id=eq.${editandoId}`);
+        } else {
+            resultado = await fetchSupabase('clientes', 'POST', dados);
+        }
+
+        if (resultado) {
+            showAlert('Cliente salvo com sucesso!', 'alertClientes', 'success');
+            closeModal('modalCliente');
+            carregarClientes();
+        }
+    }
+
+    async function deletarCliente(id) {
+        if (confirm('Tem certeza que deseja deletar este cliente?')) {
+            const resultado = await fetchSupabase('clientes', 'DELETE', null, `id=eq.${id}`);
+            if (resultado !== null) {
+                showAlert('Cliente deletado com sucesso!', 'alertClientes', 'success');
+                carregarClientes();
+            }
+        }
+    }
+
+    // CONTAS A RECEBER
+    async function carregarContasReceber() {
+        const filtro = `status=eq.pendente`;
+        const dados = await fetchSupabase('contas_a_receber', 'GET', null, filtro);
+        if (dados) {
+            dadosCache.contasReceber = dados;
+            atualizarTabelaPendentesReceber();
+        }
+    }
+
+    function atualizarTabelaPendentesReceber() {
+        const tbody = document.querySelector('#tabelaPendentesReceber tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        let filtrado = dadosCache.contasReceber;
+
+        const filtroCliente = document.getElementById('filtroClienteReceber');
+        const filtroAno = document.getElementById('filtroAnoReceber');
+        const filtroMes = document.getElementById('filtroMesReceber');
+
+        if (filtroCliente && filtroCliente.value) {
+            filtrado = filtrado.filter(c => c.cliente_id == filtroCliente.value);
+        }
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_vencimento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_vencimento.includes('-' + filtroMes.value + '-'));
+        }
+
+        filtrado.forEach(conta => {
+            const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
+            const status = new Date(conta.data_vencimento) < new Date() ? 'atrasado' : 'pendente';
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${cliente ? cliente.nome : '-'}</td>
+                    <td>${conta.descricao}</td>
+                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                    <td>
+                        <button class="btn btn-success btn-small" onclick="receberConta(${conta.id}, 'receber')">Receber</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function salvarContaReceber(event) {
+        event.preventDefault();
+
+        const dados = {
+            cliente_id: parseInt(document.getElementById('clienteReceber').value),
+            descricao: document.getElementById('descricaoReceber').value,
+            valor: parseFloat(document.getElementById('valorReceber').value),
+            data_vencimento: document.getElementById('vencimentoReceber').value,
+            status: 'pendente',
+            observacoes: document.getElementById('observacoesReceber').value
+        };
+
+        const resultado = await fetchSupabase('contas_a_receber', 'POST', dados);
+        if (resultado) {
+            showAlert('Conta lançada com sucesso!', 'alertLancarReceber', 'success');
+            event.target.reset();
+            carregarContasReceber();
+            atualizarDashboard();
+        }
+    }
+
+    // CONTAS A PAGAR
+    async function carregarContasPagar() {
+        const filtro = `status=eq.pendente`;
+        const dados = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
+        if (dados) {
+            dadosCache.contasPagar = dados;
+            atualizarTabelaPendentesPagar();
+        }
+    }
+
+    function atualizarTabelaPendentesPagar() {
+        const tbody = document.querySelector('#tabelaPendentesPagar tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        let filtrado = dadosCache.contasPagar;
+
+        const filtroFornecedor = document.getElementById('filtroFornecedorPagar');
+        const filtroCategoria = document.getElementById('filtroCategoriaPagar');
+        const filtroAno = document.getElementById('filtroAnoPagar');
+        const filtroMes = document.getElementById('filtroMesPagar');
+
+        if (filtroFornecedor && filtroFornecedor.value) {
+            filtrado = filtrado.filter(c => c.fornecedor_id == filtroFornecedor.value);
+        }
+
+        if (filtroCategoria && filtroCategoria.value) {
+            filtrado = filtrado.filter(c => c.categoria_id == filtroCategoria.value);
+        }
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_vencimento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_vencimento.includes('-' + filtroMes.value + '-'));
+        }
+
+        filtrado.forEach(conta => {
+            const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
+            const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
+            const status = new Date(conta.data_vencimento) < new Date() ? 'atrasado' : 'pendente';
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${fornecedor ? fornecedor.nome : '-'}</td>
+                    <td>${categoria ? categoria.nome : '-'}</td>
+                    <td>${conta.descricao}</td>
+                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                    <td>
+                        <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id}, 'pagar')">Pagar</button>
+                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function salvarContaPagar(event) {
+        event.preventDefault();
+
+        const dados = {
+            fornecedor_id: parseInt(document.getElementById('fornecedorPagar').value),
+            categoria_id: document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null,
+            produto_id: document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null,
+            descricao: document.getElementById('descricaoPagar').value,
+            valor: parseFloat(document.getElementById('valorPagar').value),
+            data_vencimento: document.getElementById('vencimentoPagar').value,
+            status: 'pendente',
+            observacoes: document.getElementById('observacoesPagar').value
+        };
+
+        const resultado = await fetchSupabase('contas_a_pagar', 'POST', dados);
+        if (resultado) {
+            showAlert('Conta lançada com sucesso!', 'alertLancarPagar', 'success');
+            event.target.reset();
+            carregarContasPagar();
+            atualizarDashboard();
+        }
+    }
+
+    // CONTAS RECEBIDAS
+    async function carregarContasRecebidas() {
+        let filtro = `status=eq.recebido`;
+        const filtroCliente = document.getElementById('filtroClienteRecebida');
+        const filtroAno = document.getElementById('filtroAnoRecebida');
+        const filtroMes = document.getElementById('filtroMesRecebida');
+        const filtroDia = document.getElementById('filtroDialRecebida');
+
+        if (filtroCliente && filtroCliente.value) {
+            filtro += `&cliente_id=eq.${filtroCliente.value}`;
+        }
+
+        const dados = await fetchSupabase('contas_a_receber', 'GET', null, filtro);
+        if (dados) {
+            dadosCache.contasRecebidas = dados;
+            atualizarTabelaRecebidas();
+        }
+    }
+
+    function atualizarTabelaRecebidas() {
+        const tbody = document.querySelector('#tabelaRecebidas tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        let filtrado = dadosCache.contasRecebidas;
+
+        const filtroAno = document.getElementById('filtroAnoRecebida');
+        const filtroMes = document.getElementById('filtroMesRecebida');
+        const filtroDia = document.getElementById('filtroDialRecebida');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
+        }
+
+        if (filtroDia && filtroDia.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.endsWith('-' + filtroDia.value));
+        }
+
+        filtrado.forEach(conta => {
+            const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${cliente ? cliente.nome : '-'}</td>
+                    <td>${conta.descricao}</td>
+                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td>${conta.data_recebimento ? new Date(conta.data_recebimento).toLocaleDateString('pt-BR') : '-'}</td>
+                    <td>
+                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // CONTAS PAGAS
+    async function carregarContasPagas() {
+        let filtro = `status=eq.pago`;
+        const filtroFornecedor = document.getElementById('filtroFornecedorPaga');
+
+        if (filtroFornecedor && filtroFornecedor.value) {
+            filtro += `&fornecedor_id=eq.${filtroFornecedor.value}`;
+        }
+
+        const dados = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
+        if (dados) {
+            dadosCache.contasPagas = dados;
+            atualizarTabelaPagas();
+        }
+    }
+
+    function atualizarTabelaPagas() {
+        const tbody = document.querySelector('#tabelaPagas tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        let filtrado = dadosCache.contasPagas;
+
+        const filtroAno = document.getElementById('filtroAnoPaga');
+        const filtroMes = document.getElementById('filtroMesPaga');
+        const filtroDia = document.getElementById('filtroDiaPaga');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        }
+
+        if (filtroDia && filtroDia.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.endsWith('-' + filtroDia.value));
+        }
+
+        filtrado.forEach(conta => {
+            const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
+            const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td>${fornecedor ? fornecedor.nome : '-'}</td>
+                    <td>${categoria ? categoria.nome : '-'}</td>
+                    <td>${conta.descricao}</td>
+                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
+                    <td>${conta.data_pagamento ? new Date(conta.data_pagamento).toLocaleDateString('pt-BR') : '-'}</td>
+                    <td>
+                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // MARCAR COMO RECEBIDO/PAGO
+    async function receberConta(id, tipo) {
+        const data_recebimento = prompt('Data de recebimento (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+        
+        if (data_recebimento) {
+            const resultado = await fetchSupabase('contas_a_receber', 'PATCH', {
+                status: 'recebido',
+                data_recebimento: data_recebimento
+            }, `id=eq.${id}`);
+
+            if (resultado) {
+                showAlert('Conta marcada como recebida!', 'alertLancarReceber', 'success');
+                carregarContasReceber();
+                carregarContasRecebidas();
+                atualizarDashboard();
+            }
+        }
+    }
+
+    async function pagarConta(id, tipo) {
+        const data_pagamento = prompt('Data de pagamento (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+        
+        if (data_pagamento) {
+            const resultado = await fetchSupabase('contas_a_pagar', 'PATCH', {
+                status: 'pago',
+                data_pagamento: data_pagamento
+            }, `id=eq.${id}`);
+
+            if (resultado) {
+                showAlert('Conta marcada como paga!', 'alertLancarPagar', 'success');
+                carregarContasPagar();
+                carregarContasPagas();
+                atualizarDashboard();
+            }
+        }
+    }
+
+    // DELETAR CONTAS
+    async function deletarConta(id, tabela) {
+        if (confirm('Tem certeza que deseja deletar esta conta?')) {
+            const resultado = await fetchSupabase(tabela, 'DELETE', null, `id=eq.${id}`);
+            if (resultado !== null) {
+                showAlert('Conta deletada com sucesso!', 'alertLancarReceber', 'success');
+                carregarContasReceber();
+                carregarContasPagar();
+                carregarContasRecebidas();
+                carregarContasPagas();
+                atualizarDashboard();
+            }
+        }
+    }
+
+    // DASHBOARD
+    async function atualizarDashboard() {
+        // Carrega todas as contas
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
+
+        if (!contasReceber || !contasPagar) return;
+
+        // Contas a receber pendentes
+        const recberPendentes = contasReceber.filter(c => c.status === 'pendente');
+        const totalReceber = recberPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        document.getElementById('totalReceber').textContent = 'R$ ' + totalReceber.toFixed(2).replace('.', ',');
+        document.getElementById('countReceber').textContent = recberPendentes.length + ' pendentes';
+
+        // Contas a pagar pendentes
+        const pagarPendentes = contasPagar.filter(c => c.status === 'pendente');
+        const totalPagar = pagarPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        document.getElementById('totalPagar').textContent = 'R$ ' + totalPagar.toFixed(2).replace('.', ',');
+        document.getElementById('countPagar').textContent = pagarPendentes.length + ' pendentes';
+
+        // Este mês
+        const hoje = new Date();
+        const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+        const anoAtual = String(hoje.getFullYear());
+
+        const recebidoMes = contasReceber.filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.includes(anoAtual + '-' + mesAtual));
+        const totalRecebidoMes = recebidoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        document.getElementById('recebidoMes').textContent = 'R$ ' + totalRecebidoMes.toFixed(2).replace('.', ',');
+        document.getElementById('countRecebidoMes').textContent = recebidoMes.length + ' transações';
+
+        const pagoMes = contasPagar.filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.includes(anoAtual + '-' + mesAtual));
+        const totalPagoMes = pagoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        document.getElementById('pagoMes').textContent = 'R$ ' + totalPagoMes.toFixed(2).replace('.', ',');
+        document.getElementById('countPagoMes').textContent = pagoMes.length + ' transações';
+
+        // Gráficos
+        criarGraficoFluxo(contasReceber, contasPagar);
+        criarGraficoDevedores(contasReceber);
+    }
+
+    // GRÁFICOS
+    function criarGraficoFluxo(contasReceber, contasPagar) {
+        const ctx = document.getElementById('chartFluxo');
+        if (!ctx) return;
+
+        // Últimos 30 dias
+        const datas = [];
+        const entradas = [];
+        const saidas = [];
+
+        for (let i = 29; i >= 0; i--) {
+            const data = new Date();
+            data.setDate(data.getDate() - i);
+            const dataStr = data.toISOString().split('T')[0];
+            datas.push(new Date(dataStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+
+            const entrada = contasReceber
+                .filter(c => c.status === 'recebido' && c.data_recebimento === dataStr)
+                .reduce((sum, c) => sum + parseFloat(c.valor), 0);
+
+            const saida = contasPagar
+                .filter(c => c.status === 'pago' && c.data_pagamento === dataStr)
+                .reduce((sum, c) => sum + parseFloat(c.valor), 0);
+
+            entradas.push(entrada);
+            saidas.push(saida);
+        }
+
+        if (charts.fluxo) {
+            charts.fluxo.destroy();
+        }
+
+        charts.fluxo = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datas,
+                datasets: [
+                    {
+                        label: 'Recebimentos',
+                        data: entradas,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Pagamentos',
+                        data: saidas,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function criarGraficoDevedores(contasReceber) {
+        const ctx = document.getElementById('chartDevedores');
+        if (!ctx) return;
+
+        // Top 5 devedores
+        const devedores = {};
+        contasReceber.filter(c => c.status === 'pendente').forEach(c => {
+            const cliente = dadosCache.clientes.find(cl => cl.id === c.cliente_id);
+            const nome = cliente ? cliente.nome : 'Desconhecido';
+            devedores[nome] = (devedores[nome] || 0) + parseFloat(c.valor);
+        });
+
+        const top5 = Object.entries(devedores)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+
+        if (charts.devedores) {
+            charts.devedores.destroy();
+        }
+
+        charts.devedores = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: top5.map(d => d[0]),
+                datasets: [{
+                    data: top5.map(d => d[1]),
+                    backgroundColor: [
+                        '#FF7A42',
+                        '#FF6B2E',
+                        '#E85A1F',
+                        '#D04A11',
+                        '#B83A03'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+
+    // UTILITÁRIOS
+    function preencherAnos() {
+        const selects = document.querySelectorAll('select[id*="Ano"]');
+        const anoAtual = new Date().getFullYear();
+        
+        selects.forEach(select => {
+            for (let ano = anoAtual; ano >= anoAtual - 5; ano--) {
+                select.innerHTML += `<option value="${ano}">${ano}</option>`;
+            }
+        });
+    }
+
+    function preencherDias() {
+        const selects = document.querySelectorAll('select[id*="Dia"]');
+        
+        selects.forEach(select => {
+            for (let dia = 1; dia <= 31; dia++) {
+                select.innerHTML += `<option value="${String(dia).padStart(2, '0')}">${dia}</option>`;
+            }
+        });
+    }
+
+    function preencherProdutosPagar() {
+        const categoriaSelecionada = document.getElementById('categoriaPagar').value;
+        const selectProdutos = document.getElementById('produtoPagar');
+
+        selectProdutos.innerHTML = '<option value="">Selecione...</option>';
+
+        if (categoriaSelecionada) {
+            const produtos = dadosCache.produtos.filter(p => p.categoria_id == categoriaSelecionada);
+            produtos.forEach(prod => {
+                selectProdutos.innerHTML += `<option value="${prod.id}">${prod.nome}</option>`;
+            });
+        }
+    }
+
+    function showPage(pageId) {
+        // Oculta todas as páginas
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+
+        // Oculta todos os itens do menu
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Mostra a página selecionada
+        const page = document.getElementById(pageId);
+        if (page) {
+            page.classList.add('active');
+
+            // Marca o menu como ativo
+            event.target.classList.add('active');
+
+            // Carrega dados quando a página for exibida
+            if (pageId === 'categorias') carregarCategorias();
+            else if (pageId === 'produtos') carregarProdutos();
+            else if (pageId === 'fornecedores') carregarFornecedores();
+            else if (pageId === 'clientes') carregarClientes();
+            else if (pageId === 'lancar-receber') carregarContasReceber();
+            else if (pageId === 'lancar-pagar') carregarContasPagar();
+            else if (pageId === 'contas-recebidas') carregarContasRecebidas();
+            else if (pageId === 'contas-pagas') carregarContasPagas();
+            else if (pageId === 'calendario') gerarCalendario();
+            else if (pageId === 'relatorio-receber') carregarRelatorioReceber();
+            else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
+            else if (pageId === 'dfc') carregarDFC();
+            else if (pageId === 'dre') carregarDRE();
+            else if (pageId === 'dashboard') atualizarDashboard();
+        }
+    }
+
+    function showAlert(message, elementId, type) {
+        const alert = document.getElementById(elementId);
+        if (alert) {
+            alert.textContent = message;
+            alert.className = 'alert show alert-' + type;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+    }
+
+    // RELATÓRIOS
+    async function carregarRelatorioReceber() {
+        const contasRecebidas = await fetchSupabase('contas_a_receber', 'GET', null, `status=eq.recebido`);
+        if (!contasRecebidas) return;
+
+        let filtrado = contasRecebidas;
+
+        const filtroAno = document.getElementById('filtroAnoRelReceber');
+        const filtroMes = document.getElementById('filtroMesRelReceber');
+        const filtroDia = document.getElementById('filtroDialRelReceber');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
+        }
+
+        if (filtroDia && filtroDia.value) {
+            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.endsWith('-' + filtroDia.value));
+        }
+
+        const total = filtrado.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const quantidade = filtrado.length;
+        const ticket = quantidade > 0 ? total / quantidade : 0;
+
+        document.getElementById('totalRecebidoRel').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+        document.getElementById('qtdRecebidoRel').textContent = quantidade;
+        document.getElementById('ticketRecebidoRel').textContent = 'R$ ' + ticket.toFixed(2).replace('.', ',');
+
+        // Ranking de clientes
+        const ranking = {};
+        filtrado.forEach(c => {
+            if (!ranking[c.cliente_id]) {
+                ranking[c.cliente_id] = { quantidade: 0, valor: 0 };
+            }
+            ranking[c.cliente_id].quantidade++;
+            ranking[c.cliente_id].valor += parseFloat(c.valor);
+        });
+
+        const tbody = document.querySelector('#tabelaRankingClientes tbody');
+        tbody.innerHTML = '';
+
+        Object.entries(ranking)
+            .map(([clienteId, dados]) => {
+                const cliente = dadosCache.clientes.find(c => c.id == clienteId);
+                return {
+                    nome: cliente ? cliente.nome : 'Desconhecido',
+                    ...dados,
+                    pct: (dados.valor / total * 100).toFixed(2)
+                };
+            })
+            .sort((a, b) => b.valor - a.valor)
+            .forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nome}</td>
+                        <td>${item.quantidade}</td>
+                        <td>R$ ${item.valor.toFixed(2).replace('.', ',')}</td>
+                        <td>${item.pct}%</td>
+                    </tr>
+                `;
+            });
+
+        // Gráfico Top 10
+        criarGraficoTopClientes(filtrado, total);
+    }
+
+    function criarGraficoTopClientes(contasRecebidas, total) {
+        const ctx = document.getElementById('chartTopClientesReceber');
+        if (!ctx) return;
+
+        const ranking = {};
+        contasRecebidas.forEach(c => {
+            if (!ranking[c.cliente_id]) {
+                ranking[c.cliente_id] = 0;
+            }
+            ranking[c.cliente_id] += parseFloat(c.valor);
+        });
+
+        const top10 = Object.entries(ranking)
+            .map(([clienteId, valor]) => {
+                const cliente = dadosCache.clientes.find(c => c.id == clienteId);
+                return {
+                    nome: cliente ? cliente.nome.substring(0, 15) : 'Desconhecido',
+                    valor: valor
+                };
+            })
+            .sort((a, b) => b.valor - a.valor)
+            .slice(0, 10);
+
+        if (charts.topClientes) {
+            charts.topClientes.destroy();
+        }
+
+        charts.topClientes = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top10.map(c => c.nome),
+                datasets: [{
+                    label: 'Valor Recebido',
+                    data: top10.map(c => c.valor),
+                    backgroundColor: '#28a745'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    async function carregarRelatorioPagar() {
+        const contasPagas = await fetchSupabase('contas_a_pagar', 'GET', null, `status=eq.pago`);
+        if (!contasPagas) return;
+
+        let filtrado = contasPagas;
+
+        const filtroAno = document.getElementById('filtroAnoRelPagar');
+        const filtroMes = document.getElementById('filtroMesRelPagar');
+        const filtroDia = document.getElementById('filtroDiaRelPagar');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        }
+
+        if (filtroDia && filtroDia.value) {
+            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.endsWith('-' + filtroDia.value));
+        }
+
+        const total = filtrado.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const quantidade = filtrado.length;
+        const ticket = quantidade > 0 ? total / quantidade : 0;
+
+        document.getElementById('totalPagoRel').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+        document.getElementById('qtdPagoRel').textContent = quantidade;
+        document.getElementById('ticketPagoRel').textContent = 'R$ ' + ticket.toFixed(2).replace('.', ',');
+
+        // Ranking de fornecedores
+        const ranking = {};
+        filtrado.forEach(c => {
+            if (!ranking[c.fornecedor_id]) {
+                ranking[c.fornecedor_id] = { quantidade: 0, valor: 0 };
+            }
+            ranking[c.fornecedor_id].quantidade++;
+            ranking[c.fornecedor_id].valor += parseFloat(c.valor);
+        });
+
+        const tbody = document.querySelector('#tabelaRankingFornecedores tbody');
+        tbody.innerHTML = '';
+
+        Object.entries(ranking)
+            .map(([fornecedorId, dados]) => {
+                const fornecedor = dadosCache.fornecedores.find(f => f.id == fornecedorId);
+                return {
+                    nome: fornecedor ? fornecedor.nome : 'Desconhecido',
+                    ...dados,
+                    pct: (dados.valor / total * 100).toFixed(2)
+                };
+            })
+            .sort((a, b) => b.valor - a.valor)
+            .forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.nome}</td>
+                        <td>${item.quantidade}</td>
+                        <td>R$ ${item.valor.toFixed(2).replace('.', ',')}</td>
+                        <td>${item.pct}%</td>
+                    </tr>
+                `;
+            });
+
+        // Gráfico Top 10
+        criarGraficoTopFornecedores(filtrado, total);
+    }
+
+    function criarGraficoTopFornecedores(contasPagas, total) {
+        const ctx = document.getElementById('chartTopFornecedoresPagar');
+        if (!ctx) return;
+
+        const ranking = {};
+        contasPagas.forEach(c => {
+            if (!ranking[c.fornecedor_id]) {
+                ranking[c.fornecedor_id] = 0;
+            }
+            ranking[c.fornecedor_id] += parseFloat(c.valor);
+        });
+
+        const top10 = Object.entries(ranking)
+            .map(([fornecedorId, valor]) => {
+                const fornecedor = dadosCache.fornecedores.find(f => f.id == fornecedorId);
+                return {
+                    nome: fornecedor ? fornecedor.nome.substring(0, 15) : 'Desconhecido',
+                    valor: valor
+                };
+            })
+            .sort((a, b) => b.valor - a.valor)
+            .slice(0, 10);
+
+        if (charts.topFornecedores) {
+            charts.topFornecedores.destroy();
+        }
+
+        charts.topFornecedores = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: top10.map(f => f.nome),
+                datasets: [{
+                    label: 'Valor Pago',
+                    data: top10.map(f => f.valor),
+                    backgroundColor: '#dc3545'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // CALENDÁRIO
+    async function gerarCalendario() {
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET', null, `status=eq.pendente`);
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET', null, `status=eq.pendente`);
+
+        const container = document.getElementById('calendarContainer');
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = hoje.getMonth();
+
+        let html = `<h3>${new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
+        html += '<table style="width: 100%; border-collapse: collapse;">';
+        html += '<tr style="text-align: center;"><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sab</th></tr>';
+
+        const primeiroDia = new Date(ano, mes, 1).getDay();
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+        let diaAtual = 1;
+        for (let semana = 0; semana < 6; semana++) {
+            html += '<tr>';
+            for (let dia = 0; dia < 7; dia++) {
+                if ((semana === 0 && dia < primeiroDia) || diaAtual > ultimoDia) {
+                    html += '<td style="height: 60px; border: 1px solid #ddd;"></td>';
+                } else {
+                    const dataStr = String(ano) + '-' + String(mes + 1).padStart(2, '0') + '-' + String(diaAtual).padStart(2, '0');
+                    const receber = contasReceber ? contasReceber.filter(c => c.data_vencimento === dataStr) : [];
+                    const pagar = contasPagar ? contasPagar.filter(c => c.data_vencimento === dataStr) : [];
+
+                    let cellColor = '#fff';
+                    let content = `<strong>${diaAtual}</strong>`;
+
+                    if (receber.length > 0) {
+                        cellColor = '#d4edda';
+                        content += `<br><small style="color: #155724;">R: ${receber.length}</small>`;
+                    }
+
+                    if (pagar.length > 0) {
+                        cellColor = '#f8d7da';
+                        content += `<br><small style="color: #721c24;">P: ${pagar.length}</small>`;
+                    }
+
+                    html += `<td style="height: 60px; border: 1px solid #ddd; background: ${cellColor}; padding: 5px; vertical-align: top;">${content}</td>`;
+                    diaAtual++;
+                }
+            }
+            html += '</tr>';
+        }
+
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
+    // DFC
+    async function carregarDFC() {
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
+
+        if (!contasReceber || !contasPagar) return;
+
+        let filtrado_receber = contasReceber.filter(c => c.status === 'recebido');
+        let filtrado_pagar = contasPagar.filter(c => c.status === 'pago');
+
+        const filtroAno = document.getElementById('filtroAnoDFC');
+        const filtroMes = document.getElementById('filtroMesDFC');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
+            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
+            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        }
+
+        // Contas pendentes
+        const pendentes_receber = contasReceber.filter(c => c.status === 'pendente');
+        const pendentes_pagar = contasPagar.filter(c => c.status === 'pendente');
+
+        const totalReceber = filtrado_receber.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const totalPagar = filtrado_pagar.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const totalPendentesReceber = pendentes_receber.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const totalPendentesPagar = pendentes_pagar.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+
+        const fluxoLiquido = (totalReceber + totalPendentesReceber) - (totalPagar + totalPendentesPagar);
+
+        document.getElementById('dfcEntradaReceber').textContent = 'R$ ' + (totalReceber + totalPendentesReceber).toFixed(2).replace('.', ',');
+        document.getElementById('dfcSaidaPagar').textContent = 'R$ ' + (totalPagar + totalPendentesPagar).toFixed(2).replace('.', ',');
+        document.getElementById('dfcFluxoLiquido').textContent = 'R$ ' + fluxoLiquido.toFixed(2).replace('.', ',');
+
+        // Gráfico DFC
+        criarGraficoDFC(contasReceber, contasPagar);
+    }
+
+    function criarGraficoDFC(contasReceber, contasPagar) {
+        const ctx = document.getElementById('chartDFC');
+        if (!ctx) return;
+
+        // Últimos 12 meses
+        const meses = [];
+        const fluxos = [];
+
+        for (let i = 11; i >= 0; i--) {
+            const data = new Date();
+            data.setMonth(data.getMonth() - i);
+            const anoMes = data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0');
+            const mesNome = data.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+            meses.push(mesNome);
+
+            const entrada = contasReceber
+                .filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.startsWith(anoMes))
+                .reduce((sum, c) => sum + parseFloat(c.valor), 0);
+
+            const saida = contasPagar
+                .filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(anoMes))
+                .reduce((sum, c) => sum + parseFloat(c.valor), 0);
+
+            fluxos.push(entrada - saida);
+        }
+
+        if (charts.dfc) {
+            charts.dfc.destroy();
+        }
+
+        charts.dfc = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: meses,
+                datasets: [{
+                    label: 'Fluxo Líquido',
+                    data: fluxos,
+                    backgroundColor: fluxos.map(f => f >= 0 ? '#28a745' : '#dc3545')
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value.toFixed(0);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // DRE
+    async function carregarDRE() {
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
+
+        if (!contasReceber || !contasPagar) return;
+
+        let filtrado_receber = contasReceber.filter(c => c.status === 'recebido');
+        let filtrado_pagar = contasPagar.filter(c => c.status === 'pago');
+
+        const filtroAno = document.getElementById('filtroAnoDRE');
+        const filtroMes = document.getElementById('filtroMesDRE');
+
+        if (filtroAno && filtroAno.value) {
+            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
+            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        }
+
+        if (filtroMes && filtroMes.value) {
+            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
+            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        }
+
+        const receita = filtrado_receber.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const custo = filtrado_pagar.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const lucroBruto = receita - custo;
+        const despesas = custo * 0.2; // Estimativa
+        const resultado = lucroBruto - despesas;
+
+        document.getElementById('dreReceita').textContent = 'R$ ' + receita.toFixed(2).replace('.', ',');
+        document.getElementById('drePctReceita').textContent = '100%';
+
+        document.getElementById('dreCusto').textContent = 'R$ ' + custo.toFixed(2).replace('.', ',');
+        document.getElementById('drePctCusto').textContent = receita > 0 ? ((custo / receita) * 100).toFixed(1) + '%' : '0%';
+
+        document.getElementById('dreLucroBruto').textContent = 'R$ ' + lucroBruto.toFixed(2).replace('.', ',');
+        document.getElementById('drePctLucroBruto').textContent = receita > 0 ? ((lucroBruto / receita) * 100).toFixed(1) + '%' : '0%';
+
+        document.getElementById('dreDespesas').textContent = 'R$ ' + despesas.toFixed(2).replace('.', ',');
+        document.getElementById('drePctDespesas').textContent = receita > 0 ? ((despesas / receita) * 100).toFixed(1) + '%' : '0%';
+
+        document.getElementById('dreResultado').textContent = 'R$ ' + resultado.toFixed(2).replace('.', ',');
+        document.getElementById('drePctResultado').textContent = receita > 0 ? ((resultado / receita) * 100).toFixed(1) + '%' : '0%';
+
+        // Gráfico DRE
+        criarGraficoDRE(receita, custo, despesas);
+    }
+
+    function criarGraficoDRE(receita, custo, despesas) {
+        const ctx = document.getElementById('chartDRE');
+        if (!ctx) return;
+
+        if (charts.dre) {
+            charts.dre.destroy();
+        }
+
+        charts.dre = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Receita Bruta', 'Custos', 'Despesas'],
+                datasets: [{
+                    data: [receita, custo, despesas],
+                    backgroundColor: [
+                        '#28a745',
+                        '#FF7A42',
+                        '#dc3545'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
