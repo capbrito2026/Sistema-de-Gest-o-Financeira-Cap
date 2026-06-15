@@ -723,6 +723,9 @@
 
               </div><!-- fim sidebar-menu -->
         <button class="logout-btn" onclick="handleLogout()">🚪 Sair</button>
+        <div style="text-align:center; padding: 6px 0 10px;">
+            <span onclick="diagnosticarConexao()" style="font-size:10px; color:#666; cursor:pointer; text-decoration:underline;">🔧 diagnóstico</span>
+        </div>
     </div>
 
     <!-- CONTENT AREA -->
@@ -1876,45 +1879,81 @@
     }
 
     // REQUISIÇÕES SUPABASE
+    let _ultimoErroSupabase = null;
+
     async function fetchSupabase(tabela, metodo = 'GET', dados = null, filtros = '') {
         try {
-            const url = filtros 
-                ? `${API_URL}/${tabela}?${filtros}`
-                : `${API_URL}/${tabela}`;
+            const url = filtros
+                ? API_URL + '/' + tabela + '?' + filtros
+                : API_URL + '/' + tabela;
 
-            const opcoes = {
-                method: metodo,
-                headers: {
-                    'apikey': SUPABASE_KEY,
-                    'Authorization': `Bearer ${SUPABASE_KEY}`,
-                    'Content-Type': 'application/json',
-                    'Prefer': 'return=representation'
-                }
+            const headers = {
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_KEY,
+                'Content-Type': 'application/json'
             };
 
-            if (dados) {
-                opcoes.body = JSON.stringify(dados);
+            // Prefer: return=representation só para POST/PATCH
+            if (metodo === 'POST' || metodo === 'PATCH') {
+                headers['Prefer'] = 'return=representation';
             }
 
+            const opcoes = { method: metodo, headers: headers };
+            if (dados) opcoes.body = JSON.stringify(dados);
+
             const resposta = await fetch(url, opcoes);
-            
+            const status = resposta.status;
+
+            // 204 No Content (DELETE bem-sucedido)
+            if (status === 204) return [];
+
+            const text = await resposta.text();
+
             if (!resposta.ok) {
-                const errText = await resposta.text();
-                console.error('Erro Supabase:', errText);
+                _ultimoErroSupabase = { status: status, body: text };
+                console.error('Erro Supabase [' + metodo + ' ' + tabela + '] HTTP ' + status + ':', text);
+                mostrarErroBD(tabela, metodo, status, text);
                 return null;
             }
 
-            // 204 No Content (DELETE) ou body vazio
-            const text = await resposta.text();
             if (!text || text.trim() === '') return [];
-            try {
-                return JSON.parse(text);
-            } catch(e) {
-                return [];
-            }
+            try { return JSON.parse(text); }
+            catch(e) { return []; }
+
         } catch (erro) {
-            console.error('Erro na requisição:', erro);
+            console.error('Erro de rede:', erro);
             return null;
+        }
+    }
+
+    function mostrarErroBD(tabela, metodo, status, body) {
+        // Tentar parsear o erro do Supabase
+        let msg = 'Erro ' + status + ' ao ' + metodo + ' em ' + tabela;
+        try {
+            const j = JSON.parse(body);
+            if (j.message) msg += ': ' + j.message;
+            else if (j.hint) msg += ' — ' + j.hint;
+            else if (j.details) msg += ' — ' + j.details;
+        } catch(e) { msg += ': ' + body.substring(0, 120); }
+
+        // Sugestão específica por código
+        if (status === 401 || status === 403) {
+            msg += ' ⚠️ Verifique RLS no Supabase: execute "DISABLE ROW LEVEL SECURITY" na tabela ' + tabela + '.';
+        } else if (status === 409) {
+            msg += ' ⚠️ Registro duplicado.';
+        } else if (status === 422) {
+            msg += ' ⚠️ Dado inválido ou campo obrigatório faltando.';
+        }
+
+        // Exibir no alerta da página ativa
+        const alertas = document.querySelectorAll('.alert');
+        const visivel = Array.from(alertas).find(el => el.offsetParent !== null);
+        if (visivel) {
+            visivel.textContent = msg;
+            visivel.className = 'alert alert-error show';
+            setTimeout(() => visivel.classList.remove('show'), 8000);
+        } else {
+            alert(msg);
         }
     }
 
@@ -3245,6 +3284,76 @@
         container.innerHTML = html;
     }
 
+    // DIAGNÓSTICO
+    async function diagnosticarConexao() {
+        document.getElementById('modalDiagnostico').classList.add('active');
+        const div = document.getElementById('diagResultado');
+        div.innerHTML = '<p style="color:#666;">⏳ Testando conexão com Supabase...</p>';
+
+        const resultados = [];
+
+        // Teste 1: GET categorias
+        try {
+            const r = await fetch(API_URL + '/categorias?limit=1', {
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+            });
+            const txt = await r.text();
+            if (r.ok) {
+                resultados.push('✅ GET categorias: OK (status ' + r.status + ')');
+            } else {
+                resultados.push('❌ GET categorias: ERRO ' + r.status + ' — ' + txt.substring(0,120));
+            }
+        } catch(e) {
+            resultados.push('❌ GET categorias: falha de rede — ' + e.message);
+        }
+
+        // Teste 2: POST categorias (INSERT teste)
+        try {
+            const r = await fetch(API_URL + '/categorias', {
+                method: 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': 'Bearer ' + SUPABASE_KEY,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify({ nome: '__teste_diagnostico__', ativo: false })
+            });
+            const txt = await r.text();
+            if (r.ok || r.status === 201) {
+                resultados.push('✅ INSERT categorias: OK (status ' + r.status + ')');
+                // Deletar o registro de teste
+                try {
+                    const parsed = JSON.parse(txt);
+                    const id = Array.isArray(parsed) ? parsed[0]?.id : parsed?.id;
+                    if (id) {
+                        await fetch(API_URL + '/categorias?id=eq.' + id, {
+                            method: 'DELETE',
+                            headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+                        });
+                        resultados.push('✅ DELETE categorias: OK (limpeza do teste)');
+                    }
+                } catch(e2) {}
+            } else {
+                resultados.push('❌ INSERT categorias: ERRO ' + r.status + ' — ' + txt.substring(0,200));
+                if (r.status === 401 || r.status === 403 || txt.includes('permission') || txt.includes('policy')) {
+                    resultados.push('   ⚠️ <strong>Provável causa: RLS ativo</strong>. Use o comando SQL abaixo para corrigir.');
+                }
+            }
+        } catch(e) {
+            resultados.push('❌ INSERT categorias: falha de rede — ' + e.message);
+        }
+
+        // Teste 3: Último erro registrado
+        if (_ultimoErroSupabase) {
+            resultados.push('');
+            resultados.push('📋 Último erro registrado: HTTP ' + _ultimoErroSupabase.status);
+            resultados.push('   ' + _ultimoErroSupabase.body.substring(0, 300));
+        }
+
+        div.innerHTML = resultados.map(r => '<p style="margin:3px 0; font-family:monospace;">' + r + '</p>').join('');
+    }
+
     // DFC
     function fmtBRL(v) { return 'R$ ' + Math.abs(v).toFixed(2).replace('.', ','); }
 
@@ -3481,6 +3590,36 @@
         });
     }
 </script>
+
+
+<!-- MODAL DIAGNÓSTICO -->
+<div class="modal" id="modalDiagnostico" style="z-index:9999;">
+    <div class="modal-content" style="max-width:600px;">
+        <div class="modal-header">
+            <span>🔧 Diagnóstico de Conexão</span>
+            <button class="modal-close" onclick="closeModal('modalDiagnostico')">&times;</button>
+        </div>
+        <div id="diagResultado" style="font-size:13px; line-height:1.7;">
+            <p style="color:#666;">Executando testes...</p>
+        </div>
+        <div style="margin-top:16px; padding:12px; background:#fff8e1; border-radius:6px; border-left:3px solid #ffc107;">
+            <strong style="font-size:12px; color:#856404;">💡 Se RLS está bloqueando INSERT, execute no Supabase SQL Editor:</strong>
+            <pre style="font-size:11px; margin-top:6px; background:#f5f5f5; padding:8px; border-radius:4px; overflow-x:auto;">ALTER TABLE categorias DISABLE ROW LEVEL SECURITY;
+ALTER TABLE produtos DISABLE ROW LEVEL SECURITY;
+ALTER TABLE fornecedores DISABLE ROW LEVEL SECURITY;
+ALTER TABLE clientes DISABLE ROW LEVEL SECURITY;
+ALTER TABLE contas_a_receber DISABLE ROW LEVEL SECURITY;
+ALTER TABLE contas_a_pagar DISABLE ROW LEVEL SECURITY;
+
+GRANT ALL ON ALL TABLES IN SCHEMA public TO anon;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
+        </div>
+        <div class="form-actions" style="margin-top:12px;">
+            <button class="btn btn-primary" onclick="diagnosticarConexao()">🔄 Testar novamente</button>
+            <button class="btn btn-secondary" onclick="closeModal('modalDiagnostico')">Fechar</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
