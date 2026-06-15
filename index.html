@@ -2184,12 +2184,19 @@
         const lembrar = localStorage.getItem('cap_lembrar');
 
         if (usuarioSalvo && lembrar === 'true') {
-            usuarioAtual = JSON.parse(usuarioSalvo);
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainContainer').classList.add('active');
-            document.getElementById('userGreeting').textContent = `Bem-vindo, ${usuarioAtual.nome}!`;
-            carregarDadosIniciais();
+            try {
+                usuarioAtual = JSON.parse(usuarioSalvo);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainContainer').classList.add('active');
+                document.getElementById('userGreeting').textContent = 'Bem-vindo, ' + usuarioAtual.nome + '!';
+                carregarDadosIniciais();
+                return;
+            } catch(e) {}
         }
+        // Sem sessao valida — limpar e mostrar login
+        localStorage.removeItem('cap_usuario');
+        localStorage.removeItem('cap_lembrar');
+        document.getElementById('loginScreen').style.display = 'flex';
     }
 
     function handleLogout() {
@@ -2342,7 +2349,7 @@
 
     function atualizarSelectCategorias() {
         // IDs de todos os selects que recebem lista de categorias
-        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar'];
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -2571,7 +2578,7 @@
     }
 
     function atualizarSelectFornecedores() {
-        const ids = ['fornecedorPagar', 'filtroFornecedorPagar'];
+        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -2691,7 +2698,7 @@
     }
 
     function atualizarSelectClientes() {
-        const ids = ['clienteReceber', 'filtroClienteReceber', 'filtroClienteRecebida'];
+        const ids = ['clienteReceber', 'filtroClienteReceber', 'filtroClienteRecebida', 'editLancCliente'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -2815,7 +2822,6 @@
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
                     <button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
-                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
                 </td>
             </tr>`;
@@ -2910,7 +2916,6 @@
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
                     <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
-                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
                 </td>
             </tr>`;
@@ -3194,40 +3199,51 @@
     }
 
     function editarLancamento(id, tipo) {
+        // Popular selects primeiro
+        atualizarSelectClientes();
+        atualizarSelectFornecedores();
+        atualizarSelectCategorias();
+
         if (tipo === 'receber') {
             const conta = dadosCache.contasRecebidas.find(c => c.id === id)
                        || dadosCache.contasReceber.find(c => c.id === id);
             if (!conta) return;
-            atualizarSelectClientes();
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_receber';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Receber';
-            document.getElementById('editLancCliente').style.display = '';
+            // Mostrar cliente, ocultar fornecedor
             document.getElementById('editLancFornecedorWrap').style.display = 'none';
-            document.getElementById('editLancCliente').value = conta.cliente_id || '';
-            document.getElementById('editLancDescricao').value = conta.descricao || '';
-            document.getElementById('editLancValor').value = conta.valor || '';
+            document.getElementById('editLancCliente').parentElement.style.display = '';
+            // Preencher categoria — mostrar campo com todas as cats (receita e geral)
+            document.getElementById('editLancCategoriaWrap').style.display = '';
+            // Valores
+            document.getElementById('editLancCliente').value    = conta.cliente_id || '';
+            document.getElementById('editLancCategoria').value  = conta.categoria_id || '';
+            document.getElementById('editLancDescricao').value  = conta.descricao || '';
+            document.getElementById('editLancValor').value      = conta.valor || '';
             document.getElementById('editLancVencimento').value = conta.data_vencimento || '';
-            document.getElementById('editLancCompetencia').value = conta.data_competencia || '';
-            document.getElementById('editLancObs').value = conta.observacoes || '';
+            document.getElementById('editLancCompetencia').value= conta.data_competencia || '';
+            document.getElementById('editLancObs').value        = conta.observacoes || '';
             document.getElementById('modalEditarLancamento').classList.add('active');
         } else {
             const conta = dadosCache.contasPagas.find(c => c.id === id)
                        || dadosCache.contasPagar.find(c => c.id === id);
             if (!conta) return;
-            atualizarSelectFornecedores();
-            atualizarSelectCategorias();
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_pagar';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Pagar';
-            document.getElementById('editLancCliente').style.display = 'none';
+            // Mostrar fornecedor, ocultar cliente
             document.getElementById('editLancFornecedorWrap').style.display = '';
+            document.getElementById('editLancCliente').parentElement.style.display = 'none';
+            document.getElementById('editLancCategoriaWrap').style.display = '';
+            // Valores
             document.getElementById('editLancFornecedor').value = conta.fornecedor_id || '';
-            document.getElementById('editLancDescricao').value = conta.descricao || '';
-            document.getElementById('editLancValor').value = conta.valor || '';
+            document.getElementById('editLancCategoria').value  = conta.categoria_id || '';
+            document.getElementById('editLancDescricao').value  = conta.descricao || '';
+            document.getElementById('editLancValor').value      = conta.valor || '';
             document.getElementById('editLancVencimento').value = conta.data_vencimento || '';
-            document.getElementById('editLancCompetencia').value = conta.data_competencia || '';
-            document.getElementById('editLancObs').value = conta.observacoes || '';
+            document.getElementById('editLancCompetencia').value= conta.data_competencia || '';
+            document.getElementById('editLancObs').value        = conta.observacoes || '';
             document.getElementById('modalEditarLancamento').classList.add('active');
         }
     }
@@ -3236,12 +3252,14 @@
         event.preventDefault();
         const id    = parseInt(document.getElementById('editLancId').value);
         const tipo  = document.getElementById('editLancTipo').value;
+        const catVal = document.getElementById('editLancCategoria').value;
         const dados = {
             descricao:        document.getElementById('editLancDescricao').value,
             valor:            parseFloat(document.getElementById('editLancValor').value),
             data_vencimento:  document.getElementById('editLancVencimento').value,
             data_competencia: document.getElementById('editLancCompetencia').value || null,
-            observacoes:      document.getElementById('editLancObs').value || null
+            observacoes:      document.getElementById('editLancObs').value || null,
+            categoria_id:     catVal ? parseInt(catVal) : null
         };
         if (tipo === 'contas_a_receber') {
             dados.cliente_id = parseInt(document.getElementById('editLancCliente').value) || null;
@@ -5115,6 +5133,12 @@
             <div class="form-group">
                 <label>Cliente*</label>
                 <select id="editLancCliente">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group" id="editLancCategoriaWrap">
+                <label>Categoria</label>
+                <select id="editLancCategoria">
                     <option value="">Selecione...</option>
                 </select>
             </div>
