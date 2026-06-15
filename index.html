@@ -190,6 +190,11 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
         }
         .sidebar-menu {
             flex: 1;
@@ -267,6 +272,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 30px;
+            margin-left: 250px;
         }
 
         .page {
@@ -283,8 +289,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
-            padding-bottom: 20px;
+            padding: 16px 0 20px;
             border-bottom: 2px solid var(--cor-primaria);
+            position: sticky;
+            top: 0;
+            background: var(--cor-fundo);
+            z-index: 50;
         }
 
         .page-header h1 {
@@ -906,45 +916,27 @@
                 <button class="btn btn-primary" onclick="openModalBanco()">+ Novo Banco</button>
             </div>
             <div class="alert alert-success" id="alertBancos"></div>
-
-            <!-- Cards de saldo -->
             <div id="cardsSaldoBancos" class="dashboard-grid" style="margin-bottom:20px;"></div>
-
-            <!-- Tabela de bancos cadastrados -->
             <div class="table-container" style="margin-bottom:24px;">
                 <table id="tabelaBancos">
-                    <thead>
-                        <tr>
-                            <th>Banco</th>
-                            <th>Agência</th>
-                            <th>Conta</th>
-                            <th>Tipo</th>
-                            <th>Saldo Inicial</th>
-                            <th>Saldo Atual</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
+                    <thead><tr>
+                        <th>Banco</th><th>Agência</th><th>Conta</th><th>Tipo</th>
+                        <th>Saldo Inicial</th><th>Saldo Atual</th><th>Status</th><th>Ações</th>
+                    </tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
-
-            <!-- Extrato por banco -->
-            <div class="card" style="margin-top:8px;">
+            <div class="card">
                 <div class="card-title">📄 Extrato Bancário</div>
                 <div class="filter-container" style="padding:0 0 16px;">
                     <div class="filter-row" style="gap:12px;flex-wrap:wrap;align-items:flex-end;">
                         <div class="form-group">
                             <label>Banco</label>
-                            <select id="extratoFiltrobancoId" onchange="gerarExtrato()">
-                                <option value="">Todos os bancos</option>
-                            </select>
+                            <select id="extratoFiltrobancoId" onchange="gerarExtrato()"><option value="">Todos</option></select>
                         </div>
                         <div class="form-group">
                             <label>Ano</label>
-                            <select id="extratoFiltroAno" onchange="gerarExtrato()">
-                                <option value="">Todos</option>
-                            </select>
+                            <select id="extratoFiltroAno" onchange="gerarExtrato()"><option value="">Todos</option></select>
                         </div>
                         <div class="form-group">
                             <label>Mês</label>
@@ -959,30 +951,24 @@
                             </select>
                         </div>
                         <div class="form-group" style="min-width:180px;">
-                            <label>Pesquisar descrição</label>
-                            <input type="text" id="extratoBusca" placeholder="Ex: pagamento, cliente..." oninput="gerarExtrato()">
+                            <label>Pesquisar</label>
+                            <input type="text" id="extratoBusca" placeholder="Descrição..." oninput="gerarExtrato()">
                         </div>
                     </div>
                 </div>
-
-                <!-- Resumo do extrato -->
                 <div class="dashboard-grid" style="margin-bottom:16px;" id="extratoResumo"></div>
-
-                <!-- Tabela extrato dia a dia -->
                 <div class="table-container">
                     <table id="tabelaExtrato" style="font-size:13px;">
-                        <thead>
-                            <tr>
-                                <th style="width:90px;">Data</th>
-                                <th>Descrição</th>
-                                <th style="width:110px;">Banco</th>
-                                <th style="width:80px;">Tipo</th>
-                                <th style="text-align:right;width:120px;">Crédito (R$)</th>
-                                <th style="text-align:right;width:120px;">Débito (R$)</th>
-                                <th style="text-align:right;width:130px;">Saldo do Dia</th>
-                                <th style="text-align:right;width:130px;">Saldo Acumulado</th>
-                            </tr>
-                        </thead>
+                        <thead><tr>
+                            <th style="width:90px;">Data</th>
+                            <th>Descrição</th>
+                            <th style="width:110px;">Banco</th>
+                            <th style="width:80px;">Tipo</th>
+                            <th style="text-align:right;width:120px;">Crédito</th>
+                            <th style="text-align:right;width:120px;">Débito</th>
+                            <th style="text-align:right;width:120px;">Saldo Dia</th>
+                            <th style="text-align:right;width:130px;">Saldo Acumulado</th>
+                        </tr></thead>
                         <tbody id="extratoCorpo"></tbody>
                         <tfoot id="extratoRodape"></tfoot>
                     </table>
@@ -2195,6 +2181,43 @@
     let editandoId = null;
     let editandoTipo = null;
 
+    // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes"];
+
+    function _filtroKey(id) {
+        const user = usuarioAtual ? usuarioAtual.email : 'guest';
+        return 'cap_filtro_' + user + '_' + id;
+    }
+
+    function salvarFiltros() {
+        _FILTER_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            localStorage.setItem(_filtroKey(id), el.value || '');
+        });
+    }
+
+    function restaurarFiltros() {
+        _FILTER_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const saved = localStorage.getItem(_filtroKey(id));
+            if (saved !== null) el.value = saved;
+        });
+    }
+
+    // Sobrescreve os onchange dos filtros para salvar automaticamente
+    function _bindFiltrosSave() {
+        _FILTER_IDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('change', salvarFiltros);
+            el.addEventListener('input',  salvarFiltros);
+        });
+    }
+    // ────────────────────────────────────────────────────────────────────────
+
+
     // INICIALIZAÇÃO
     document.addEventListener('DOMContentLoaded', function() {
         verificarLogin();
@@ -2243,21 +2266,11 @@
     }
 
     function verificarLogin() {
-        const usuarioSalvo = localStorage.getItem('cap_usuario');
-        const lembrar = localStorage.getItem('cap_lembrar');
-        if (usuarioSalvo && lembrar === 'true') {
-            try {
-                usuarioAtual = JSON.parse(usuarioSalvo);
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('mainContainer').classList.add('active');
-                document.getElementById('userGreeting').textContent = 'Bem-vindo, ' + usuarioAtual.nome + '!';
-                carregarDadosIniciais();
-                return;
-            } catch(e) {}
-        }
+        // Nunca pular a tela de login — sempre exibir ao abrir o sistema
         localStorage.removeItem('cap_usuario');
         localStorage.removeItem('cap_lembrar');
         document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('mainContainer').classList.remove('active');
     }
 
     function handleLogout() {
@@ -2360,6 +2373,8 @@
 
     // CARREGAMENTO INICIAL
     async function carregarDadosIniciais() {
+        restaurarFiltros();
+        _bindFiltrosSave();
         await carregarCategorias();
         await carregarProdutos();
         await carregarFornecedores();
@@ -3580,9 +3595,7 @@
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
-            else if (pageId === 'bancos') {
-                Promise.all([carregarContasRecebidas(), carregarContasPagas()]).then(() => carregarBancos());
-            }
+            else if (pageId === 'bancos') carregarBancos();
             else if (pageId === 'dashboard') atualizarDashboard();
         }
     }
@@ -4049,263 +4062,69 @@
     // ================================================================
     // BANCOS
     // ================================================================
+    function _calcularSaldosBancos(bancos, recebidas, pagas) {
+        const saldos = {};
+        bancos.forEach(b => { saldos[b.id] = parseFloat(b.saldo_inicial || 0); });
+        (recebidas || []).filter(c => c.status === 'recebido' && c.banco_id).forEach(c => {
+            if (saldos[c.banco_id] !== undefined) saldos[c.banco_id] += parseFloat(c.valor || 0);
+        });
+        (pagas || []).filter(c => c.status === 'pago' && c.banco_id).forEach(c => {
+            if (saldos[c.banco_id] !== undefined) saldos[c.banco_id] -= parseFloat(c.valor || 0);
+        });
+        return saldos;
+    }
+
     async function carregarBancos() {
-        const dados = await fetchSupabase('bancos', 'GET');
-        if (dados) {
-            dadosCache.bancos = dados;
-            atualizarTabelaBancos();
-            atualizarCardsSaldoBancos();
-            _popularSelectExtrato();
-            await gerarExtrato();
-        }
+        const [bancos, recebidas, pagas] = await Promise.all([
+            fetchSupabase('bancos', 'GET'),
+            fetchSupabase('contas_a_receber', 'GET', null, 'status=eq.recebido'),
+            fetchSupabase('contas_a_pagar',   'GET', null, 'status=eq.pago')
+        ]);
+        if (!bancos) return;
+        dadosCache.bancos = bancos;
+        if (recebidas) dadosCache.contasRecebidas = recebidas;
+        if (pagas)     dadosCache.contasPagas     = pagas;
+        const saldos = _calcularSaldosBancos(bancos, recebidas || [], pagas || []);
+        atualizarTabelaBancos(saldos);
+        atualizarCardsSaldoBancos(saldos);
+        _popularSelectExtrato();
+        await gerarExtrato();
     }
 
-    function _popularSelectExtrato() {
-        const sel = document.getElementById('extratoFiltrobancoId');
-        if (!sel) return;
-        const val = sel.value;
-        sel.innerHTML = '<option value="">Todos os bancos</option>';
-        (dadosCache.bancos || []).filter(b => b.ativo).forEach(b => {
-            const opt = document.createElement('option');
-            opt.value = b.id;
-            opt.textContent = b.nome;
-            sel.appendChild(opt);
-        });
-        if (val) sel.value = val;
-        // Popular anos no select de extrato
-        const selAno = document.getElementById('extratoFiltroAno');
-        if (selAno && selAno.options.length <= 1) {
-            const anoAtual = new Date().getFullYear();
-            for (let a = anoAtual; a >= anoAtual - 4; a--) {
-                const opt = document.createElement('option');
-                opt.value = a;
-                opt.textContent = a;
-                selAno.appendChild(opt);
-            }
-            selAno.value = anoAtual;
-        }
-    }
-
-    async function gerarExtrato() {
-        const tbody = document.getElementById('extratoCorpo');
-        const tfoot = document.getElementById('extratoRodape');
-        const resumo = document.getElementById('extratoResumo');
-        if (!tbody) return;
-
-        const bancoIdFiltro = document.getElementById('extratoFiltrobancoId') ? document.getElementById('extratoFiltrobancoId').value : '';
-        const anoFiltro     = document.getElementById('extratoFiltroAno') ? document.getElementById('extratoFiltroAno').value : '';
-        const mesFiltro     = document.getElementById('extratoFiltroMes') ? document.getElementById('extratoFiltroMes').value : '';
-        const busca         = (document.getElementById('extratoBusca') ? document.getElementById('extratoBusca').value : '').toLowerCase();
-
-        // Buscar contas recebidas e pagas do cache (já carregadas)
-        const recebidas = (dadosCache.contasRecebidas && dadosCache.contasRecebidas.length)
-            ? dadosCache.contasRecebidas
-            : await fetchSupabase('contas_a_receber', 'GET', null, 'status=eq.recebido') || [];
-        const pagas = (dadosCache.contasPagas && dadosCache.contasPagas.length)
-            ? dadosCache.contasPagas
-            : await fetchSupabase('contas_a_pagar', 'GET', null, 'status=eq.pago') || [];
-
-        // Montar lista de movimentos
-        let movimentos = [];
-
-        recebidas.forEach(c => {
-            const data = c.data_recebimento || '';
-            if (!data) return;
-            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
-            if (anoFiltro && !data.startsWith(anoFiltro)) return;
-            if (mesFiltro && !data.startsWith((anoFiltro || data.substring(0,4)) + '-' + mesFiltro)) return;
-            if (mesFiltro && !data.includes('-' + mesFiltro + '-')) return;
-            const desc = (c.descricao || '').toLowerCase();
-            if (busca && !desc.includes(busca)) return;
-            const banco = (dadosCache.bancos || []).find(b => b.id === c.banco_id);
-            const cliente = (dadosCache.clientes || []).find(x => x.id === c.cliente_id);
-            movimentos.push({
-                data, tipo: 'credito',
-                descricao: c.descricao || '-',
-                complemento: cliente ? cliente.nome : '',
-                banco: banco ? banco.nome : '-',
-                valor: parseFloat(c.valor || 0)
-            });
-        });
-
-        pagas.forEach(c => {
-            const data = c.data_pagamento || '';
-            if (!data) return;
-            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
-            if (anoFiltro && !data.startsWith(anoFiltro)) return;
-            if (mesFiltro && !data.includes('-' + mesFiltro + '-')) return;
-            const desc = (c.descricao || '').toLowerCase();
-            if (busca && !desc.includes(busca)) return;
-            const banco = (dadosCache.bancos || []).find(b => b.id === c.banco_id);
-            const fornecedor = (dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id);
-            movimentos.push({
-                data, tipo: 'debito',
-                descricao: c.descricao || '-',
-                complemento: fornecedor ? fornecedor.nome : '',
-                banco: banco ? banco.nome : '-',
-                valor: parseFloat(c.valor || 0)
-            });
-        });
-
-        // Ordenar por data
-        movimentos.sort((a, b) => a.data.localeCompare(b.data));
-
-        // Agrupar por dia
-        const porDia = {};
-        movimentos.forEach(m => {
-            if (!porDia[m.data]) porDia[m.data] = [];
-            porDia[m.data].push(m);
-        });
-
-        // Calcular saldo inicial (saldo_inicial dos bancos filtrados)
-        let saldoInicial = 0;
-        (dadosCache.bancos || []).filter(b => {
-            if (bancoIdFiltro) return String(b.id) === String(bancoIdFiltro);
-            return b.ativo;
-        }).forEach(b => { saldoInicial += parseFloat(b.saldo_inicial || 0); });
-
-        // Renderizar
-        const fmtData = d => {
-            const p = d.split('-');
-            return p[2] + '/' + p[1] + '/' + p[0];
-        };
-        const fmtVal = v => 'R$ ' + v.toFixed(2).replace('.', ',');
-
-        tbody.innerHTML = '';
-        let acumulado = saldoInicial;
-        let totalCred = 0, totalDeb = 0;
-
-        // Linha saldo inicial
-        if (saldoInicial !== 0) {
-            const cor = saldoInicial >= 0 ? '#28a745' : '#dc3545';
-            tbody.innerHTML += '<tr style="background:#f8f9fa;">' +
-                '<td colspan="4" style="font-weight:600;color:#555;">Saldo Inicial</td>' +
-                '<td></td><td></td><td></td>' +
-                '<td style="text-align:right;font-weight:700;color:' + cor + ';">' + fmtVal(saldoInicial) + '</td>' +
-                '</tr>';
-        }
-
-        const dias = Object.keys(porDia).sort();
-
-        if (dias.length === 0) {
-            tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
-        }
-
-        dias.forEach(dia => {
-            const movs = porDia[dia];
-            let credDia = 0, debDia = 0;
-            movs.forEach(m => {
-                if (m.tipo === 'credito') credDia += m.valor;
-                else debDia += m.valor;
-            });
-            const saldoDia = credDia - debDia;
-            acumulado += saldoDia;
-            totalCred += credDia;
-            totalDeb  += debDia;
-
-            const corAcum = acumulado >= 0 ? '#28a745' : '#dc3545';
-            const corDia  = saldoDia >= 0 ? '#28a745' : '#dc3545';
-
-            // Linha de subtotal do dia
-            const numMovs = movs.length;
-            movs.forEach((m, idx) => {
-                const isFirst = idx === 0;
-                const descCompleta = m.descricao + (m.complemento ? ' — ' + m.complemento : '');
-                const credCell = m.tipo === 'credito'
-                    ? '<td style="text-align:right;color:#28a745;font-weight:600;">' + fmtVal(m.valor) + '</td>'
-                    : '<td style="text-align:right;color:#aaa;">-</td>';
-                const debCell = m.tipo === 'debito'
-                    ? '<td style="text-align:right;color:#dc3545;font-weight:600;">' + fmtVal(m.valor) + '</td>'
-                    : '<td style="text-align:right;color:#aaa;">-</td>';
-
-                tbody.innerHTML +=
-                    '<tr style="' + (isFirst ? 'border-top:2px solid #f0f0f0;' : '') + '">' +
-                    '<td>' + (isFirst ? '<b>' + fmtData(dia) + '</b>' : '') + '</td>' +
-                    '<td>' + descCompleta + '</td>' +
-                    '<td style="font-size:11px;color:#666;">' + m.banco + '</td>' +
-                    '<td><span style="padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:' +
-                        (m.tipo === 'credito' ? '#d4edda;color:#155724' : '#f8d7da;color:#721c24') + ';">' +
-                        (m.tipo === 'credito' ? 'Crédito' : 'Débito') + '</span></td>' +
-                    credCell + debCell +
-                    (isFirst
-                        ? '<td rowspan="' + numMovs + '" style="text-align:right;font-weight:700;color:' + corDia + ';vertical-align:middle;">' + fmtVal(Math.abs(saldoDia)) + (saldoDia < 0 ? ' ▼' : ' ▲') + '</td>'
-                        + '<td rowspan="' + numMovs + '" style="text-align:right;font-weight:700;color:' + corAcum + ';vertical-align:middle;">' + fmtVal(acumulado) + '</td>'
-                        : '') +
-                    '</tr>';
-            });
-        });
-
-        // Rodapé totais
-        const corSaldo = (acumulado) >= 0 ? '#28a745' : '#dc3545';
-        tfoot.innerHTML = '<tr style="font-weight:700;background:#333;color:white;">' +
-            '<td colspan="4">TOTAIS DO PERÍODO</td>' +
-            '<td style="text-align:right;color:#90ee90;">R$ ' + totalCred.toFixed(2).replace('.', ',') + '</td>' +
-            '<td style="text-align:right;color:#ffb3b3;">R$ ' + totalDeb.toFixed(2).replace('.', ',') + '</td>' +
-            '<td style="text-align:right;color:' + ((totalCred - totalDeb) >= 0 ? '#90ee90' : '#ffb3b3') + ';">R$ ' + Math.abs(totalCred - totalDeb).toFixed(2).replace('.', ',') + '</td>' +
-            '<td style="text-align:right;color:' + corSaldo + ';">R$ ' + acumulado.toFixed(2).replace('.', ',') + '</td>' +
-            '</tr>';
-
-        // Cards resumo
-        if (resumo) {
-            resumo.innerHTML =
-                '<div class="stat-card" style="border-left-color:#28a745;">' +
-                '<div class="stat-label">💚 Total Créditos</div>' +
-                '<div class="stat-value" style="color:#28a745;font-size:20px;">R$ ' + totalCred.toFixed(2).replace('.', ',') + '</div>' +
-                '<div class="stat-change">' + movimentos.filter(m => m.tipo === 'credito').length + ' entradas</div>' +
-                '</div>' +
-                '<div class="stat-card" style="border-left-color:#dc3545;">' +
-                '<div class="stat-label">❤️ Total Débitos</div>' +
-                '<div class="stat-value" style="color:#dc3545;font-size:20px;">R$ ' + totalDeb.toFixed(2).replace('.', ',') + '</div>' +
-                '<div class="stat-change">' + movimentos.filter(m => m.tipo === 'debito').length + ' saídas</div>' +
-                '</div>' +
-                '<div class="stat-card" id="extratoSaldoCard" style="border-left-color:' + ((totalCred-totalDeb) >= 0 ? '#28a745' : '#dc3545') + ';">' +
-                '<div class="stat-label">📊 Fluxo do Período</div>' +
-                '<div class="stat-value" style="color:' + ((totalCred-totalDeb) >= 0 ? '#28a745' : '#dc3545') + ';font-size:20px;">R$ ' + Math.abs(totalCred - totalDeb).toFixed(2).replace('.', ',') + '</div>' +
-                '<div class="stat-change">' + (totalCred - totalDeb >= 0 ? 'Saldo positivo' : 'Saldo negativo') + '</div>' +
-                '</div>' +
-                '<div class="stat-card" style="border-left-color:#FF7A42;">' +
-                '<div class="stat-label">🏦 Saldo Acumulado</div>' +
-                '<div class="stat-value" style="color:' + corSaldo + ';font-size:20px;">R$ ' + acumulado.toFixed(2).replace('.', ',') + '</div>' +
-                '<div class="stat-change">incl. saldo inicial</div>' +
-                '</div>';
-        }
-    }
-
-    function atualizarTabelaBancos() {
+    function atualizarTabelaBancos(saldos) {
         const tbody = document.querySelector('#tabelaBancos tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
         (dadosCache.bancos || []).forEach(banco => {
-            const saldoAtual = banco.saldo_atual !== undefined ? banco.saldo_atual : banco.saldo_inicial;
-            const saldoClass = parseFloat(saldoAtual) >= 0 ? 'color:#28a745;font-weight:600;' : 'color:#dc3545;font-weight:600;';
+            const saldoAtual = saldos ? (saldos[banco.id] !== undefined ? saldos[banco.id] : parseFloat(banco.saldo_inicial || 0)) : parseFloat(banco.saldo_inicial || 0);
+            const saldoClass = saldoAtual >= 0 ? 'color:#28a745;font-weight:600;' : 'color:#dc3545;font-weight:600;';
             tbody.innerHTML += '<tr>' +
                 '<td><b>' + banco.nome + '</b></td>' +
                 '<td>' + (banco.agencia || '-') + '</td>' +
                 '<td>' + (banco.conta || '-') + '</td>' +
                 '<td>' + (banco.tipo || '-') + '</td>' +
                 '<td>R$ ' + parseFloat(banco.saldo_inicial || 0).toFixed(2).replace('.', ',') + '</td>' +
-                '<td style="' + saldoClass + '">R$ ' + parseFloat(saldoAtual || 0).toFixed(2).replace('.', ',') + '</td>' +
+                '<td style="' + saldoClass + '">R$ ' + saldoAtual.toFixed(2).replace('.', ',') + '</td>' +
                 '<td><span class="status-badge ' + (banco.ativo ? 'status-recebido' : 'status-atrasado') + '">' + (banco.ativo ? 'Ativo' : 'Inativo') + '</span></td>' +
-                '<td>' +
-                '<button class="btn btn-secondary btn-small" onclick="editarBanco(' + banco.id + ')">Editar</button> ' +
-                '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button>' +
-                '</td></tr>';
+                '<td><button class="btn btn-secondary btn-small" onclick="editarBanco(' + banco.id + ')">Editar</button> ' +
+                '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button></td></tr>';
         });
     }
 
-    function atualizarCardsSaldoBancos() {
+    function atualizarCardsSaldoBancos(saldos) {
         const container = document.getElementById('cardsSaldoBancos');
         if (!container) return;
         container.innerHTML = '';
         let totalGeral = 0;
         (dadosCache.bancos || []).filter(b => b.ativo).forEach(banco => {
-            const saldo = parseFloat(banco.saldo_atual !== undefined ? banco.saldo_atual : banco.saldo_inicial || 0);
+            const saldo = saldos ? (saldos[banco.id] !== undefined ? saldos[banco.id] : parseFloat(banco.saldo_inicial || 0)) : parseFloat(banco.saldo_inicial || 0);
             totalGeral += saldo;
             const cor = saldo >= 0 ? '#28a745' : '#dc3545';
             container.innerHTML += '<div class="stat-card" style="border-left-color:' + cor + ';">' +
                 '<div class="stat-label">🏦 ' + banco.nome + '</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">' + (banco.tipo || '') + '</div>' +
                 '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toFixed(2).replace('.', ',') + '</div>' +
+                '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toFixed(2).replace('.', ',') + '</div>' +
                 '</div>';
         });
         if ((dadosCache.bancos || []).filter(b => b.ativo).length > 1) {
@@ -4318,7 +4137,116 @@
         }
     }
 
-    function atualizarSelectBancosModal(selectId) {
+    function _popularSelectExtrato() {
+        const sel = document.getElementById('extratoFiltrobancoId');
+        if (!sel) return;
+        const val = sel.value;
+        sel.innerHTML = '<option value="">Todos os bancos</option>';
+        (dadosCache.bancos || []).filter(b => b.ativo).forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id; opt.textContent = b.nome;
+            sel.appendChild(opt);
+        });
+        if (val) sel.value = val;
+        const selAno = document.getElementById('extratoFiltroAno');
+        if (selAno && selAno.options.length <= 1) {
+            const anoAtual = new Date().getFullYear();
+            for (let a = anoAtual; a >= anoAtual - 4; a--) {
+                const opt = document.createElement('option');
+                opt.value = a; opt.textContent = a;
+                selAno.appendChild(opt);
+            }
+            selAno.value = anoAtual;
+        }
+    }
+
+    async function gerarExtrato() {
+        const tbody  = document.getElementById('extratoCorpo');
+        const tfoot  = document.getElementById('extratoRodape');
+        const resumo = document.getElementById('extratoResumo');
+        if (!tbody) return;
+        const bancoIdFiltro = (document.getElementById('extratoFiltrobancoId')||{}).value||'';
+        const anoFiltro     = (document.getElementById('extratoFiltroAno')||{}).value||'';
+        const mesFiltro     = (document.getElementById('extratoFiltroMes')||{}).value||'';
+        const busca         = ((document.getElementById('extratoBusca')||{}).value||'').toLowerCase();
+        const recebidas = dadosCache.contasRecebidas || [];
+        const pagas     = dadosCache.contasPagas     || [];
+        const movimentos = [];
+        recebidas.forEach(c => {
+            const data = c.data_recebimento || ''; if (!data) return;
+            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
+            if (anoFiltro  && !data.startsWith(anoFiltro)) return;
+            if (mesFiltro  && !data.includes('-' + mesFiltro + '-')) return;
+            if (busca && !(c.descricao||'').toLowerCase().includes(busca)) return;
+            const banco   = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
+            const cliente = (dadosCache.clientes||[]).find(x => x.id === c.cliente_id);
+            movimentos.push({ data, tipo:'credito', descricao:c.descricao||'-',
+                complemento: cliente?cliente.nome:'', banco: banco?banco.nome:'-',
+                valor: parseFloat(c.valor||0) });
+        });
+        pagas.forEach(c => {
+            const data = c.data_pagamento || ''; if (!data) return;
+            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
+            if (anoFiltro  && !data.startsWith(anoFiltro)) return;
+            if (mesFiltro  && !data.includes('-' + mesFiltro + '-')) return;
+            if (busca && !(c.descricao||'').toLowerCase().includes(busca)) return;
+            const banco      = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
+            const fornecedor = (dadosCache.fornecedores||[]).find(x => x.id === c.fornecedor_id);
+            movimentos.push({ data, tipo:'debito', descricao:c.descricao||'-',
+                complemento: fornecedor?fornecedor.nome:'', banco: banco?banco.nome:'-',
+                valor: parseFloat(c.valor||0) });
+        });
+        movimentos.sort((a,b) => a.data.localeCompare(b.data));
+        let saldoInicial = 0;
+        (dadosCache.bancos||[]).filter(b => bancoIdFiltro ? String(b.id)===String(bancoIdFiltro) : b.ativo)
+            .forEach(b => { saldoInicial += parseFloat(b.saldo_inicial||0); });
+        const porDia = {};
+        movimentos.forEach(m => { if (!porDia[m.data]) porDia[m.data]=[]; porDia[m.data].push(m); });
+        const fmtData = d => { const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
+        const fmtVal  = v => 'R$ ' + v.toFixed(2).replace('.',',');
+        tbody.innerHTML = ''; let acumulado=saldoInicial, totalCred=0, totalDeb=0;
+        if (saldoInicial !== 0) {
+            const cor = saldoInicial>=0?'#28a745':'#dc3545';
+            tbody.innerHTML += '<tr style="background:#f8f9fa;"><td colspan="4" style="font-weight:600;color:#555;">Saldo Inicial</td>' +
+                '<td></td><td></td><td></td><td style="text-align:right;font-weight:700;color:'+cor+';">'+fmtVal(saldoInicial)+'</td></tr>';
+        }
+        const dias = Object.keys(porDia).sort();
+        if (dias.length===0) tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
+        dias.forEach(dia => {
+            const movs=porDia[dia]; let credDia=0,debDia=0;
+            movs.forEach(m => { if(m.tipo==='credito') credDia+=m.valor; else debDia+=m.valor; });
+            const saldoDia=credDia-debDia; acumulado+=saldoDia; totalCred+=credDia; totalDeb+=debDia;
+            const corAcum=acumulado>=0?'#28a745':'#dc3545', corDia=saldoDia>=0?'#28a745':'#dc3545';
+            const n=movs.length;
+            movs.forEach((m,idx) => {
+                const desc = m.descricao+(m.complemento?' — '+m.complemento:'');
+                const cred = m.tipo==='credito'?'<td style="text-align:right;color:#28a745;font-weight:600;">'+fmtVal(m.valor)+'</td>':'<td style="text-align:right;color:#bbb;">-</td>';
+                const deb  = m.tipo==='debito' ?'<td style="text-align:right;color:#dc3545;font-weight:600;">'+fmtVal(m.valor)+'</td>':'<td style="text-align:right;color:#bbb;">-</td>';
+                tbody.innerHTML += '<tr style="'+(idx===0?'border-top:2px solid #eee;':'')+'">' +
+                    '<td>'+(idx===0?'<b>'+fmtData(dia)+'</b>':'')+' </td>' +
+                    '<td>'+desc+'</td>' +
+                    '<td style="font-size:11px;color:#666;">'+m.banco+'</td>' +
+                    '<td><span style="padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:'+(m.tipo==='credito'?'#d4edda;color:#155724':'#f8d7da;color:#721c24')+';"> '+(m.tipo==='credito'?'Crédito':'Débito')+'</span></td>' +
+                    cred + deb +
+                    (idx===0?'<td rowspan="'+n+'" style="text-align:right;font-weight:700;color:'+corDia+';vertical-align:middle;">'+fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲')+'</td>' +
+                    '<td rowspan="'+n+'" style="text-align:right;font-weight:700;color:'+corAcum+';vertical-align:middle;">'+fmtVal(acumulado)+'</td>':'') + '</tr>';
+            });
+        });
+        const fluxo=totalCred-totalDeb;
+        tfoot.innerHTML = '<tr style="font-weight:700;background:#333;color:white;">' +
+            '<td colspan="4">TOTAIS DO PERÍODO</td>' +
+            '<td style="text-align:right;color:#90ee90;">'+fmtVal(totalCred)+'</td>' +
+            '<td style="text-align:right;color:#ffb3b3;">'+fmtVal(totalDeb)+'</td>' +
+            '<td style="text-align:right;color:'+(fluxo>=0?'#90ee90':'#ffb3b3')+';">'+fmtVal(Math.abs(fluxo))+'</td>' +
+            '<td style="text-align:right;color:'+(acumulado>=0?'#90ee90':'#ffb3b3')+';">'+fmtVal(acumulado)+'</td></tr>';
+        if (resumo) resumo.innerHTML =
+            '<div class="stat-card" style="border-left-color:#28a745;"><div class="stat-label">💚 Total Créditos</div><div class="stat-value" style="color:#28a745;font-size:20px;">'+fmtVal(totalCred)+'</div><div class="stat-change">'+movimentos.filter(m=>m.tipo==='credito').length+' entradas</div></div>' +
+            '<div class="stat-card" style="border-left-color:#dc3545;"><div class="stat-label">❤️ Total Débitos</div><div class="stat-value" style="color:#dc3545;font-size:20px;">'+fmtVal(totalDeb)+'</div><div class="stat-change">'+movimentos.filter(m=>m.tipo==='debito').length+' saídas</div></div>' +
+            '<div class="stat-card" style="border-left-color:'+(fluxo>=0?'#28a745':'#dc3545')+'"><div class="stat-label">📊 Fluxo do Período</div><div class="stat-value" style="color:'+(fluxo>=0?'#28a745':'#dc3545')+';font-size:20px;">'+fmtVal(Math.abs(fluxo))+'</div><div class="stat-change">'+(fluxo>=0?'Positivo':'Negativo')+'</div></div>' +
+            '<div class="stat-card" style="border-left-color:#FF7A42;"><div class="stat-label">🏦 Saldo Acumulado</div><div class="stat-value" style="color:'+(acumulado>=0?'#28a745':'#dc3545')+';font-size:20px;">'+fmtVal(acumulado)+'</div><div class="stat-change">incl. saldo inicial</div></div>';
+    }
+
+        function atualizarSelectBancosModal(selectId) {
         const select = document.getElementById(selectId);
         if (!select) return;
         select.innerHTML = '<option value="">Selecione...</option>';
@@ -5409,9 +5337,7 @@
             </div>
             <div class="form-group" id="editLancCategoriaWrap">
                 <label>Categoria</label>
-                <select id="editLancCategoria">
-                    <option value="">Selecione...</option>
-                </select>
+                <select id="editLancCategoria"><option value="">Selecione...</option></select>
             </div>
             <div class="form-group">
                 <label>Descrição*</label>
