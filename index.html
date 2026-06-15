@@ -698,6 +698,7 @@
             <div class="menu-item" onclick="showPage('produtos')">📦 Produtos</div>
             <div class="menu-item" onclick="showPage('fornecedores')">🏭 Fornecedores</div>
             <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
+            <div class="menu-item" onclick="showPage('bancos')">🏦 Bancos</div>
         </div>
 
         <div class="menu-section">
@@ -896,228 +897,152 @@
             </div>
         </div>
 
+        <!-- BANCOS -->
+        <div id="bancos" class="page">
+            <div class="page-header">
+                <h1>🏦 Bancos</h1>
+                <button class="btn btn-primary" onclick="openModalBanco()">+ Novo Banco</button>
+            </div>
+            <div class="alert alert-success" id="alertBancos"></div>
+
+            <!-- Cards de saldo -->
+            <div id="cardsSaldoBancos" class="dashboard-grid" style="margin-bottom:20px;"></div>
+
+            <div class="table-container">
+                <table id="tabelaBancos">
+                    <thead>
+                        <tr>
+                            <th>Banco</th>
+                            <th>Agência</th>
+                            <th>Conta</th>
+                            <th>Tipo</th>
+                            <th>Saldo Inicial</th>
+                            <th>Saldo Atual</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- LANÇAR CONTAS A RECEBER -->
         <div id="lancar-receber" class="page">
             <div class="page-header">
-                <h1>Lançar Contas a Receber</h1>
+                <h1>📥 Contas a Receber</h1>
+                <button class="btn btn-primary" onclick="openModalLancarReceber()">+ Novo Lançamento</button>
             </div>
-
             <div class="alert alert-success" id="alertLancarReceber"></div>
 
-            <div class="card">
-                <div class="card-title">Novo Lançamento</div>
-                <form onsubmit="salvarContaReceber(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Cliente*</label>
-                            <select id="clienteReceber" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descrição*</label>
-                            <input type="text" id="descricaoReceber" required>
-                        </div>
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <select id="filtroClienteReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Valor*</label>
-                            <input type="number" id="valorReceber" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Data de Vencimento*</label>
-                            <input type="date" id="vencimentoReceber" required>
-                        </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Observações</label>
-                            <textarea id="observacoesReceber" rows="3"></textarea>
-                        </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-success">Salvar</button>
-                        <button type="reset" class="btn btn-secondary">Limpar</button>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-title">Contas a Receber Pendentes</div>
-                
-                <div class="filter-container">
-                    <div class="filter-row">
-                        <div class="form-group">
-                            <label>Cliente</label>
-                            <select id="filtroClienteReceber" onchange="carregarContasReceber()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ano</label>
-                            <select id="filtroAnoReceber" onchange="carregarContasReceber()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Mês</label>
-                            <select id="filtroMesReceber" onchange="carregarContasReceber()">
-                                <option value="">Todos</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <table id="tabelaPendentesReceber">
-                        <thead>
-                            <tr>
-                                <th>Cliente</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table id="tabelaPendentesReceber">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Descrição</th>
+                            <th>Competência</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Parcela</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
         <!-- LANÇAR CONTAS A PAGAR -->
         <div id="lancar-pagar" class="page">
             <div class="page-header">
-                <h1>Lançar Contas a Pagar</h1>
+                <h1>📤 Contas a Pagar</h1>
+                <button class="btn btn-primary" onclick="openModalLancarPagar()">+ Novo Lançamento</button>
             </div>
-
             <div class="alert alert-success" id="alertLancarPagar"></div>
 
-            <div class="card">
-                <div class="card-title">Novo Lançamento</div>
-                <form onsubmit="salvarContaPagar(event)">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Fornecedor*</label>
-                            <select id="fornecedorPagar" required onchange="preencherProdutosPagar()">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoria*</label>
-                            <select id="categoriaPagar" required>
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Produto</label>
-                            <select id="produtoPagar">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descrição*</label>
-                            <input type="text" id="descricaoPagar" required>
-                        </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Valor*</label>
-                            <input type="number" id="valorPagar" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Data de Vencimento*</label>
-                            <input type="date" id="vencimentoPagar" required>
-                        </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="">Todos</option>
+                        </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Observações</label>
-                            <textarea id="observacoesPagar" rows="3"></textarea>
-                        </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-success">Salvar</button>
-                        <button type="reset" class="btn btn-secondary">Limpar</button>
-                    </div>
-                </form>
+                </div>
             </div>
 
-            <div class="card">
-                <div class="card-title">Contas a Pagar Pendentes</div>
-                
-                <div class="filter-container">
-                    <div class="filter-row">
-                        <div class="form-group">
-                            <label>Fornecedor</label>
-                            <select id="filtroFornecedorPagar" onchange="carregarContasPagar()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoria</label>
-                            <select id="filtroCategoriaPagar" onchange="carregarContasPagar()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Ano</label>
-                            <select id="filtroAnoPagar" onchange="carregarContasPagar()">
-                                <option value="">Todos</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Mês</label>
-                            <select id="filtroMesPagar" onchange="carregarContasPagar()">
-                                <option value="">Todos</option>
-                                <option value="01">Janeiro</option>
-                                <option value="02">Fevereiro</option>
-                                <option value="03">Março</option>
-                                <option value="04">Abril</option>
-                                <option value="05">Maio</option>
-                                <option value="06">Junho</option>
-                                <option value="07">Julho</option>
-                                <option value="08">Agosto</option>
-                                <option value="09">Setembro</option>
-                                <option value="10">Outubro</option>
-                                <option value="11">Novembro</option>
-                                <option value="12">Dezembro</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <table id="tabelaPendentesPagar">
-                        <thead>
-                            <tr>
-                                <th>Fornecedor</th>
-                                <th>Categoria</th>
-                                <th>Descrição</th>
-                                <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table id="tabelaPendentesPagar">
+                    <thead>
+                        <tr>
+                            <th>Fornecedor</th>
+                            <th>Categoria</th>
+                            <th>Descrição</th>
+                            <th>Competência</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Parcela</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
@@ -1637,6 +1562,293 @@
     </div>
 </div>
 
+<!-- MODAL BANCO -->
+<div class="modal" id="modalBanco">
+    <div class="modal-content" style="max-width:480px;">
+        <div class="modal-header">
+            <span id="modalBancoTitulo">Novo Banco</span>
+            <button class="modal-close" onclick="closeModal('modalBanco')">&times;</button>
+        </div>
+        <form onsubmit="salvarBanco(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome do Banco*</label>
+                    <input type="text" id="nomeBanco" required placeholder="Ex: Bradesco, Nubank...">
+                </div>
+                <div class="form-group">
+                    <label>Tipo*</label>
+                    <select id="tipoBanco" required>
+                        <option value="">Selecione...</option>
+                        <option value="Conta Corrente">Conta Corrente</option>
+                        <option value="Conta Poupança">Conta Poupança</option>
+                        <option value="Conta Pagamento">Conta Pagamento</option>
+                        <option value="Caixa Interno">Caixa Interno</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Agência</label>
+                    <input type="text" id="agenciaBanco" placeholder="0000-0">
+                </div>
+                <div class="form-group">
+                    <label>Conta</label>
+                    <input type="text" id="contaBanco" placeholder="00000-0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Saldo Inicial (R$)*</label>
+                    <input type="number" id="saldoInicialBanco" step="0.01" value="0" required>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="ativoBanco" checked> Ativo
+                    </label>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalBanco')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL LANÇAR RECEBER -->
+<div class="modal" id="modalLancarReceber">
+    <div class="modal-content" style="max-width:580px;">
+        <div class="modal-header">
+            <span>📥 Novo Lançamento a Receber</span>
+            <button class="modal-close" onclick="closeModal('modalLancarReceber')">&times;</button>
+        </div>
+        <form onsubmit="salvarContaReceber(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Cliente*</label>
+                    <select id="clienteReceber" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição*</label>
+                    <input type="text" id="descricaoReceber" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor Total*</label>
+                    <input type="number" id="valorReceber" step="0.01" required oninput="calcularParcelasReceber()">
+                </div>
+                <div class="form-group">
+                    <label>Data de Competência*</label>
+                    <input type="date" id="competenciaReceber" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data Prevista de Recebimento*</label>
+                    <input type="date" id="vencimentoReceber" required oninput="calcularParcelasReceber()">
+                </div>
+                <div class="form-group">
+                    <label>Parcelas</label>
+                    <select id="parcelasReceber" onchange="calcularParcelasReceber()">
+                        <option value="1">À vista (1x)</option>
+                        <option value="2">2x</option><option value="3">3x</option>
+                        <option value="4">4x</option><option value="5">5x</option>
+                        <option value="6">6x</option><option value="7">7x</option>
+                        <option value="8">8x</option><option value="9">9x</option>
+                        <option value="10">10x</option><option value="11">11x</option>
+                        <option value="12">12x</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Preview parcelas -->
+            <div id="previewParcelasReceber" style="display:none; margin-bottom:12px;">
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
+                <div id="listaParcelasReceber" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Observações</label>
+                <textarea id="observacoesReceber" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalLancarReceber')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL LANÇAR PAGAR -->
+<div class="modal" id="modalLancarPagar">
+    <div class="modal-content" style="max-width:580px;">
+        <div class="modal-header">
+            <span>📤 Novo Lançamento a Pagar</span>
+            <button class="modal-close" onclick="closeModal('modalLancarPagar')">&times;</button>
+        </div>
+        <form onsubmit="salvarContaPagar(event)">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Fornecedor*</label>
+                    <select id="fornecedorPagar" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria*</label>
+                    <select id="categoriaPagar" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Produto</label>
+                    <select id="produtoPagar">
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Descrição*</label>
+                    <input type="text" id="descricaoPagar" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor Total*</label>
+                    <input type="number" id="valorPagar" step="0.01" required oninput="calcularParcelasPagar()">
+                </div>
+                <div class="form-group">
+                    <label>Data de Competência*</label>
+                    <input type="date" id="competenciaPagar" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Data Prevista de Pagamento*</label>
+                    <input type="date" id="vencimentoPagar" required oninput="calcularParcelasPagar()">
+                </div>
+                <div class="form-group">
+                    <label>Parcelas</label>
+                    <select id="parcelasPagar" onchange="calcularParcelasPagar()">
+                        <option value="1">À vista (1x)</option>
+                        <option value="2">2x</option><option value="3">3x</option>
+                        <option value="4">4x</option><option value="5">5x</option>
+                        <option value="6">6x</option><option value="7">7x</option>
+                        <option value="8">8x</option><option value="9">9x</option>
+                        <option value="10">10x</option><option value="11">11x</option>
+                        <option value="12">12x</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Preview parcelas -->
+            <div id="previewParcelasPagar" style="display:none; margin-bottom:12px;">
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
+                <div id="listaParcelasPagar" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Observações</label>
+                <textarea id="observacoesPagar" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalLancarPagar')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMAR RECEBIMENTO -->
+<div class="modal" id="modalConfirmarRecebimento">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <span>✅ Confirmar Recebimento</span>
+            <button class="modal-close" onclick="closeModal('modalConfirmarRecebimento')">&times;</button>
+        </div>
+        <div id="infoConfirmarRecebimento" style="background:#f8f9fa; border-radius:6px; padding:12px; margin-bottom:16px; font-size:13px;"></div>
+        <div class="form-group">
+            <label>Data do Recebimento*</label>
+            <input type="date" id="dataRecebimentoConfirm">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Tipo de Recebimento*</label>
+                <select id="tipoRecebimentoConfirm">
+                    <option value="">Selecione...</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Banco*</label>
+                <select id="bancoRecebimentoConfirm">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Observação</label>
+            <input type="text" id="obsRecebimentoConfirm" placeholder="Opcional">
+        </div>
+        <input type="hidden" id="idContaRecebimentoConfirm">
+        <div class="form-actions">
+            <button class="btn btn-success" onclick="confirmarRecebimento()">✅ Confirmar</button>
+            <button class="btn btn-secondary" onclick="closeModal('modalConfirmarRecebimento')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMAR PAGAMENTO -->
+<div class="modal" id="modalConfirmarPagamento">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <span>💳 Confirmar Pagamento</span>
+            <button class="modal-close" onclick="closeModal('modalConfirmarPagamento')">&times;</button>
+        </div>
+        <div id="infoConfirmarPagamento" style="background:#f8f9fa; border-radius:6px; padding:12px; margin-bottom:16px; font-size:13px;"></div>
+        <div class="form-group">
+            <label>Data do Pagamento*</label>
+            <input type="date" id="dataPagamentoConfirm">
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Tipo de Pagamento*</label>
+                <select id="tipoPagamentoConfirm">
+                    <option value="">Selecione...</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Transferência">Transferência</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Cheque">Cheque</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Banco*</label>
+                <select id="bancoPagamentoConfirm">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Observação</label>
+            <input type="text" id="obsPagamentoConfirm" placeholder="Opcional">
+        </div>
+        <input type="hidden" id="idContaPagamentoConfirm">
+        <div class="form-actions">
+            <button class="btn btn-success" onclick="confirmarPagamento()">💳 Confirmar</button>
+            <button class="btn btn-secondary" onclick="closeModal('modalConfirmarPagamento')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAIS -->
 <div class="modal" id="modalCategoria">
     <div class="modal-content">
@@ -1797,6 +2009,7 @@
         produtos: [],
         fornecedores: [],
         clientes: [],
+        bancos: [],
         contasReceber: [],
         contasPagar: [],
         contasRecebidas: [],
@@ -1971,6 +2184,7 @@
         await carregarProdutos();
         await carregarFornecedores();
         await carregarClientes();
+        await carregarBancos();
         await carregarContasReceber();
         await carregarContasPagar();
         await atualizarDashboard();
@@ -2006,14 +2220,20 @@
     }
 
     function atualizarSelectCategorias() {
-        const selects = document.querySelectorAll('select[id$="Categoria"]');
-        selects.forEach(select => {
-            const optionSelecionada = select.value;
+        // IDs de todos os selects que recebem lista de categorias
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar'];
+        ids.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const valorAtual = select.value;
             select.innerHTML = '<option value="">Selecione...</option>';
-            dadosCache.categorias.forEach(cat => {
-                select.innerHTML += `<option value="${cat.id}">${cat.nome}</option>`;
+            dadosCache.categorias.filter(c => c.ativo !== false).forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.nome;
+                select.appendChild(opt);
             });
-            select.value = optionSelecionada;
+            if (valorAtual) select.value = valorAtual;
         });
     }
 
@@ -2111,14 +2331,19 @@
     }
 
     function atualizarSelectProdutos() {
-        const selects = document.querySelectorAll('select[id$="Produto"]');
-        selects.forEach(select => {
-            const optionSelecionada = select.value;
+        const ids = ['produtoPagar'];
+        ids.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const valorAtual = select.value;
             select.innerHTML = '<option value="">Selecione...</option>';
-            dadosCache.produtos.forEach(prod => {
-                select.innerHTML += `<option value="${prod.id}">${prod.nome}</option>`;
+            dadosCache.produtos.filter(p => p.ativo !== false).forEach(prod => {
+                const opt = document.createElement('option');
+                opt.value = prod.id;
+                opt.textContent = prod.nome;
+                select.appendChild(opt);
             });
-            select.value = optionSelecionada;
+            if (valorAtual) select.value = valorAtual;
         });
     }
 
@@ -2220,14 +2445,19 @@
     }
 
     function atualizarSelectFornecedores() {
-        const selects = document.querySelectorAll('select[id$="Fornecedor"]');
-        selects.forEach(select => {
-            const optionSelecionada = select.value;
+        const ids = ['fornecedorPagar', 'filtroFornecedorPagar'];
+        ids.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const valorAtual = select.value;
             select.innerHTML = '<option value="">Selecione...</option>';
-            dadosCache.fornecedores.forEach(forn => {
-                select.innerHTML += `<option value="${forn.id}">${forn.nome}</option>`;
+            dadosCache.fornecedores.filter(f => f.ativo !== false).forEach(forn => {
+                const opt = document.createElement('option');
+                opt.value = forn.id;
+                opt.textContent = forn.nome;
+                select.appendChild(opt);
             });
-            select.value = optionSelecionada;
+            if (valorAtual) select.value = valorAtual;
         });
     }
 
@@ -2335,14 +2565,19 @@
     }
 
     function atualizarSelectClientes() {
-        const selects = document.querySelectorAll('select[id$="Cliente"]');
-        selects.forEach(select => {
-            const optionSelecionada = select.value;
+        const ids = ['clienteReceber', 'filtroClienteReceber', 'filtroClienteRecebida'];
+        ids.forEach(id => {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const valorAtual = select.value;
             select.innerHTML = '<option value="">Selecione...</option>';
-            dadosCache.clientes.forEach(cli => {
-                select.innerHTML += `<option value="${cli.id}">${cli.nome}</option>`;
+            dadosCache.clientes.filter(c => c.ativo !== false).forEach(cli => {
+                const opt = document.createElement('option');
+                opt.value = cli.id;
+                opt.textContent = cli.nome;
+                select.appendChild(opt);
             });
-            select.value = optionSelecionada;
+            if (valorAtual) select.value = valorAtual;
         });
     }
 
@@ -2424,64 +2659,78 @@
     function atualizarTabelaPendentesReceber() {
         const tbody = document.querySelector('#tabelaPendentesReceber tbody');
         if (!tbody) return;
-
         tbody.innerHTML = '';
         let filtrado = dadosCache.contasReceber;
-
         const filtroCliente = document.getElementById('filtroClienteReceber');
         const filtroAno = document.getElementById('filtroAnoReceber');
         const filtroMes = document.getElementById('filtroMesReceber');
-
-        if (filtroCliente && filtroCliente.value) {
-            filtrado = filtrado.filter(c => c.cliente_id == filtroCliente.value);
-        }
-
-        if (filtroAno && filtroAno.value) {
-            filtrado = filtrado.filter(c => c.data_vencimento.startsWith(filtroAno.value));
-        }
-
-        if (filtroMes && filtroMes.value) {
-            filtrado = filtrado.filter(c => c.data_vencimento.includes('-' + filtroMes.value + '-'));
-        }
+        if (filtroCliente && filtroCliente.value) filtrado = filtrado.filter(c => c.cliente_id == filtroCliente.value);
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
 
         filtrado.forEach(conta => {
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
-            const status = new Date(conta.data_vencimento) < new Date() ? 'atrasado' : 'pendente';
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td>${cliente ? cliente.nome : '-'}</td>
-                    <td>${conta.descricao}</td>
-                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
-                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
-                    <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
-                    <td>
-                        <button class="btn btn-success btn-small" onclick="receberConta(${conta.id}, 'receber')">Receber</button>
-                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
-                    </td>
-                </tr>
-            `;
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const venc = new Date(conta.data_vencimento + 'T12:00:00');
+            const status = venc < hoje ? 'atrasado' : 'pendente';
+            const parcLabel = conta.total_parcelas > 1
+                ? '<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>'
+                : '<span style="color:#aaa;font-size:11px;">-</span>';
+            const compLabel = conta.data_competencia
+                ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
+                : '-';
+            tbody.innerHTML += '<tr>' +
+                '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
+                '<td>' + conta.descricao + '</td>' +
+                '<td>' + compLabel + '</td>' +
+                '<td>' + venc.toLocaleDateString('pt-BR') + '</td>' +
+                '<td>R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') + '</td>' +
+                '<td>' + parcLabel + '</td>' +
+                '<td><span class="status-badge status-' + status + '">' + (status === 'atrasado' ? 'Atrasado' : 'Pendente') + '</span></td>' +
+                '<td>' +
+                '<button class="btn btn-success btn-small" onclick="receberConta(' + conta.id + ')">✅ Recebido</button> ' +
+                '<button class="btn btn-danger btn-small" onclick="deletarConta(' + conta.id + ', 'contas_a_receber')">Deletar</button>' +
+                '</td></tr>';
         });
     }
 
     async function salvarContaReceber(event) {
         event.preventDefault();
+        const numParcelas = parseInt(document.getElementById('parcelasReceber').value) || 1;
+        const valorTotal = parseFloat(document.getElementById('valorReceber').value);
+        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
+        const dataBase = document.getElementById('vencimentoReceber').value;
+        const competencia = document.getElementById('competenciaReceber').value;
+        const obs = document.getElementById('observacoesReceber').value;
+        const clienteId = parseInt(document.getElementById('clienteReceber').value);
+        const descricao = document.getElementById('descricaoReceber').value;
 
-        const dados = {
-            cliente_id: parseInt(document.getElementById('clienteReceber').value),
-            descricao: document.getElementById('descricaoReceber').value,
-            valor: parseFloat(document.getElementById('valorReceber').value),
-            data_vencimento: document.getElementById('vencimentoReceber').value,
-            status: 'pendente',
-            observacoes: document.getElementById('observacoesReceber').value
-        };
+        let erros = 0;
+        for (let i = 0; i < numParcelas; i++) {
+            const dataVenc = addMonths(dataBase, i);
+            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const dados = {
+                cliente_id: clienteId,
+                descricao: descParc,
+                valor: valorParcela,
+                data_competencia: competencia,
+                data_vencimento: dataVenc,
+                parcela_atual: i + 1,
+                total_parcelas: numParcelas,
+                status: 'pendente',
+                observacoes: obs
+            };
+            const r = await fetchSupabase('contas_a_receber', 'POST', dados);
+            if (r === null) erros++;
+        }
 
-        const resultado = await fetchSupabase('contas_a_receber', 'POST', dados);
-        if (resultado) {
-            showAlert('Conta lançada com sucesso!', 'alertLancarReceber', 'success');
-            event.target.reset();
-            carregarContasReceber();
-            atualizarDashboard();
+        if (erros === 0) {
+            showAlert(numParcelas > 1 ? numParcelas + ' parcelas lançadas!' : 'Lançamento salvo!', 'alertLancarReceber', 'success');
+            closeModal('modalLancarReceber');
+            await carregarContasReceber();
+            await atualizarDashboard();
+        } else {
+            showAlert('Erro ao salvar ' + erros + ' parcela(s).', 'alertLancarReceber', 'error');
         }
     }
 
@@ -2498,73 +2747,87 @@
     function atualizarTabelaPendentesPagar() {
         const tbody = document.querySelector('#tabelaPendentesPagar tbody');
         if (!tbody) return;
-
         tbody.innerHTML = '';
         let filtrado = dadosCache.contasPagar;
-
         const filtroFornecedor = document.getElementById('filtroFornecedorPagar');
         const filtroCategoria = document.getElementById('filtroCategoriaPagar');
         const filtroAno = document.getElementById('filtroAnoPagar');
         const filtroMes = document.getElementById('filtroMesPagar');
-
-        if (filtroFornecedor && filtroFornecedor.value) {
-            filtrado = filtrado.filter(c => c.fornecedor_id == filtroFornecedor.value);
-        }
-
-        if (filtroCategoria && filtroCategoria.value) {
-            filtrado = filtrado.filter(c => c.categoria_id == filtroCategoria.value);
-        }
-
-        if (filtroAno && filtroAno.value) {
-            filtrado = filtrado.filter(c => c.data_vencimento.startsWith(filtroAno.value));
-        }
-
-        if (filtroMes && filtroMes.value) {
-            filtrado = filtrado.filter(c => c.data_vencimento.includes('-' + filtroMes.value + '-'));
-        }
+        if (filtroFornecedor && filtroFornecedor.value) filtrado = filtrado.filter(c => c.fornecedor_id == filtroFornecedor.value);
+        if (filtroCategoria && filtroCategoria.value) filtrado = filtrado.filter(c => c.categoria_id == filtroCategoria.value);
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
 
         filtrado.forEach(conta => {
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
             const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
-            const status = new Date(conta.data_vencimento) < new Date() ? 'atrasado' : 'pendente';
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td>${fornecedor ? fornecedor.nome : '-'}</td>
-                    <td>${categoria ? categoria.nome : '-'}</td>
-                    <td>${conta.descricao}</td>
-                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
-                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
-                    <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
-                    <td>
-                        <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id}, 'pagar')">Pagar</button>
-                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
-                    </td>
-                </tr>
-            `;
+            const hoje = new Date(); hoje.setHours(0,0,0,0);
+            const venc = new Date(conta.data_vencimento + 'T12:00:00');
+            const status = venc < hoje ? 'atrasado' : 'pendente';
+            const parcLabel = conta.total_parcelas > 1
+                ? '<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>'
+                : '<span style="color:#aaa;font-size:11px;">-</span>';
+            const compLabel = conta.data_competencia
+                ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
+                : '-';
+            tbody.innerHTML += '<tr>' +
+                '<td>' + (fornecedor ? fornecedor.nome : '-') + '</td>' +
+                '<td>' + (categoria ? categoria.nome : '-') + '</td>' +
+                '<td>' + conta.descricao + '</td>' +
+                '<td>' + compLabel + '</td>' +
+                '<td>' + venc.toLocaleDateString('pt-BR') + '</td>' +
+                '<td>R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') + '</td>' +
+                '<td>' + parcLabel + '</td>' +
+                '<td><span class="status-badge status-' + status + '">' + (status === 'atrasado' ? 'Atrasado' : 'Pendente') + '</span></td>' +
+                '<td>' +
+                '<button class="btn btn-success btn-small" onclick="pagarConta(' + conta.id + ')">💳 Pagar</button> ' +
+                '<button class="btn btn-danger btn-small" onclick="deletarConta(' + conta.id + ', 'contas_a_pagar')">Deletar</button>' +
+                '</td></tr>';
         });
     }
 
+
     async function salvarContaPagar(event) {
         event.preventDefault();
+        const numParcelas = parseInt(document.getElementById('parcelasPagar').value) || 1;
+        const valorTotal = parseFloat(document.getElementById('valorPagar').value);
+        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
+        const dataBase = document.getElementById('vencimentoPagar').value;
+        const competencia = document.getElementById('competenciaPagar').value;
+        const obs = document.getElementById('observacoesPagar').value;
+        const fornecedorId = parseInt(document.getElementById('fornecedorPagar').value);
+        const categoriaId = document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null;
+        const produtoId = document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null;
+        const descricao = document.getElementById('descricaoPagar').value;
 
-        const dados = {
-            fornecedor_id: parseInt(document.getElementById('fornecedorPagar').value),
-            categoria_id: document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null,
-            produto_id: document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null,
-            descricao: document.getElementById('descricaoPagar').value,
-            valor: parseFloat(document.getElementById('valorPagar').value),
-            data_vencimento: document.getElementById('vencimentoPagar').value,
-            status: 'pendente',
-            observacoes: document.getElementById('observacoesPagar').value
-        };
+        let erros = 0;
+        for (let i = 0; i < numParcelas; i++) {
+            const dataVenc = addMonths(dataBase, i);
+            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const dados = {
+                fornecedor_id: fornecedorId,
+                categoria_id: categoriaId,
+                produto_id: produtoId,
+                descricao: descParc,
+                valor: valorParcela,
+                data_competencia: competencia,
+                data_vencimento: dataVenc,
+                parcela_atual: i + 1,
+                total_parcelas: numParcelas,
+                status: 'pendente',
+                observacoes: obs
+            };
+            const r = await fetchSupabase('contas_a_pagar', 'POST', dados);
+            if (r === null) erros++;
+        }
 
-        const resultado = await fetchSupabase('contas_a_pagar', 'POST', dados);
-        if (resultado) {
-            showAlert('Conta lançada com sucesso!', 'alertLancarPagar', 'success');
-            event.target.reset();
-            carregarContasPagar();
-            atualizarDashboard();
+        if (erros === 0) {
+            showAlert(numParcelas > 1 ? numParcelas + ' parcelas lançadas!' : 'Lançamento salvo!', 'alertLancarPagar', 'success');
+            closeModal('modalLancarPagar');
+            await carregarContasPagar();
+            await atualizarDashboard();
+        } else {
+            showAlert('Erro ao salvar ' + erros + ' parcela(s).', 'alertLancarPagar', 'error');
         }
     }
 
@@ -2688,39 +2951,89 @@
     }
 
     // MARCAR COMO RECEBIDO/PAGO
-    async function receberConta(id, tipo) {
-        const data_recebimento = prompt('Data de recebimento (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-        
-        if (data_recebimento) {
-            const resultado = await fetchSupabase('contas_a_receber', 'PATCH', {
-                status: 'recebido',
-                data_recebimento: data_recebimento
-            }, `id=eq.${id}`);
+    function receberConta(id) {
+        const conta = dadosCache.contasReceber.find(c => c.id === id);
+        if (!conta) return;
+        const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
+        document.getElementById('idContaRecebimentoConfirm').value = id;
+        document.getElementById('dataRecebimentoConfirm').value = new Date().toISOString().split('T')[0];
+        document.getElementById('tipoRecebimentoConfirm').value = '';
+        document.getElementById('bancoRecebimentoConfirm').value = '';
+        document.getElementById('obsRecebimentoConfirm').value = '';
+        document.getElementById('infoConfirmarRecebimento').innerHTML =
+            '<b>Cliente:</b> ' + (cliente ? cliente.nome : '-') + '<br>' +
+            '<b>Descrição:</b> ' + conta.descricao + '<br>' +
+            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') +
+            (conta.total_parcelas > 1 ? ' &nbsp;<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>' : '') +
+            '<br><b>Vencimento:</b> ' + new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
+        atualizarSelectBancosModal('bancoRecebimentoConfirm');
+        document.getElementById('modalConfirmarRecebimento').classList.add('active');
+    }
 
-            if (resultado) {
-                showAlert('Conta marcada como recebida!', 'alertLancarReceber', 'success');
-                carregarContasReceber();
-                carregarContasRecebidas();
-                atualizarDashboard();
-            }
+    async function confirmarRecebimento() {
+        const id = parseInt(document.getElementById('idContaRecebimentoConfirm').value);
+        const data = document.getElementById('dataRecebimentoConfirm').value;
+        const tipo = document.getElementById('tipoRecebimentoConfirm').value;
+        const bancoId = document.getElementById('bancoRecebimentoConfirm').value;
+        const obs = document.getElementById('obsRecebimentoConfirm').value;
+        if (!data || !tipo || !bancoId) { alert('Preencha data, tipo e banco!'); return; }
+        const r = await fetchSupabase('contas_a_receber', 'PATCH', {
+            status: 'recebido',
+            data_recebimento: data,
+            tipo_recebimento: tipo,
+            banco_id: parseInt(bancoId),
+            observacoes: obs || undefined
+        }, 'id=eq.' + id);
+        if (r !== null) {
+            closeModal('modalConfirmarRecebimento');
+            showAlert('Recebimento confirmado!', 'alertLancarReceber', 'success');
+            await carregarContasReceber();
+            await carregarContasRecebidas();
+            await carregarBancos();
+            await atualizarDashboard();
         }
     }
 
-    async function pagarConta(id, tipo) {
-        const data_pagamento = prompt('Data de pagamento (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
-        
-        if (data_pagamento) {
-            const resultado = await fetchSupabase('contas_a_pagar', 'PATCH', {
-                status: 'pago',
-                data_pagamento: data_pagamento
-            }, `id=eq.${id}`);
+    function pagarConta(id) {
+        const conta = dadosCache.contasPagar.find(c => c.id === id);
+        if (!conta) return;
+        const forn = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
+        document.getElementById('idContaPagamentoConfirm').value = id;
+        document.getElementById('dataPagamentoConfirm').value = new Date().toISOString().split('T')[0];
+        document.getElementById('tipoPagamentoConfirm').value = '';
+        document.getElementById('bancoPagamentoConfirm').value = '';
+        document.getElementById('obsPagamentoConfirm').value = '';
+        document.getElementById('infoConfirmarPagamento').innerHTML =
+            '<b>Fornecedor:</b> ' + (forn ? forn.nome : '-') + '<br>' +
+            '<b>Descrição:</b> ' + conta.descricao + '<br>' +
+            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') +
+            (conta.total_parcelas > 1 ? ' &nbsp;<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>' : '') +
+            '<br><b>Vencimento:</b> ' + new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
+        atualizarSelectBancosModal('bancoPagamentoConfirm');
+        document.getElementById('modalConfirmarPagamento').classList.add('active');
+    }
 
-            if (resultado) {
-                showAlert('Conta marcada como paga!', 'alertLancarPagar', 'success');
-                carregarContasPagar();
-                carregarContasPagas();
-                atualizarDashboard();
-            }
+    async function confirmarPagamento() {
+        const id = parseInt(document.getElementById('idContaPagamentoConfirm').value);
+        const data = document.getElementById('dataPagamentoConfirm').value;
+        const tipo = document.getElementById('tipoPagamentoConfirm').value;
+        const bancoId = document.getElementById('bancoPagamentoConfirm').value;
+        const obs = document.getElementById('obsPagamentoConfirm').value;
+        if (!data || !tipo || !bancoId) { alert('Preencha data, tipo e banco!'); return; }
+        const r = await fetchSupabase('contas_a_pagar', 'PATCH', {
+            status: 'pago',
+            data_pagamento: data,
+            tipo_pagamento: tipo,
+            banco_id: parseInt(bancoId),
+            observacoes: obs || undefined
+        }, 'id=eq.' + id);
+        if (r !== null) {
+            closeModal('modalConfirmarPagamento');
+            showAlert('Pagamento confirmado!', 'alertLancarPagar', 'success');
+            await carregarContasPagar();
+            await carregarContasPagas();
+            await carregarBancos();
+            await atualizarDashboard();
         }
     }
 
@@ -3284,7 +3597,223 @@
         container.innerHTML = html;
     }
 
+    // ================================================================
+    // BANCOS
+    // ================================================================
+    async function carregarBancos() {
+        const dados = await fetchSupabase('bancos', 'GET');
+        if (dados) {
+            dadosCache.bancos = dados;
+            atualizarTabelaBancos();
+            atualizarCardsSaldoBancos();
+        }
+    }
+
+    function atualizarTabelaBancos() {
+        const tbody = document.querySelector('#tabelaBancos tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        (dadosCache.bancos || []).forEach(banco => {
+            const saldoAtual = banco.saldo_atual !== undefined ? banco.saldo_atual : banco.saldo_inicial;
+            const saldoClass = parseFloat(saldoAtual) >= 0 ? 'color:#28a745;font-weight:600;' : 'color:#dc3545;font-weight:600;';
+            tbody.innerHTML += '<tr>' +
+                '<td><b>' + banco.nome + '</b></td>' +
+                '<td>' + (banco.agencia || '-') + '</td>' +
+                '<td>' + (banco.conta || '-') + '</td>' +
+                '<td>' + (banco.tipo || '-') + '</td>' +
+                '<td>R$ ' + parseFloat(banco.saldo_inicial || 0).toFixed(2).replace('.', ',') + '</td>' +
+                '<td style="' + saldoClass + '">R$ ' + parseFloat(saldoAtual || 0).toFixed(2).replace('.', ',') + '</td>' +
+                '<td><span class="status-badge ' + (banco.ativo ? 'status-recebido' : 'status-atrasado') + '">' + (banco.ativo ? 'Ativo' : 'Inativo') + '</span></td>' +
+                '<td>' +
+                '<button class="btn btn-secondary btn-small" onclick="editarBanco(' + banco.id + ')">Editar</button> ' +
+                '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button>' +
+                '</td></tr>';
+        });
+    }
+
+    function atualizarCardsSaldoBancos() {
+        const container = document.getElementById('cardsSaldoBancos');
+        if (!container) return;
+        container.innerHTML = '';
+        let totalGeral = 0;
+        (dadosCache.bancos || []).filter(b => b.ativo).forEach(banco => {
+            const saldo = parseFloat(banco.saldo_atual !== undefined ? banco.saldo_atual : banco.saldo_inicial || 0);
+            totalGeral += saldo;
+            const cor = saldo >= 0 ? '#28a745' : '#dc3545';
+            container.innerHTML += '<div class="stat-card" style="border-left-color:' + cor + ';">' +
+                '<div class="stat-label">🏦 ' + banco.nome + '</div>' +
+                '<div style="font-size:11px;color:#999;margin-bottom:4px;">' + (banco.tipo || '') + '</div>' +
+                '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toFixed(2).replace('.', ',') + '</div>' +
+                '</div>';
+        });
+        if ((dadosCache.bancos || []).filter(b => b.ativo).length > 1) {
+            const corTotal = totalGeral >= 0 ? '#FF7A42' : '#dc3545';
+            container.innerHTML += '<div class="stat-card" style="border-left-color:' + corTotal + ';">' +
+                '<div class="stat-label">💰 Saldo Total</div>' +
+                '<div style="font-size:11px;color:#999;margin-bottom:4px;">Todos os bancos</div>' +
+                '<div class="stat-value" style="color:' + corTotal + ';font-size:20px;">R$ ' + totalGeral.toFixed(2).replace('.', ',') + '</div>' +
+                '</div>';
+        }
+    }
+
+    function atualizarSelectBancosModal(selectId) {
+        const select = document.getElementById(selectId);
+        if (!select) return;
+        select.innerHTML = '<option value="">Selecione...</option>';
+        (dadosCache.bancos || []).filter(b => b.ativo).forEach(banco => {
+            const opt = document.createElement('option');
+            opt.value = banco.id;
+            opt.textContent = banco.nome + ' (' + (banco.tipo || '') + ')';
+            select.appendChild(opt);
+        });
+    }
+
+    function openModalBanco() {
+        document.getElementById('nomeBanco').value = '';
+        document.getElementById('tipoBanco').value = '';
+        document.getElementById('agenciaBanco').value = '';
+        document.getElementById('contaBanco').value = '';
+        document.getElementById('saldoInicialBanco').value = '0';
+        document.getElementById('ativoBanco').checked = true;
+        document.getElementById('modalBancoTitulo').textContent = 'Novo Banco';
+        window._editandoBancoId = null;
+        document.getElementById('modalBanco').classList.add('active');
+    }
+
+    function editarBanco(id) {
+        const banco = (dadosCache.bancos || []).find(b => b.id === id);
+        if (!banco) return;
+        document.getElementById('nomeBanco').value = banco.nome;
+        document.getElementById('tipoBanco').value = banco.tipo || '';
+        document.getElementById('agenciaBanco').value = banco.agencia || '';
+        document.getElementById('contaBanco').value = banco.conta || '';
+        document.getElementById('saldoInicialBanco').value = banco.saldo_inicial || 0;
+        document.getElementById('ativoBanco').checked = banco.ativo;
+        document.getElementById('modalBancoTitulo').textContent = 'Editar Banco';
+        window._editandoBancoId = id;
+        document.getElementById('modalBanco').classList.add('active');
+    }
+
+    async function salvarBanco(event) {
+        event.preventDefault();
+        const dados = {
+            nome: document.getElementById('nomeBanco').value,
+            tipo: document.getElementById('tipoBanco').value,
+            agencia: document.getElementById('agenciaBanco').value || null,
+            conta: document.getElementById('contaBanco').value || null,
+            saldo_inicial: parseFloat(document.getElementById('saldoInicialBanco').value) || 0,
+            ativo: document.getElementById('ativoBanco').checked
+        };
+        let r;
+        if (window._editandoBancoId) {
+            r = await fetchSupabase('bancos', 'PATCH', dados, 'id=eq.' + window._editandoBancoId);
+        } else {
+            r = await fetchSupabase('bancos', 'POST', dados);
+        }
+        if (r !== null) {
+            showAlert('Banco salvo com sucesso!', 'alertBancos', 'success');
+            closeModal('modalBanco');
+            await carregarBancos();
+        }
+    }
+
+    async function deletarBanco(id) {
+        if (!confirm('Deletar este banco?')) return;
+        const r = await fetchSupabase('bancos', 'DELETE', null, 'id=eq.' + id);
+        if (r !== null) {
+            showAlert('Banco deletado!', 'alertBancos', 'success');
+            await carregarBancos();
+        }
+    }
+
+    // ================================================================
+    // ABRIR MODAIS DE LANÇAMENTO
+    // ================================================================
+    function openModalLancarReceber() {
+        document.getElementById('clienteReceber').value = '';
+        document.getElementById('descricaoReceber').value = '';
+        document.getElementById('valorReceber').value = '';
+        document.getElementById('competenciaReceber').value = new Date().toISOString().slice(0,7) + '-01';
+        document.getElementById('vencimentoReceber').value = '';
+        document.getElementById('parcelasReceber').value = '1';
+        document.getElementById('observacoesReceber').value = '';
+        document.getElementById('previewParcelasReceber').style.display = 'none';
+        atualizarSelectCategorias();
+        atualizarSelectClientes();
+        document.getElementById('modalLancarReceber').classList.add('active');
+    }
+
+    function openModalLancarPagar() {
+        document.getElementById('fornecedorPagar').value = '';
+        document.getElementById('categoriaPagar').value = '';
+        document.getElementById('produtoPagar').value = '';
+        document.getElementById('descricaoPagar').value = '';
+        document.getElementById('valorPagar').value = '';
+        document.getElementById('competenciaPagar').value = new Date().toISOString().slice(0,7) + '-01';
+        document.getElementById('vencimentoPagar').value = '';
+        document.getElementById('parcelasPagar').value = '1';
+        document.getElementById('observacoesPagar').value = '';
+        document.getElementById('previewParcelasPagar').style.display = 'none';
+        atualizarSelectCategorias();
+        atualizarSelectFornecedores();
+        atualizarSelectProdutos();
+        document.getElementById('modalLancarPagar').classList.add('active');
+    }
+
+    // ================================================================
+    // PREVIEW DE PARCELAS
+    // ================================================================
+    function addMonths(dateStr, months) {
+        const d = new Date(dateStr + 'T12:00:00');
+        d.setMonth(d.getMonth() + months);
+        return d.toISOString().split('T')[0];
+    }
+
+    function calcularParcelasReceber() {
+        const valor = parseFloat(document.getElementById('valorReceber').value);
+        const n = parseInt(document.getElementById('parcelasReceber').value) || 1;
+        const dataBase = document.getElementById('vencimentoReceber').value;
+        const preview = document.getElementById('previewParcelasReceber');
+        const lista = document.getElementById('listaParcelasReceber');
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        let html = '';
+        for (let i = 0; i < n; i++) {
+            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
+            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span>' + (i+1) + '/' + n + '</span>' +
+                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
+                '<span style="color:#28a745;font-weight:600;">R$ ' + parc.toFixed(2).replace('.', ',') + '</span>' +
+                '</div>';
+        }
+        lista.innerHTML = html;
+        preview.style.display = 'block';
+    }
+
+    function calcularParcelasPagar() {
+        const valor = parseFloat(document.getElementById('valorPagar').value);
+        const n = parseInt(document.getElementById('parcelasPagar').value) || 1;
+        const dataBase = document.getElementById('vencimentoPagar').value;
+        const preview = document.getElementById('previewParcelasPagar');
+        const lista = document.getElementById('listaParcelasPagar');
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        let html = '';
+        for (let i = 0; i < n; i++) {
+            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
+            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span>' + (i+1) + '/' + n + '</span>' +
+                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
+                '<span style="color:#dc3545;font-weight:600;">R$ ' + parc.toFixed(2).replace('.', ',') + '</span>' +
+                '</div>';
+        }
+        lista.innerHTML = html;
+        preview.style.display = 'block';
+    }
+
+    // ================================================================
     // DIAGNÓSTICO
+    // ================================================================
     async function diagnosticarConexao() {
         document.getElementById('modalDiagnostico').classList.add('active');
         const div = document.getElementById('diagResultado');
