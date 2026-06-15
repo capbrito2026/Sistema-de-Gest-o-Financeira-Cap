@@ -1178,13 +1178,87 @@
         <!-- CALENDÁRIO -->
         <div id="calendario" class="page">
             <div class="page-header">
-                <h1>Calendário de Pagamentos e Recebimentos</h1>
+                <h1>📅 Calendário Financeiro</h1>
             </div>
 
+            <!-- Filtros -->
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesCalendario" onchange="gerarCalendario()">
+                            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+                            <option value="2">Março</option><option value="3">Abril</option>
+                            <option value="4">Maio</option><option value="5">Junho</option>
+                            <option value="6">Julho</option><option value="7">Agosto</option>
+                            <option value="8">Setembro</option><option value="9">Outubro</option>
+                            <option value="10">Novembro</option><option value="11">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoCalendario" onchange="gerarCalendario()">
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;gap:12px;align-items:center;padding-top:4px;">
+                        <span style="display:flex;align-items:center;gap:5px;font-size:12px;">
+                            <span style="width:14px;height:14px;background:#d4edda;border:1px solid #28a745;border-radius:3px;display:inline-block;"></span> A Receber
+                        </span>
+                        <span style="display:flex;align-items:center;gap:5px;font-size:12px;">
+                            <span style="width:14px;height:14px;background:#f8d7da;border:1px solid #dc3545;border-radius:3px;display:inline-block;"></span> A Pagar
+                        </span>
+                        <span style="display:flex;align-items:center;gap:5px;font-size:12px;">
+                            <span style="width:14px;height:14px;background:#fff3cd;border:1px solid #ffc107;border-radius:3px;display:inline-block;"></span> Ambos
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards resumo do mês -->
+            <div class="dashboard-grid" style="margin-bottom:16px;">
+                <div class="stat-card" style="border-left-color:#28a745;">
+                    <div class="stat-label">💚 A Receber no Mês</div>
+                    <div class="stat-value" id="calTotalReceber" style="color:#28a745;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="calCountReceber">0 lançamentos</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">❤️ A Pagar no Mês</div>
+                    <div class="stat-value" id="calTotalPagar" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="calCountPagar">0 lançamentos</div>
+                </div>
+                <div class="stat-card" id="calSaldoCard">
+                    <div class="stat-label">📊 Saldo do Mês</div>
+                    <div class="stat-value" id="calSaldo" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="calSaldoLabel">Projeção</div>
+                </div>
+            </div>
+
+            <!-- Calendário -->
             <div class="card">
-                <div class="card-title">Visualizar Pendências</div>
-                <div id="calendarContainer" style="padding: 20px;">
-                    <!-- Calendário será renderizado aqui -->
+                <div id="calendarContainer" style="padding:10px 0;">
+                </div>
+            </div>
+
+            <!-- Tabela melhor dia para compras (dias úteis) -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">📆 Melhor Dia para Compras (Dias Úteis)</div>
+                <p style="font-size:12px;color:#666;margin-bottom:12px;">Ranking dos dias úteis com menor saída de caixa — ideal para negociar pagamentos.</p>
+                <div class="table-container">
+                    <table id="tabelaMelhorDia">
+                        <thead>
+                            <tr>
+                                <th>Posição</th>
+                                <th>Dia</th>
+                                <th>Data</th>
+                                <th>Dia da Semana</th>
+                                <th>A Pagar</th>
+                                <th>A Receber</th>
+                                <th>Saldo do Dia</th>
+                                <th>Indicação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -3286,6 +3360,7 @@
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
+            else if (pageId === 'bancos') carregarBancos();
             else if (pageId === 'dashboard') atualizarDashboard();
         }
     }
@@ -3550,55 +3625,203 @@
 
     // CALENDÁRIO
     async function gerarCalendario() {
-        const contasReceber = await fetchSupabase('contas_a_receber', 'GET', null, `status=eq.pendente`);
-        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET', null, `status=eq.pendente`);
+        const mesEl = document.getElementById('filtroMesCalendario');
+        const anoEl = document.getElementById('filtroAnoCalendario');
+        const hoje = new Date();
+        const mes = mesEl ? parseInt(mesEl.value) : hoje.getMonth();
+        const ano = anoEl && anoEl.value ? parseInt(anoEl.value) : hoje.getFullYear();
+
+        const anoMes = ano + '-' + String(mes + 1).padStart(2, '0');
+        const filtro = 'status=eq.pendente&data_vencimento=gte.' + anoMes + '-01&data_vencimento=lte.' + anoMes + '-31';
+
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET', null, filtro);
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
 
         const container = document.getElementById('calendarContainer');
-        const hoje = new Date();
-        const ano = hoje.getFullYear();
-        const mes = hoje.getMonth();
+        if (!container) return;
 
-        let html = `<h3>${new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
-        html += '<table style="width: 100%; border-collapse: collapse;">';
-        html += '<tr style="text-align: center;"><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sab</th></tr>';
+        const rList = contasReceber || [];
+        const pList = contasPagar || [];
 
+        // Cards resumo
+        const totalR = rList.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+        const totalP = pList.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+        const saldo = totalR - totalP;
+        const fmtR = v => 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',');
+
+        const elTR = document.getElementById('calTotalReceber');
+        const elTP = document.getElementById('calTotalPagar');
+        const elS  = document.getElementById('calSaldo');
+        const elSC = document.getElementById('calSaldoCard');
+        const elSL = document.getElementById('calSaldoLabel');
+        const elCR = document.getElementById('calCountReceber');
+        const elCP = document.getElementById('calCountPagar');
+        if (elTR) elTR.textContent = fmtR(totalR);
+        if (elTP) elTP.textContent = fmtR(totalP);
+        if (elS) { elS.textContent = (saldo < 0 ? '-' : '') + fmtR(saldo); elS.style.color = saldo >= 0 ? '#28a745' : '#dc3545'; }
+        if (elSC) elSC.style.borderLeftColor = saldo >= 0 ? '#28a745' : '#dc3545';
+        if (elSL) elSL.textContent = saldo >= 0 ? 'Projeção positiva ✅' : 'Projeção negativa ⚠️';
+        if (elCR) elCR.textContent = rList.length + ' lançamento' + (rList.length !== 1 ? 's' : '');
+        if (elCP) elCP.textContent = pList.length + ' lançamento' + (pList.length !== 1 ? 's' : '');
+
+        // ── Renderizar calendário ──
         const primeiroDia = new Date(ano, mes, 1).getDay();
-        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+        const ultimoDia   = new Date(ano, mes + 1, 0).getDate();
+        const nomeMes = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+        let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
+            <button onclick="navegarMes(-1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">‹</button>
+            <strong style="font-size:16px;text-transform:capitalize;">${nomeMes}</strong>
+            <button onclick="navegarMes(1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">›</button>
+        </div>`;
+
+        html += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">';
+        html += '<tr>' + diasSemana.map(d => {
+            const isWeekend = d === 'Dom' || d === 'Sáb';
+            return `<th style="padding:8px 4px;text-align:center;font-size:12px;color:${isWeekend ? '#aaa' : '#555'};font-weight:600;border-bottom:2px solid #eee;">${d}</th>`;
+        }).join('') + '</tr>';
+
+        const HOJE = new Date(); HOJE.setHours(0,0,0,0);
         let diaAtual = 1;
+
         for (let semana = 0; semana < 6; semana++) {
+            if (diaAtual > ultimoDia) break;
             html += '<tr>';
-            for (let dia = 0; dia < 7; dia++) {
-                if ((semana === 0 && dia < primeiroDia) || diaAtual > ultimoDia) {
-                    html += '<td style="height: 60px; border: 1px solid #ddd;"></td>';
+            for (let col = 0; col < 7; col++) {
+                if ((semana === 0 && col < primeiroDia) || diaAtual > ultimoDia) {
+                    html += '<td style="height:80px;border:1px solid #f0f0f0;background:#fafafa;"></td>';
                 } else {
-                    const dataStr = String(ano) + '-' + String(mes + 1).padStart(2, '0') + '-' + String(diaAtual).padStart(2, '0');
-                    const receber = contasReceber ? contasReceber.filter(c => c.data_vencimento === dataStr) : [];
-                    const pagar = contasPagar ? contasPagar.filter(c => c.data_vencimento === dataStr) : [];
+                    const dataStr = ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(diaAtual).padStart(2, '0');
+                    const rec = rList.filter(c => c.data_vencimento === dataStr);
+                    const pag = pList.filter(c => c.data_vencimento === dataStr);
+                    const dObj = new Date(dataStr + 'T12:00:00');
+                    const isHoje = dObj.getTime() === HOJE.getTime();
+                    const isWeekend = col === 0 || col === 6;
 
-                    let cellColor = '#fff';
-                    let content = `<strong>${diaAtual}</strong>`;
+                    const totalRecDia = rec.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                    const totalPagDia = pag.reduce((s,c) => s + parseFloat(c.valor||0), 0);
 
-                    if (receber.length > 0) {
-                        cellColor = '#d4edda';
-                        content += `<br><small style="color: #155724;">R: ${receber.length}</small>`;
+                    let bgColor = isWeekend ? '#f9f9f9' : '#fff';
+                    let borderStyle = isHoje ? '2px solid #FF7A42' : '1px solid #f0f0f0';
+
+                    if (rec.length > 0 && pag.length > 0) bgColor = '#fffde7'; // amarelo — ambos
+                    else if (rec.length > 0) bgColor = '#f0fdf4'; // verde claro
+                    else if (pag.length > 0) bgColor = '#fef2f2'; // vermelho claro
+
+                    let cellContent = `<div style="font-weight:${isHoje?'700':'500'};font-size:13px;color:${isHoje?'#FF7A42':'#333'};margin-bottom:3px;">${diaAtual}</div>`;
+
+                    if (rec.length > 0) {
+                        const nomes = rec.slice(0,2).map(c => {
+                            const cli = dadosCache.clientes.find(x => x.id === c.cliente_id);
+                            return cli ? cli.nome.split(' ')[0] : 'Cliente';
+                        }).join(', ');
+                        cellContent += `<div style="background:#d4edda;color:#155724;border-radius:4px;padding:2px 5px;font-size:10px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${nomes}">
+                            💚 R$ ${fmtR(totalRecDia).replace('R$ ','')} ${rec.length > 1 ? '('+rec.length+'x)' : ''}
+                        </div>`;
+                    }
+                    if (pag.length > 0) {
+                        const nomes = pag.slice(0,2).map(c => {
+                            const forn = dadosCache.fornecedores.find(x => x.id === c.fornecedor_id);
+                            return forn ? forn.nome.split(' ')[0] : 'Forn.';
+                        }).join(', ');
+                        cellContent += `<div style="background:#f8d7da;color:#721c24;border-radius:4px;padding:2px 5px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${nomes}">
+                            ❤️ R$ ${fmtR(totalPagDia).replace('R$ ','')} ${pag.length > 1 ? '('+pag.length+'x)' : ''}
+                        </div>`;
                     }
 
-                    if (pagar.length > 0) {
-                        cellColor = '#f8d7da';
-                        content += `<br><small style="color: #721c24;">P: ${pagar.length}</small>`;
-                    }
-
-                    html += `<td style="height: 60px; border: 1px solid #ddd; background: ${cellColor}; padding: 5px; vertical-align: top;">${content}</td>`;
+                    html += `<td style="height:80px;border:${borderStyle};background:${bgColor};padding:5px;vertical-align:top;cursor:default;" title="${dataStr}">${cellContent}</td>`;
                     diaAtual++;
                 }
             }
             html += '</tr>';
         }
-
         html += '</table>';
         container.innerHTML = html;
+
+        // ── Tabela melhor dia de compras (somente dias úteis) ──
+        gerarTabelaMelhorDia(ano, mes, rList, pList);
     }
+
+    function navegarMes(delta) {
+        const mesEl = document.getElementById('filtroMesCalendario');
+        const anoEl = document.getElementById('filtroAnoCalendario');
+        if (!mesEl || !anoEl) return;
+        let mes = parseInt(mesEl.value) + delta;
+        let ano = parseInt(anoEl.value);
+        if (mes < 0) { mes = 11; ano--; }
+        if (mes > 11) { mes = 0; ano++; }
+        mesEl.value = mes;
+        // Garantir que o ano exista no select
+        let optExists = Array.from(anoEl.options).some(o => parseInt(o.value) === ano);
+        if (!optExists) {
+            const opt = document.createElement('option');
+            opt.value = ano; opt.textContent = ano;
+            anoEl.appendChild(opt);
+        }
+        anoEl.value = ano;
+        gerarCalendario();
+    }
+
+    function gerarTabelaMelhorDia(ano, mes, rList, pList) {
+        const tbody = document.querySelector('#tabelaMelhorDia tbody');
+        if (!tbody) return;
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+        const FERIADOS_FIXOS = ['01-01','04-21','05-01','09-07','10-12','11-02','11-15','12-25'];
+
+        const dias = [];
+        for (let d = 1; d <= ultimoDia; d++) {
+            const dt = new Date(ano, mes, d);
+            const col = dt.getDay(); // 0=Dom, 6=Sáb
+            if (col === 0 || col === 6) continue; // pular fins de semana
+
+            const mmdd = String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            if (FERIADOS_FIXOS.includes(mmdd)) continue; // pular feriados fixos
+
+            const dataStr = ano + '-' + String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+            const totalR = rList.filter(c => c.data_vencimento === dataStr).reduce((s,c) => s+parseFloat(c.valor||0),0);
+            const totalP = pList.filter(c => c.data_vencimento === dataStr).reduce((s,c) => s+parseFloat(c.valor||0),0);
+            const saldo = totalR - totalP;
+            const nomesDia = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+            dias.push({ d, dataStr, col, totalR, totalP, saldo, nomeDia: nomesDia[col] });
+        }
+
+        // Ordenar: melhor dia = menor saída (totalP) e maior entrada (totalR)
+        // Score: prioriza quem tem menos a pagar e mais a receber
+        dias.sort((a, b) => {
+            if (a.totalP !== b.totalP) return a.totalP - b.totalP; // menos pagamento = melhor
+            return b.totalR - a.totalR; // mais recebimento = melhor
+        });
+
+        const fmtV = v => v > 0 ? 'R$ ' + v.toFixed(2).replace('.', ',') : '-';
+        const medalhas = ['🥇','🥈','🥉'];
+
+        tbody.innerHTML = '';
+        dias.forEach((dia, i) => {
+            const dtObj = new Date(dia.dataStr + 'T12:00:00');
+            const dtFmt = dtObj.toLocaleDateString('pt-BR');
+            const saldoCor = dia.saldo >= 0 ? '#28a745' : '#dc3545';
+            const saldoFmt = (dia.saldo < 0 ? '-' : '+') + 'R$ ' + Math.abs(dia.saldo).toFixed(2).replace('.', ',');
+            const indicacao = i === 0 ? '⭐ Melhor dia' : i === 1 ? '✅ Ótima opção' : i === 2 ? '👍 Boa opção' : '';
+            const bgRow = i < 3 ? (i === 0 ? 'background:#fffde7;' : 'background:#f0fdf4;') : '';
+
+            tbody.innerHTML += `<tr style="${bgRow}">
+                <td style="text-align:center;font-size:16px;">${medalhas[i] || (i+1)}</td>
+                <td style="font-weight:600;">${dia.d}</td>
+                <td>${dtFmt}</td>
+                <td>${dia.nomeDia}</td>
+                <td style="color:#dc3545;">${fmtV(dia.totalP)}</td>
+                <td style="color:#28a745;">${fmtV(dia.totalR)}</td>
+                <td style="color:${saldoCor};font-weight:600;">${saldoFmt}</td>
+                <td>${indicacao}</td>
+            </tr>`;
+        });
+
+        if (dias.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;padding:20px;">Nenhum dia útil encontrado para o período.</td></tr>';
+        }
+    }
+
 
     // ================================================================
     // BANCOS
