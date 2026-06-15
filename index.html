@@ -910,7 +910,8 @@
             <!-- Cards de saldo -->
             <div id="cardsSaldoBancos" class="dashboard-grid" style="margin-bottom:20px;"></div>
 
-            <div class="table-container">
+            <!-- Tabela de bancos cadastrados -->
+            <div class="table-container" style="margin-bottom:24px;">
                 <table id="tabelaBancos">
                     <thead>
                         <tr>
@@ -926,6 +927,66 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+
+            <!-- Extrato por banco -->
+            <div class="card" style="margin-top:8px;">
+                <div class="card-title">📄 Extrato Bancário</div>
+                <div class="filter-container" style="padding:0 0 16px;">
+                    <div class="filter-row" style="gap:12px;flex-wrap:wrap;align-items:flex-end;">
+                        <div class="form-group">
+                            <label>Banco</label>
+                            <select id="extratoFiltrobancoId" onchange="gerarExtrato()">
+                                <option value="">Todos os bancos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Ano</label>
+                            <select id="extratoFiltroAno" onchange="gerarExtrato()">
+                                <option value="">Todos</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Mês</label>
+                            <select id="extratoFiltroMes" onchange="gerarExtrato()">
+                                <option value="">Todos</option>
+                                <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                                <option value="03">Março</option><option value="04">Abril</option>
+                                <option value="05">Maio</option><option value="06">Junho</option>
+                                <option value="07">Julho</option><option value="08">Agosto</option>
+                                <option value="09">Setembro</option><option value="10">Outubro</option>
+                                <option value="11">Novembro</option><option value="12">Dezembro</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="min-width:180px;">
+                            <label>Pesquisar descrição</label>
+                            <input type="text" id="extratoBusca" placeholder="Ex: pagamento, cliente..." oninput="gerarExtrato()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo do extrato -->
+                <div class="dashboard-grid" style="margin-bottom:16px;" id="extratoResumo"></div>
+
+                <!-- Tabela extrato dia a dia -->
+                <div class="table-container">
+                    <table id="tabelaExtrato" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th style="width:90px;">Data</th>
+                                <th>Descrição</th>
+                                <th style="width:110px;">Banco</th>
+                                <th style="width:80px;">Tipo</th>
+                                <th style="text-align:right;width:120px;">Crédito (R$)</th>
+                                <th style="text-align:right;width:120px;">Débito (R$)</th>
+                                <th style="text-align:right;width:130px;">Saldo do Dia</th>
+                                <th style="text-align:right;width:130px;">Saldo Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="extratoCorpo"></tbody>
+                        <tfoot id="extratoRodape"></tfoot>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -1436,7 +1497,6 @@
         <div id="dfc" class="page">
             <div class="page-header">
                 <h1>Demonstração de Fluxo de Caixa (DFC)</h1>
-                <span style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;">💳 Por data de pagamento/recebimento</span>
             </div>
 
             <div id="dfcAviso" style="display:none;"></div>
@@ -1566,13 +1626,6 @@
             <div id="dreAviso" style="display:none;"></div>
             <div class="filter-container">
                 <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
-                    <div class="form-group">
-                        <label>Modo</label>
-                        <select id="modoDRE" onchange="carregarDRE()" style="font-weight:600;">
-                            <option value="competencia">📋 DRE por Competência</option>
-                            <option value="vencimento">📅 DRE por Vencimento</option>
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoDRE" onchange="carregarDRE()">
@@ -3212,7 +3265,6 @@
         atualizarSelectClientes();
         atualizarSelectFornecedores();
         atualizarSelectCategorias();
-
         if (tipo === 'receber') {
             const conta = dadosCache.contasRecebidas.find(c => c.id === id)
                        || dadosCache.contasReceber.find(c => c.id === id);
@@ -3528,7 +3580,9 @@
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
-            else if (pageId === 'bancos') carregarBancos();
+            else if (pageId === 'bancos') {
+                Promise.all([carregarContasRecebidas(), carregarContasPagas()]).then(() => carregarBancos());
+            }
             else if (pageId === 'dashboard') atualizarDashboard();
         }
     }
@@ -4001,6 +4055,219 @@
             dadosCache.bancos = dados;
             atualizarTabelaBancos();
             atualizarCardsSaldoBancos();
+            _popularSelectExtrato();
+            await gerarExtrato();
+        }
+    }
+
+    function _popularSelectExtrato() {
+        const sel = document.getElementById('extratoFiltrobancoId');
+        if (!sel) return;
+        const val = sel.value;
+        sel.innerHTML = '<option value="">Todos os bancos</option>';
+        (dadosCache.bancos || []).filter(b => b.ativo).forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id;
+            opt.textContent = b.nome;
+            sel.appendChild(opt);
+        });
+        if (val) sel.value = val;
+        // Popular anos no select de extrato
+        const selAno = document.getElementById('extratoFiltroAno');
+        if (selAno && selAno.options.length <= 1) {
+            const anoAtual = new Date().getFullYear();
+            for (let a = anoAtual; a >= anoAtual - 4; a--) {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.textContent = a;
+                selAno.appendChild(opt);
+            }
+            selAno.value = anoAtual;
+        }
+    }
+
+    async function gerarExtrato() {
+        const tbody = document.getElementById('extratoCorpo');
+        const tfoot = document.getElementById('extratoRodape');
+        const resumo = document.getElementById('extratoResumo');
+        if (!tbody) return;
+
+        const bancoIdFiltro = document.getElementById('extratoFiltrobancoId') ? document.getElementById('extratoFiltrobancoId').value : '';
+        const anoFiltro     = document.getElementById('extratoFiltroAno') ? document.getElementById('extratoFiltroAno').value : '';
+        const mesFiltro     = document.getElementById('extratoFiltroMes') ? document.getElementById('extratoFiltroMes').value : '';
+        const busca         = (document.getElementById('extratoBusca') ? document.getElementById('extratoBusca').value : '').toLowerCase();
+
+        // Buscar contas recebidas e pagas do cache (já carregadas)
+        const recebidas = (dadosCache.contasRecebidas && dadosCache.contasRecebidas.length)
+            ? dadosCache.contasRecebidas
+            : await fetchSupabase('contas_a_receber', 'GET', null, 'status=eq.recebido') || [];
+        const pagas = (dadosCache.contasPagas && dadosCache.contasPagas.length)
+            ? dadosCache.contasPagas
+            : await fetchSupabase('contas_a_pagar', 'GET', null, 'status=eq.pago') || [];
+
+        // Montar lista de movimentos
+        let movimentos = [];
+
+        recebidas.forEach(c => {
+            const data = c.data_recebimento || '';
+            if (!data) return;
+            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
+            if (anoFiltro && !data.startsWith(anoFiltro)) return;
+            if (mesFiltro && !data.startsWith((anoFiltro || data.substring(0,4)) + '-' + mesFiltro)) return;
+            if (mesFiltro && !data.includes('-' + mesFiltro + '-')) return;
+            const desc = (c.descricao || '').toLowerCase();
+            if (busca && !desc.includes(busca)) return;
+            const banco = (dadosCache.bancos || []).find(b => b.id === c.banco_id);
+            const cliente = (dadosCache.clientes || []).find(x => x.id === c.cliente_id);
+            movimentos.push({
+                data, tipo: 'credito',
+                descricao: c.descricao || '-',
+                complemento: cliente ? cliente.nome : '',
+                banco: banco ? banco.nome : '-',
+                valor: parseFloat(c.valor || 0)
+            });
+        });
+
+        pagas.forEach(c => {
+            const data = c.data_pagamento || '';
+            if (!data) return;
+            if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
+            if (anoFiltro && !data.startsWith(anoFiltro)) return;
+            if (mesFiltro && !data.includes('-' + mesFiltro + '-')) return;
+            const desc = (c.descricao || '').toLowerCase();
+            if (busca && !desc.includes(busca)) return;
+            const banco = (dadosCache.bancos || []).find(b => b.id === c.banco_id);
+            const fornecedor = (dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id);
+            movimentos.push({
+                data, tipo: 'debito',
+                descricao: c.descricao || '-',
+                complemento: fornecedor ? fornecedor.nome : '',
+                banco: banco ? banco.nome : '-',
+                valor: parseFloat(c.valor || 0)
+            });
+        });
+
+        // Ordenar por data
+        movimentos.sort((a, b) => a.data.localeCompare(b.data));
+
+        // Agrupar por dia
+        const porDia = {};
+        movimentos.forEach(m => {
+            if (!porDia[m.data]) porDia[m.data] = [];
+            porDia[m.data].push(m);
+        });
+
+        // Calcular saldo inicial (saldo_inicial dos bancos filtrados)
+        let saldoInicial = 0;
+        (dadosCache.bancos || []).filter(b => {
+            if (bancoIdFiltro) return String(b.id) === String(bancoIdFiltro);
+            return b.ativo;
+        }).forEach(b => { saldoInicial += parseFloat(b.saldo_inicial || 0); });
+
+        // Renderizar
+        const fmtData = d => {
+            const p = d.split('-');
+            return p[2] + '/' + p[1] + '/' + p[0];
+        };
+        const fmtVal = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+
+        tbody.innerHTML = '';
+        let acumulado = saldoInicial;
+        let totalCred = 0, totalDeb = 0;
+
+        // Linha saldo inicial
+        if (saldoInicial !== 0) {
+            const cor = saldoInicial >= 0 ? '#28a745' : '#dc3545';
+            tbody.innerHTML += '<tr style="background:#f8f9fa;">' +
+                '<td colspan="4" style="font-weight:600;color:#555;">Saldo Inicial</td>' +
+                '<td></td><td></td><td></td>' +
+                '<td style="text-align:right;font-weight:700;color:' + cor + ';">' + fmtVal(saldoInicial) + '</td>' +
+                '</tr>';
+        }
+
+        const dias = Object.keys(porDia).sort();
+
+        if (dias.length === 0) {
+            tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
+        }
+
+        dias.forEach(dia => {
+            const movs = porDia[dia];
+            let credDia = 0, debDia = 0;
+            movs.forEach(m => {
+                if (m.tipo === 'credito') credDia += m.valor;
+                else debDia += m.valor;
+            });
+            const saldoDia = credDia - debDia;
+            acumulado += saldoDia;
+            totalCred += credDia;
+            totalDeb  += debDia;
+
+            const corAcum = acumulado >= 0 ? '#28a745' : '#dc3545';
+            const corDia  = saldoDia >= 0 ? '#28a745' : '#dc3545';
+
+            // Linha de subtotal do dia
+            const numMovs = movs.length;
+            movs.forEach((m, idx) => {
+                const isFirst = idx === 0;
+                const descCompleta = m.descricao + (m.complemento ? ' — ' + m.complemento : '');
+                const credCell = m.tipo === 'credito'
+                    ? '<td style="text-align:right;color:#28a745;font-weight:600;">' + fmtVal(m.valor) + '</td>'
+                    : '<td style="text-align:right;color:#aaa;">-</td>';
+                const debCell = m.tipo === 'debito'
+                    ? '<td style="text-align:right;color:#dc3545;font-weight:600;">' + fmtVal(m.valor) + '</td>'
+                    : '<td style="text-align:right;color:#aaa;">-</td>';
+
+                tbody.innerHTML +=
+                    '<tr style="' + (isFirst ? 'border-top:2px solid #f0f0f0;' : '') + '">' +
+                    '<td>' + (isFirst ? '<b>' + fmtData(dia) + '</b>' : '') + '</td>' +
+                    '<td>' + descCompleta + '</td>' +
+                    '<td style="font-size:11px;color:#666;">' + m.banco + '</td>' +
+                    '<td><span style="padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:' +
+                        (m.tipo === 'credito' ? '#d4edda;color:#155724' : '#f8d7da;color:#721c24') + ';">' +
+                        (m.tipo === 'credito' ? 'Crédito' : 'Débito') + '</span></td>' +
+                    credCell + debCell +
+                    (isFirst
+                        ? '<td rowspan="' + numMovs + '" style="text-align:right;font-weight:700;color:' + corDia + ';vertical-align:middle;">' + fmtVal(Math.abs(saldoDia)) + (saldoDia < 0 ? ' ▼' : ' ▲') + '</td>'
+                        + '<td rowspan="' + numMovs + '" style="text-align:right;font-weight:700;color:' + corAcum + ';vertical-align:middle;">' + fmtVal(acumulado) + '</td>'
+                        : '') +
+                    '</tr>';
+            });
+        });
+
+        // Rodapé totais
+        const corSaldo = (acumulado) >= 0 ? '#28a745' : '#dc3545';
+        tfoot.innerHTML = '<tr style="font-weight:700;background:#333;color:white;">' +
+            '<td colspan="4">TOTAIS DO PERÍODO</td>' +
+            '<td style="text-align:right;color:#90ee90;">R$ ' + totalCred.toFixed(2).replace('.', ',') + '</td>' +
+            '<td style="text-align:right;color:#ffb3b3;">R$ ' + totalDeb.toFixed(2).replace('.', ',') + '</td>' +
+            '<td style="text-align:right;color:' + ((totalCred - totalDeb) >= 0 ? '#90ee90' : '#ffb3b3') + ';">R$ ' + Math.abs(totalCred - totalDeb).toFixed(2).replace('.', ',') + '</td>' +
+            '<td style="text-align:right;color:' + corSaldo + ';">R$ ' + acumulado.toFixed(2).replace('.', ',') + '</td>' +
+            '</tr>';
+
+        // Cards resumo
+        if (resumo) {
+            resumo.innerHTML =
+                '<div class="stat-card" style="border-left-color:#28a745;">' +
+                '<div class="stat-label">💚 Total Créditos</div>' +
+                '<div class="stat-value" style="color:#28a745;font-size:20px;">R$ ' + totalCred.toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-change">' + movimentos.filter(m => m.tipo === 'credito').length + ' entradas</div>' +
+                '</div>' +
+                '<div class="stat-card" style="border-left-color:#dc3545;">' +
+                '<div class="stat-label">❤️ Total Débitos</div>' +
+                '<div class="stat-value" style="color:#dc3545;font-size:20px;">R$ ' + totalDeb.toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-change">' + movimentos.filter(m => m.tipo === 'debito').length + ' saídas</div>' +
+                '</div>' +
+                '<div class="stat-card" id="extratoSaldoCard" style="border-left-color:' + ((totalCred-totalDeb) >= 0 ? '#28a745' : '#dc3545') + ';">' +
+                '<div class="stat-label">📊 Fluxo do Período</div>' +
+                '<div class="stat-value" style="color:' + ((totalCred-totalDeb) >= 0 ? '#28a745' : '#dc3545') + ';font-size:20px;">R$ ' + Math.abs(totalCred - totalDeb).toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-change">' + (totalCred - totalDeb >= 0 ? 'Saldo positivo' : 'Saldo negativo') + '</div>' +
+                '</div>' +
+                '<div class="stat-card" style="border-left-color:#FF7A42;">' +
+                '<div class="stat-label">🏦 Saldo Acumulado</div>' +
+                '<div class="stat-value" style="color:' + corSaldo + ';font-size:20px;">R$ ' + acumulado.toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-change">incl. saldo inicial</div>' +
+                '</div>';
         }
     }
 
@@ -4513,31 +4780,31 @@
     ];
 
     async function carregarDRE() {
-        const lancsDRE  = await fetchSupabase('lancamentos_dre', 'GET');
+        // Buscar lançamentos DRE diretos + contas recebidas/pagas por competência
+        const lancsDRE = await fetchSupabase('lancamentos_dre', 'GET');
         const contasRec = await fetchSupabase('contas_a_receber', 'GET');
         const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
         if (contasRec === null || contasPag === null) return;
 
         const filtroAno = document.getElementById('filtroAnoDRE');
         const filtroMes = document.getElementById('filtroMesDRE');
-        const modoEl    = document.getElementById('modoDRE');
         const anoSel = filtroAno ? filtroAno.value : '';
         const mesSel = filtroMes ? filtroMes.value : '';
-        const modo   = modoEl ? modoEl.value : 'competencia';
 
         const dreLancs = lancsDRE || [];
 
-        function filtrarPorCampo(arr, campoData) {
+        // Filtrar por competência
+        function filtrarComp(arr, campoData) {
             return arr.filter(c => {
                 if (!c[campoData]) return false;
-                const d = c[campoData].substring(0, 7);
+                const d = c[campoData].substring(0, 7); // YYYY-MM
                 if (anoSel && !d.startsWith(anoSel)) return false;
                 if (mesSel && !d.endsWith('-' + mesSel)) return false;
                 return true;
             });
         }
 
-        // Lançamentos DRE manuais sempre por competência
+        // Lançamentos DRE diretos filtrados por competência
         let dreF = dreLancs.filter(l => {
             if (!l.competencia) return false;
             const comp = l.competencia.substring(0, 7);
@@ -4546,52 +4813,34 @@
             return true;
         });
 
-        let recComp, pagComp;
-        if (modo === 'vencimento') {
-            // Inclui pendentes + pagos/recebidos pelo vencimento
-            recComp = filtrarPorCampo(
-                contasRec.filter(c => c.status === 'recebido' || c.status === 'pendente'),
-                'data_vencimento'
-            );
-            pagComp = filtrarPorCampo(
-                contasPag.filter(c => c.status === 'pago' || c.status === 'pendente'),
-                'data_vencimento'
-            );
-        } else {
-            // Apenas confirmados, pela data de competência
-            recComp = filtrarPorCampo(
-                contasRec.filter(c => c.status === 'recebido'),
-                'data_competencia'
-            );
-            pagComp = filtrarPorCampo(
-                contasPag.filter(c => c.status === 'pago'),
-                'data_competencia'
-            );
-        }
+        // Contas recebidas por competência (status recebido, usa data_competencia ou data_recebimento)
+        const recComp = filtrarComp(
+            contasRec.filter(c => c.status === 'recebido'),
+            'data_competencia'
+        );
+        // Contas pagas por competência
+        const pagComp = filtrarComp(
+            contasPag.filter(c => c.status === 'pago'),
+            'data_competencia'
+        );
 
-        // Aviso
+        // Aviso pendentes
         const pendentes = contasRec.filter(c => c.status === 'pendente').length
                         + contasPag.filter(c => c.status === 'pendente').length;
         const avisoEl = document.getElementById('dreAviso');
         if (avisoEl) {
-            if (modo === 'vencimento') {
-                avisoEl.textContent = '📅 Modo Vencimento: inclui todos os lançamentos (pendentes e confirmados) pela data de vencimento.';
-                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;';
-            } else {
-                avisoEl.textContent = pendentes > 0
-                    ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
-                    : '✅ Todos os lançamentos confirmados estão na DRE.';
-                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
-                    (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
-            }
+            avisoEl.textContent = pendentes > 0
+                ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
+                : '✅ Todos os lançamentos confirmados estão na DRE.';
+            avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
+                (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
         }
 
         // Título do período
         const tit = document.getElementById('dreTituloPeriodo');
         if (tit) {
             const mNomes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-            const modoLabel = modo === 'vencimento' ? 'por Vencimento' : 'por Competência';
-            tit.textContent = 'DRE ' + modoLabel +
+            tit.textContent = 'DRE por Competência' +
                 (anoSel ? ' — ' + anoSel : '') +
                 (mesSel ? ' / ' + mNomes[parseInt(mesSel)] : '');
         }
@@ -4615,7 +4864,7 @@
             const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
             if (!porGrupo[grupo]) return;
             porGrupo[grupo].total += parseFloat(c.valor || 0);
-            const comp = modo === 'vencimento' ? (c.data_vencimento || '') : (c.data_competencia || c.data_recebimento || '');
+            const comp = c.data_competencia || c.data_recebimento || '';
             porGrupo[grupo].itens.push({
                 descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
@@ -4629,7 +4878,7 @@
             const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
             if (!porGrupo[grupo]) return;
             porGrupo[grupo].total += parseFloat(c.valor || 0);
-            const comp = modo === 'vencimento' ? (c.data_vencimento || '') : (c.data_competencia || c.data_pagamento || '');
+            const comp = c.data_competencia || c.data_pagamento || '';
             porGrupo[grupo].itens.push({
                 descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
