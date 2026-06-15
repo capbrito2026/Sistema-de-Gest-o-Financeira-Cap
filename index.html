@@ -792,6 +792,8 @@
                     <thead>
                         <tr>
                             <th>Nome</th>
+                            <th>Grupo DRE</th>
+                            <th>Tipo</th>
                             <th>Descrição</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -1434,6 +1436,7 @@
         <div id="dfc" class="page">
             <div class="page-header">
                 <h1>Demonstração de Fluxo de Caixa (DFC)</h1>
+                <span style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;">💳 Por data de pagamento/recebimento</span>
             </div>
 
             <div id="dfcAviso" style="display:none;"></div>
@@ -1563,6 +1566,13 @@
             <div id="dreAviso" style="display:none;"></div>
             <div class="filter-container">
                 <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                    <div class="form-group">
+                        <label>Modo</label>
+                        <select id="modoDRE" onchange="carregarDRE()" style="font-weight:600;">
+                            <option value="competencia">📋 DRE por Competência</option>
+                            <option value="vencimento">📅 DRE por Vencimento</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoDRE" onchange="carregarDRE()">
@@ -2182,7 +2192,6 @@
     function verificarLogin() {
         const usuarioSalvo = localStorage.getItem('cap_usuario');
         const lembrar = localStorage.getItem('cap_lembrar');
-
         if (usuarioSalvo && lembrar === 'true') {
             try {
                 usuarioAtual = JSON.parse(usuarioSalvo);
@@ -2193,7 +2202,6 @@
                 return;
             } catch(e) {}
         }
-        // Sem sessao valida — limpar e mostrar login
         localStorage.removeItem('cap_usuario');
         localStorage.removeItem('cap_lembrar');
         document.getElementById('loginScreen').style.display = 'flex';
@@ -2822,6 +2830,7 @@
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
                     <button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
+                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
                 </td>
             </tr>`;
@@ -2916,6 +2925,7 @@
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
                     <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
+                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
                 </td>
             </tr>`;
@@ -3199,7 +3209,6 @@
     }
 
     function editarLancamento(id, tipo) {
-        // Popular selects primeiro
         atualizarSelectClientes();
         atualizarSelectFornecedores();
         atualizarSelectCategorias();
@@ -3211,12 +3220,9 @@
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_receber';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Receber';
-            // Mostrar cliente, ocultar fornecedor
             document.getElementById('editLancFornecedorWrap').style.display = 'none';
             document.getElementById('editLancCliente').parentElement.style.display = '';
-            // Preencher categoria — mostrar campo com todas as cats (receita e geral)
             document.getElementById('editLancCategoriaWrap').style.display = '';
-            // Valores
             document.getElementById('editLancCliente').value    = conta.cliente_id || '';
             document.getElementById('editLancCategoria').value  = conta.categoria_id || '';
             document.getElementById('editLancDescricao').value  = conta.descricao || '';
@@ -3232,11 +3238,9 @@
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_pagar';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Pagar';
-            // Mostrar fornecedor, ocultar cliente
             document.getElementById('editLancFornecedorWrap').style.display = '';
             document.getElementById('editLancCliente').parentElement.style.display = 'none';
             document.getElementById('editLancCategoriaWrap').style.display = '';
-            // Valores
             document.getElementById('editLancFornecedor').value = conta.fornecedor_id || '';
             document.getElementById('editLancCategoria').value  = conta.categoria_id || '';
             document.getElementById('editLancDescricao').value  = conta.descricao || '';
@@ -3252,7 +3256,7 @@
         event.preventDefault();
         const id    = parseInt(document.getElementById('editLancId').value);
         const tipo  = document.getElementById('editLancTipo').value;
-        const catVal = document.getElementById('editLancCategoria').value;
+        const catVal = document.getElementById('editLancCategoria') ? document.getElementById('editLancCategoria').value : '';
         const dados = {
             descricao:        document.getElementById('editLancDescricao').value,
             valor:            parseFloat(document.getElementById('editLancValor').value),
@@ -4509,31 +4513,31 @@
     ];
 
     async function carregarDRE() {
-        // Buscar lançamentos DRE diretos + contas recebidas/pagas por competência
-        const lancsDRE = await fetchSupabase('lancamentos_dre', 'GET');
+        const lancsDRE  = await fetchSupabase('lancamentos_dre', 'GET');
         const contasRec = await fetchSupabase('contas_a_receber', 'GET');
         const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
         if (contasRec === null || contasPag === null) return;
 
         const filtroAno = document.getElementById('filtroAnoDRE');
         const filtroMes = document.getElementById('filtroMesDRE');
+        const modoEl    = document.getElementById('modoDRE');
         const anoSel = filtroAno ? filtroAno.value : '';
         const mesSel = filtroMes ? filtroMes.value : '';
+        const modo   = modoEl ? modoEl.value : 'competencia';
 
         const dreLancs = lancsDRE || [];
 
-        // Filtrar por competência
-        function filtrarComp(arr, campoData) {
+        function filtrarPorCampo(arr, campoData) {
             return arr.filter(c => {
                 if (!c[campoData]) return false;
-                const d = c[campoData].substring(0, 7); // YYYY-MM
+                const d = c[campoData].substring(0, 7);
                 if (anoSel && !d.startsWith(anoSel)) return false;
                 if (mesSel && !d.endsWith('-' + mesSel)) return false;
                 return true;
             });
         }
 
-        // Lançamentos DRE diretos filtrados por competência
+        // Lançamentos DRE manuais sempre por competência
         let dreF = dreLancs.filter(l => {
             if (!l.competencia) return false;
             const comp = l.competencia.substring(0, 7);
@@ -4542,34 +4546,52 @@
             return true;
         });
 
-        // Contas recebidas por competência (status recebido, usa data_competencia ou data_recebimento)
-        const recComp = filtrarComp(
-            contasRec.filter(c => c.status === 'recebido'),
-            'data_competencia'
-        );
-        // Contas pagas por competência
-        const pagComp = filtrarComp(
-            contasPag.filter(c => c.status === 'pago'),
-            'data_competencia'
-        );
+        let recComp, pagComp;
+        if (modo === 'vencimento') {
+            // Inclui pendentes + pagos/recebidos pelo vencimento
+            recComp = filtrarPorCampo(
+                contasRec.filter(c => c.status === 'recebido' || c.status === 'pendente'),
+                'data_vencimento'
+            );
+            pagComp = filtrarPorCampo(
+                contasPag.filter(c => c.status === 'pago' || c.status === 'pendente'),
+                'data_vencimento'
+            );
+        } else {
+            // Apenas confirmados, pela data de competência
+            recComp = filtrarPorCampo(
+                contasRec.filter(c => c.status === 'recebido'),
+                'data_competencia'
+            );
+            pagComp = filtrarPorCampo(
+                contasPag.filter(c => c.status === 'pago'),
+                'data_competencia'
+            );
+        }
 
-        // Aviso pendentes
+        // Aviso
         const pendentes = contasRec.filter(c => c.status === 'pendente').length
                         + contasPag.filter(c => c.status === 'pendente').length;
         const avisoEl = document.getElementById('dreAviso');
         if (avisoEl) {
-            avisoEl.textContent = pendentes > 0
-                ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
-                : '✅ Todos os lançamentos confirmados estão na DRE.';
-            avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
-                (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
+            if (modo === 'vencimento') {
+                avisoEl.textContent = '📅 Modo Vencimento: inclui todos os lançamentos (pendentes e confirmados) pela data de vencimento.';
+                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f4fd;color:#1565c0;border:1px solid #90caf9;';
+            } else {
+                avisoEl.textContent = pendentes > 0
+                    ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
+                    : '✅ Todos os lançamentos confirmados estão na DRE.';
+                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
+                    (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
+            }
         }
 
         // Título do período
         const tit = document.getElementById('dreTituloPeriodo');
         if (tit) {
             const mNomes = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-            tit.textContent = 'DRE por Competência' +
+            const modoLabel = modo === 'vencimento' ? 'por Vencimento' : 'por Competência';
+            tit.textContent = 'DRE ' + modoLabel +
                 (anoSel ? ' — ' + anoSel : '') +
                 (mesSel ? ' / ' + mNomes[parseInt(mesSel)] : '');
         }
@@ -4593,7 +4615,7 @@
             const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
             if (!porGrupo[grupo]) return;
             porGrupo[grupo].total += parseFloat(c.valor || 0);
-            const comp = c.data_competencia || c.data_recebimento || '';
+            const comp = modo === 'vencimento' ? (c.data_vencimento || '') : (c.data_competencia || c.data_recebimento || '');
             porGrupo[grupo].itens.push({
                 descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
@@ -4607,7 +4629,7 @@
             const grupo = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
             if (!porGrupo[grupo]) return;
             porGrupo[grupo].total += parseFloat(c.valor || 0);
-            const comp = c.data_competencia || c.data_pagamento || '';
+            const comp = modo === 'vencimento' ? (c.data_vencimento || '') : (c.data_competencia || c.data_pagamento || '');
             porGrupo[grupo].itens.push({
                 descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
