@@ -2674,25 +2674,27 @@
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
             const status = venc < hoje ? 'atrasado' : 'pendente';
             const parcLabel = conta.total_parcelas > 1
-                ? '<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>'
-                : '<span style="color:#aaa;font-size:11px;">-</span>';
+                ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">${conta.parcela_atual}/${conta.total_parcelas}</span>`
+                : `<span style="color:#aaa;font-size:11px;">-</span>`;
             const compLabel = conta.data_competencia
                 ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
                 : '-';
-            tbody.innerHTML += '<tr>' +
-                '<td>' + (cliente ? cliente.nome : '-') + '</td>' +
-                '<td>' + conta.descricao + '</td>' +
-                '<td>' + compLabel + '</td>' +
-                '<td>' + venc.toLocaleDateString('pt-BR') + '</td>' +
-                '<td>R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') + '</td>' +
-                '<td>' + parcLabel + '</td>' +
-                '<td><span class="status-badge status-' + status + '">' + (status === 'atrasado' ? 'Atrasado' : 'Pendente') + '</span></td>' +
-                '<td>' +
-                '<button class="btn btn-success btn-small" onclick="receberConta(' + conta.id + ')">✅ Recebido</button> ' +
-                '<button class="btn btn-danger btn-small" onclick="deletarConta(' + conta.id + ', 'contas_a_receber')">Deletar</button>' +
-                '</td></tr>';
+            tbody.innerHTML += `<tr>
+                <td>${cliente ? cliente.nome : '-'}</td>
+                <td>${conta.descricao}</td>
+                <td>${compLabel}</td>
+                <td>${venc.toLocaleDateString('pt-BR')}</td>
+                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>${parcLabel}</td>
+                <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                <td>
+                    <button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
+                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
+                </td>
+            </tr>`;
         });
     }
+
 
     async function salvarContaReceber(event) {
         event.preventDefault();
@@ -2765,24 +2767,25 @@
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
             const status = venc < hoje ? 'atrasado' : 'pendente';
             const parcLabel = conta.total_parcelas > 1
-                ? '<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>'
-                : '<span style="color:#aaa;font-size:11px;">-</span>';
+                ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">${conta.parcela_atual}/${conta.total_parcelas}</span>`
+                : `<span style="color:#aaa;font-size:11px;">-</span>`;
             const compLabel = conta.data_competencia
                 ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
                 : '-';
-            tbody.innerHTML += '<tr>' +
-                '<td>' + (fornecedor ? fornecedor.nome : '-') + '</td>' +
-                '<td>' + (categoria ? categoria.nome : '-') + '</td>' +
-                '<td>' + conta.descricao + '</td>' +
-                '<td>' + compLabel + '</td>' +
-                '<td>' + venc.toLocaleDateString('pt-BR') + '</td>' +
-                '<td>R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') + '</td>' +
-                '<td>' + parcLabel + '</td>' +
-                '<td><span class="status-badge status-' + status + '">' + (status === 'atrasado' ? 'Atrasado' : 'Pendente') + '</span></td>' +
-                '<td>' +
-                '<button class="btn btn-success btn-small" onclick="pagarConta(' + conta.id + ')">💳 Pagar</button> ' +
-                '<button class="btn btn-danger btn-small" onclick="deletarConta(' + conta.id + ', 'contas_a_pagar')">Deletar</button>' +
-                '</td></tr>';
+            tbody.innerHTML += `<tr>
+                <td>${fornecedor ? fornecedor.nome : '-'}</td>
+                <td>${categoria ? categoria.nome : '-'}</td>
+                <td>${conta.descricao}</td>
+                <td>${compLabel}</td>
+                <td>${venc.toLocaleDateString('pt-BR')}</td>
+                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>${parcLabel}</td>
+                <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                <td>
+                    <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
+                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
+                </td>
+            </tr>`;
         });
     }
 
