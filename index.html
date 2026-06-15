@@ -1164,9 +1164,12 @@
                             <th>Fornecedor</th>
                             <th>Categoria</th>
                             <th>Descrição</th>
+                            <th>Parcela</th>
                             <th>Valor</th>
                             <th>Vencimento</th>
                             <th>Pagamento</th>
+                            <th>Tipo</th>
+                            <th>Banco</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -1433,31 +1436,18 @@
                 <h1>Demonstração de Fluxo de Caixa (DFC)</h1>
             </div>
 
+            <div id="dfcAviso" style="display:none;"></div>
+
             <div class="filter-container">
-                <div class="filter-row">
+                <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoDFC" onchange="carregarDFC()">
-                            <option value="">Todos</option>
+                            <option value="">Todos os anos</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Mês</label>
-                        <select id="filtroMesDFC" onchange="carregarDFC()">
-                            <option value="">Todos</option>
-                            <option value="01">Janeiro</option>
-                            <option value="02">Fevereiro</option>
-                            <option value="03">Março</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Maio</option>
-                            <option value="06">Junho</option>
-                            <option value="07">Julho</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Setembro</option>
-                            <option value="10">Outubro</option>
-                            <option value="11">Novembro</option>
-                            <option value="12">Dezembro</option>
-                        </select>
+                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                        <label style="font-size:12px;color:#666;font-style:italic;">Selecione um ano para ver o detalhamento mensal Jan–Dez</label>
                     </div>
                 </div>
             </div>
@@ -1488,6 +1478,34 @@
                     <div class="stat-label">⏳ A Pagar (pendente)</div>
                     <div class="stat-value" id="dfcCardPendentesPagar" style="color:#e6a817; font-size:22px;">R$ 0,00</div>
                     <div class="stat-change" id="dfcCardPendentesPagarCount">0 contas</div>
+                </div>
+            </div>
+
+            <!-- Tabela mensal Jan-Dez DFC -->
+            <div class="card" id="cardDFCMensal" style="display:none;">
+                <div class="card-title" id="tituloDFCMensal">📅 DFC Mensal</div>
+                <div class="table-container">
+                    <table id="tabelaDFCMensal">
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th style="color:#28a745;">Entradas</th>
+                                <th style="color:#dc3545;">Saídas</th>
+                                <th>Fluxo Líquido</th>
+                                <th>Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr style="font-weight:700;background:#f5f5f5;">
+                                <td>TOTAL</td>
+                                <td id="dfcMensalTotalEnt" style="color:#28a745;">R$ 0,00</td>
+                                <td id="dfcMensalTotalSai" style="color:#dc3545;">R$ 0,00</td>
+                                <td id="dfcMensalTotalLiq">R$ 0,00</td>
+                                <td>-</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
@@ -1543,32 +1561,47 @@
                 <h1>Demonstração de Resultado do Exercício (DRE)</h1>
             </div>
 
+            <div id="dreAviso" style="display:none;"></div>
+
             <div class="filter-container">
-                <div class="filter-row">
+                <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoDRE" onchange="carregarDRE()">
-                            <option value="">Todos</option>
+                            <option value="">Todos os anos</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Mês</label>
-                        <select id="filtroMesDRE" onchange="carregarDRE()">
-                            <option value="">Todos</option>
-                            <option value="01">Janeiro</option>
-                            <option value="02">Fevereiro</option>
-                            <option value="03">Março</option>
-                            <option value="04">Abril</option>
-                            <option value="05">Maio</option>
-                            <option value="06">Junho</option>
-                            <option value="07">Julho</option>
-                            <option value="08">Agosto</option>
-                            <option value="09">Setembro</option>
-                            <option value="10">Outubro</option>
-                            <option value="11">Novembro</option>
-                            <option value="12">Dezembro</option>
-                        </select>
+                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                        <label style="font-size:12px;color:#666;font-style:italic;">Selecione um ano para ver o detalhamento mensal Jan–Dez</label>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tabela mensal Jan-Dez DRE -->
+            <div class="card" id="cardDREMensal" style="display:none;">
+                <div class="card-title" id="tituloDREMensal">📅 DRE Mensal</div>
+                <div class="table-container">
+                    <table id="tabelaDREMensal">
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th style="color:#28a745;">Receita</th>
+                                <th style="color:#dc3545;">Custos</th>
+                                <th>Lucro Bruto</th>
+                                <th>Margem %</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr style="font-weight:700;background:#f5f5f5;">
+                                <td>TOTAL ANO</td>
+                                <td id="dreMensalTotalRec" style="color:#28a745;">R$ 0,00</td>
+                                <td id="dreMensalTotalCus" style="color:#dc3545;">R$ 0,00</td>
+                                <td id="dreMensalTotalLuc">R$ 0,00</td>
+                                <td id="dreMensalTotalMar">0%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
 
@@ -2930,41 +2963,36 @@
     function atualizarTabelaRecebidas() {
         const tbody = document.querySelector('#tabelaRecebidas tbody');
         if (!tbody) return;
-
         tbody.innerHTML = '';
         let filtrado = dadosCache.contasRecebidas;
-
         const filtroAno = document.getElementById('filtroAnoRecebida');
         const filtroMes = document.getElementById('filtroMesRecebida');
         const filtroDia = document.getElementById('filtroDialRecebida');
-
-        if (filtroAno && filtroAno.value) {
-            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
-        }
-
-        if (filtroMes && filtroMes.value) {
-            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
-        }
-
-        if (filtroDia && filtroDia.value) {
-            filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.endsWith('-' + filtroDia.value));
-        }
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
+        if (filtroDia && filtroDia.value) filtrado = filtrado.filter(c => c.data_recebimento && c.data_recebimento.endsWith('-' + filtroDia.value));
 
         filtrado.forEach(conta => {
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td>${cliente ? cliente.nome : '-'}</td>
-                    <td>${conta.descricao}</td>
-                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
-                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
-                    <td>${conta.data_recebimento ? new Date(conta.data_recebimento).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td>
-                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
-                    </td>
-                </tr>
-            `;
+            const banco = (dadosCache.bancos || []).find(b => b.id === conta.banco_id);
+            const parcLabel = conta.total_parcelas > 1 ? conta.parcela_atual + '/' + conta.total_parcelas : '-';
+            const vencFmt = conta.data_vencimento ? new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+            const recFmt  = conta.data_recebimento ? new Date(conta.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+            tbody.innerHTML += `<tr>
+                <td>${cliente ? cliente.nome : '-'}</td>
+                <td>${conta.descricao}</td>
+                <td style="text-align:center;">${parcLabel}</td>
+                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>${vencFmt}</td>
+                <td style="color:#28a745;">${recFmt}</td>
+                <td>${conta.tipo_recebimento || '-'}</td>
+                <td>${banco ? banco.nome : '-'}</td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️</button>
+                    <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">🗑️</button>
+                </td>
+            </tr>`;
         });
     }
 
@@ -2987,43 +3015,38 @@
     function atualizarTabelaPagas() {
         const tbody = document.querySelector('#tabelaPagas tbody');
         if (!tbody) return;
-
         tbody.innerHTML = '';
         let filtrado = dadosCache.contasPagas;
-
         const filtroAno = document.getElementById('filtroAnoPaga');
         const filtroMes = document.getElementById('filtroMesPaga');
         const filtroDia = document.getElementById('filtroDiaPaga');
-
-        if (filtroAno && filtroAno.value) {
-            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
-        }
-
-        if (filtroMes && filtroMes.value) {
-            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
-        }
-
-        if (filtroDia && filtroDia.value) {
-            filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.endsWith('-' + filtroDia.value));
-        }
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        if (filtroDia && filtroDia.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.endsWith('-' + filtroDia.value));
 
         filtrado.forEach(conta => {
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
-            const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
-            
-            tbody.innerHTML += `
-                <tr>
-                    <td>${fornecedor ? fornecedor.nome : '-'}</td>
-                    <td>${categoria ? categoria.nome : '-'}</td>
-                    <td>${conta.descricao}</td>
-                    <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
-                    <td>${new Date(conta.data_vencimento).toLocaleDateString('pt-BR')}</td>
-                    <td>${conta.data_pagamento ? new Date(conta.data_pagamento).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td>
-                        <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
-                    </td>
-                </tr>
-            `;
+            const categoria  = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
+            const banco      = (dadosCache.bancos || []).find(b => b.id === conta.banco_id);
+            const parcLabel  = conta.total_parcelas > 1 ? conta.parcela_atual + '/' + conta.total_parcelas : '-';
+            const vencFmt    = conta.data_vencimento ? new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+            const pagFmt     = conta.data_pagamento  ? new Date(conta.data_pagamento  + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+            tbody.innerHTML += `<tr>
+                <td>${fornecedor ? fornecedor.nome : '-'}</td>
+                <td>${categoria  ? categoria.nome  : '-'}</td>
+                <td>${conta.descricao}</td>
+                <td style="text-align:center;">${parcLabel}</td>
+                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>${vencFmt}</td>
+                <td style="color:#dc3545;">${pagFmt}</td>
+                <td>${conta.tipo_pagamento || '-'}</td>
+                <td>${banco ? banco.nome : '-'}</td>
+                <td style="white-space:nowrap;">
+                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️</button>
+                    <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">🗑️</button>
+                </td>
+            </tr>`;
         });
     }
 
@@ -3110,6 +3133,108 @@
             await carregarContasPagar();
             await carregarContasPagas();
             await carregarBancos();
+            await atualizarDashboard();
+        }
+    }
+
+    // REVERTER / EDITAR LANÇAMENTOS
+    async function reverterRecebimento(id) {
+        if (!confirm('Reverter este recebimento para pendente?')) return;
+        const r = await fetchSupabase('contas_a_receber', 'PATCH', {
+            status: 'pendente',
+            data_recebimento: null,
+            tipo_recebimento: null,
+            banco_id: null
+        }, 'id=eq.' + id);
+        if (r !== null) {
+            showAlert('Recebimento revertido!', 'alertLancarReceber', 'success');
+            await carregarContasReceber();
+            await carregarContasRecebidas();
+            await carregarBancos();
+            await atualizarDashboard();
+        }
+    }
+
+    async function reverterPagamento(id) {
+        if (!confirm('Reverter este pagamento para pendente?')) return;
+        const r = await fetchSupabase('contas_a_pagar', 'PATCH', {
+            status: 'pendente',
+            data_pagamento: null,
+            tipo_pagamento: null,
+            banco_id: null
+        }, 'id=eq.' + id);
+        if (r !== null) {
+            showAlert('Pagamento revertido!', 'alertLancarPagar', 'success');
+            await carregarContasPagar();
+            await carregarContasPagas();
+            await carregarBancos();
+            await atualizarDashboard();
+        }
+    }
+
+    function editarLancamento(id, tipo) {
+        if (tipo === 'receber') {
+            const conta = dadosCache.contasRecebidas.find(c => c.id === id)
+                       || dadosCache.contasReceber.find(c => c.id === id);
+            if (!conta) return;
+            atualizarSelectClientes();
+            document.getElementById('editLancId').value = id;
+            document.getElementById('editLancTipo').value = 'contas_a_receber';
+            document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Receber';
+            document.getElementById('editLancCliente').style.display = '';
+            document.getElementById('editLancFornecedorWrap').style.display = 'none';
+            document.getElementById('editLancCliente').value = conta.cliente_id || '';
+            document.getElementById('editLancDescricao').value = conta.descricao || '';
+            document.getElementById('editLancValor').value = conta.valor || '';
+            document.getElementById('editLancVencimento').value = conta.data_vencimento || '';
+            document.getElementById('editLancCompetencia').value = conta.data_competencia || '';
+            document.getElementById('editLancObs').value = conta.observacoes || '';
+            document.getElementById('modalEditarLancamento').classList.add('active');
+        } else {
+            const conta = dadosCache.contasPagas.find(c => c.id === id)
+                       || dadosCache.contasPagar.find(c => c.id === id);
+            if (!conta) return;
+            atualizarSelectFornecedores();
+            atualizarSelectCategorias();
+            document.getElementById('editLancId').value = id;
+            document.getElementById('editLancTipo').value = 'contas_a_pagar';
+            document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Pagar';
+            document.getElementById('editLancCliente').style.display = 'none';
+            document.getElementById('editLancFornecedorWrap').style.display = '';
+            document.getElementById('editLancFornecedor').value = conta.fornecedor_id || '';
+            document.getElementById('editLancDescricao').value = conta.descricao || '';
+            document.getElementById('editLancValor').value = conta.valor || '';
+            document.getElementById('editLancVencimento').value = conta.data_vencimento || '';
+            document.getElementById('editLancCompetencia').value = conta.data_competencia || '';
+            document.getElementById('editLancObs').value = conta.observacoes || '';
+            document.getElementById('modalEditarLancamento').classList.add('active');
+        }
+    }
+
+    async function salvarEdicaoLancamento(event) {
+        event.preventDefault();
+        const id    = parseInt(document.getElementById('editLancId').value);
+        const tipo  = document.getElementById('editLancTipo').value;
+        const dados = {
+            descricao:        document.getElementById('editLancDescricao').value,
+            valor:            parseFloat(document.getElementById('editLancValor').value),
+            data_vencimento:  document.getElementById('editLancVencimento').value,
+            data_competencia: document.getElementById('editLancCompetencia').value || null,
+            observacoes:      document.getElementById('editLancObs').value || null
+        };
+        if (tipo === 'contas_a_receber') {
+            dados.cliente_id = parseInt(document.getElementById('editLancCliente').value) || null;
+        } else {
+            dados.fornecedor_id = parseInt(document.getElementById('editLancFornecedor').value) || null;
+        }
+        const r = await fetchSupabase(tipo, 'PATCH', dados, 'id=eq.' + id);
+        if (r !== null) {
+            closeModal('modalEditarLancamento');
+            showAlert('Lançamento atualizado!', tipo === 'contas_a_receber' ? 'alertLancarReceber' : 'alertLancarPagar', 'success');
+            await carregarContasReceber();
+            await carregarContasPagar();
+            await carregarContasRecebidas();
+            await carregarContasPagas();
             await atualizarDashboard();
         }
     }
@@ -3632,7 +3757,8 @@
         const ano = anoEl && anoEl.value ? parseInt(anoEl.value) : hoje.getFullYear();
 
         const anoMes = ano + '-' + String(mes + 1).padStart(2, '0');
-        const filtro = 'status=eq.pendente&data_vencimento=gte.' + anoMes + '-01&data_vencimento=lte.' + anoMes + '-31';
+        const _ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
+        const filtro = 'status=eq.pendente&data_vencimento=gte.' + anoMes + '-01&data_vencimento=lte.' + anoMes + '-' + String(_ultimoDiaMes).padStart(2, '0');
 
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET', null, filtro);
         const contasPagar = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
@@ -4111,64 +4237,117 @@
 
     // DFC
     function fmtBRL(v) { return 'R$ ' + Math.abs(v).toFixed(2).replace('.', ','); }
+    function fmtValSig(v) { return (v < 0 ? '-' : '') + fmtBRL(v); }
 
     async function carregarDFC() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
-
+        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
         if (!contasReceber || !contasPagar) return;
 
-        let filtrado_receber = contasReceber.filter(c => c.status === 'recebido');
-        let filtrado_pagar = contasPagar.filter(c => c.status === 'pago');
-
         const filtroAno = document.getElementById('filtroAnoDFC');
-        const filtroMes = document.getElementById('filtroMesDFC');
+        const anoSel    = filtroAno ? filtroAno.value : '';
 
-        if (filtroAno && filtroAno.value) {
-            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
-            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        // DFC usa datas de recebimento/pagamento (fluxo de caixa real)
+        let recebidos = contasReceber.filter(c => c.status === 'recebido');
+        let pagos     = contasPagar.filter(c => c.status === 'pago');
+
+        if (anoSel) {
+            recebidos = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(anoSel));
+            pagos     = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(anoSel));
         }
 
-        if (filtroMes && filtroMes.value) {
-            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
-            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
-        }
-
-        // Pendentes (sem filtro de período)
         const pendentes_receber = contasReceber.filter(c => c.status === 'pendente');
-        const pendentes_pagar = contasPagar.filter(c => c.status === 'pendente');
+        const pendentes_pagar   = contasPagar.filter(c => c.status === 'pendente');
 
-        const totalReceber = filtrado_receber.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-        const totalPagar = filtrado_pagar.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-        const totalPendentesReceber = pendentes_receber.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-        const totalPendentesPagar = pendentes_pagar.reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
+        const totalReceber = recebidos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const totalPagar   = pagos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const totalPendRec = pendentes_receber.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const totalPendPag = pendentes_pagar.reduce((s,c) => s + parseFloat(c.valor||0), 0);
         const fluxoLiquido = totalReceber - totalPagar;
 
-        // Atualizar tabela
-        document.getElementById('dfcEntradaReceber').textContent = fmtBRL(totalReceber);
-        document.getElementById('dfcSaidaPagar').textContent = fmtBRL(totalPagar);
-        document.getElementById('dfcFluxoLiquido').textContent = (fluxoLiquido >= 0 ? '' : '-') + fmtBRL(fluxoLiquido);
+        // ⚠️ Aviso importante: DFC/DRE só mostram lançamentos com status "recebido" ou "pago"
+        const avisoEl = document.getElementById('dfcAviso');
+        const qtdPend = pendentes_receber.length + pendentes_pagar.length;
+        if (avisoEl) {
+            avisoEl.textContent = qtdPend > 0
+                ? '⚠️ Há ' + qtdPend + ' lançamento(s) com status "pendente" que NÃO são exibidos aqui. DFC e DRE consideram apenas lançamentos marcados como Recebido/Pago.'
+                : '✅ Todos os lançamentos estão registrados no DFC.';
+            avisoEl.style.display = 'block';
+            avisoEl.style.background = qtdPend > 0 ? '#fff3cd' : '#d4edda';
+            avisoEl.style.color = qtdPend > 0 ? '#856404' : '#155724';
+            avisoEl.style.border = qtdPend > 0 ? '1px solid #ffc107' : '1px solid #c3e6cb';
+            avisoEl.style.padding = '10px 14px';
+            avisoEl.style.borderRadius = '6px';
+            avisoEl.style.marginBottom = '16px';
+            avisoEl.style.fontSize = '13px';
+        }
 
-        // Atualizar cards
-        document.getElementById('dfcCardEntradas').textContent = fmtBRL(totalReceber);
-        document.getElementById('dfcCardSaidas').textContent = fmtBRL(totalPagar);
+        // Cards
+        document.getElementById('dfcEntradaReceber').textContent = fmtBRL(totalReceber);
+        document.getElementById('dfcSaidaPagar').textContent     = fmtBRL(totalPagar);
+        document.getElementById('dfcFluxoLiquido').textContent   = fmtValSig(fluxoLiquido);
+        document.getElementById('dfcCardEntradas').textContent   = fmtBRL(totalReceber);
+        document.getElementById('dfcCardSaidas').textContent     = fmtBRL(totalPagar);
         const cardLiquido = document.getElementById('dfcCardLiquido');
-        const cardBox = document.getElementById('dfcCardLiquidoBox');
-        cardLiquido.textContent = (fluxoLiquido >= 0 ? '' : '-') + fmtBRL(fluxoLiquido);
+        const cardBox     = document.getElementById('dfcCardLiquidoBox');
+        cardLiquido.textContent = fmtValSig(fluxoLiquido);
         cardLiquido.style.color = fluxoLiquido >= 0 ? '#28a745' : '#dc3545';
         cardBox.style.borderLeftColor = fluxoLiquido >= 0 ? '#28a745' : '#dc3545';
-        document.getElementById('dfcCardLiquidoLabel').textContent = fluxoLiquido >= 0 ? 'Resultado positivo' : 'Resultado negativo';
-
-        document.getElementById('dfcCardPendentesReceber').textContent = fmtBRL(totalPendentesReceber);
+        document.getElementById('dfcCardLiquidoLabel').textContent   = fluxoLiquido >= 0 ? 'Resultado positivo' : 'Resultado negativo';
+        document.getElementById('dfcCardPendentesReceber').textContent = fmtBRL(totalPendRec);
         document.getElementById('dfcCardPendentesReceberCount').textContent = pendentes_receber.length + ' contas';
-        document.getElementById('dfcCardPendentesPagar').textContent = fmtBRL(totalPendentesPagar);
+        document.getElementById('dfcCardPendentesPagar').textContent     = fmtBRL(totalPendPag);
         document.getElementById('dfcCardPendentesPagarCount').textContent = pendentes_pagar.length + ' contas';
 
-        // Gráfico DFC
-        criarGraficoDFC(contasReceber, contasPagar);
+        // Tabela mensal Jan-Dez (só se ano selecionado)
+        const cardMensal = document.getElementById('cardDFCMensal');
+        if (anoSel && cardMensal) {
+            cardMensal.style.display = '';
+            document.getElementById('tituloDFCMensal').textContent = '📅 DFC Mensal — ' + anoSel;
+            gerarTabelaMensalDFC(recebidos, pagos, anoSel);
+        } else if (cardMensal) {
+            cardMensal.style.display = 'none';
+        }
+
+        // Gráfico (últimos 12 meses ou ano selecionado)
+        criarGraficoDFC(contasReceber, contasPagar, anoSel);
     }
 
-    function criarGraficoDFC(contasReceber, contasPagar) {
+    function gerarTabelaMensalDFC(recebidos, pagos, ano) {
+        const tbody = document.querySelector('#tabelaDFCMensal tbody');
+        const mesesNome = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        let totEnt = 0, totSai = 0, acumulado = 0;
+        mesesNome.forEach((nome, idx) => {
+            const mm = String(idx + 1).padStart(2, '0');
+            const prefixo = ano + '-' + mm;
+            const ent = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(prefixo))
+                                 .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+            const sai = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(prefixo))
+                             .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+            const liq = ent - sai;
+            acumulado += liq;
+            totEnt += ent; totSai += sai;
+            const liqCor = liq >= 0 ? '#28a745' : '#dc3545';
+            const acuCor = acumulado >= 0 ? '#28a745' : '#dc3545';
+            const hasData = ent > 0 || sai > 0;
+            tbody.innerHTML += `<tr style="${hasData ? '' : 'color:#ccc;'}">
+                <td style="font-weight:${hasData?'600':'400'};">${nome}</td>
+                <td style="color:${hasData?'#28a745':'#ccc'};">${ent > 0 ? fmtBRL(ent) : '-'}</td>
+                <td style="color:${hasData?'#dc3545':'#ccc'};">${sai > 0 ? fmtBRL(sai) : '-'}</td>
+                <td style="color:${hasData?liqCor:'#ccc'};font-weight:${hasData?'600':'400'};">${hasData ? fmtValSig(liq) : '-'}</td>
+                <td style="color:${acuCor};font-weight:600;">${fmtValSig(acumulado)}</td>
+            </tr>`;
+        });
+        const totLiq = totEnt - totSai;
+        document.getElementById('dfcMensalTotalEnt').textContent = fmtBRL(totEnt);
+        document.getElementById('dfcMensalTotalSai').textContent = fmtBRL(totSai);
+        document.getElementById('dfcMensalTotalLiq').textContent = fmtValSig(totLiq);
+        document.getElementById('dfcMensalTotalLiq').style.color = totLiq >= 0 ? '#28a745' : '#dc3545';
+    }
+
+    function criarGraficoDFC(contasReceber, contasPagar, anoSel) {
         const ctx = document.getElementById('chartDFC');
         if (!ctx) return;
 
@@ -4176,25 +4355,33 @@
         const entradas = [];
         const saidas = [];
         const liquidos = [];
+        const mesesNome = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-        for (let i = 11; i >= 0; i--) {
-            const data = new Date();
-            data.setMonth(data.getMonth() - i);
-            const anoMes = data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0');
-            const mesNome = data.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-            meses.push(mesNome);
-
-            const entrada = contasReceber
-                .filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.startsWith(anoMes))
-                .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-
-            const saida = contasPagar
-                .filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(anoMes))
-                .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-
-            entradas.push(entrada);
-            saidas.push(saida);
-            liquidos.push(entrada - saida);
+        if (anoSel) {
+            // Mostrar Jan a Dez do ano selecionado
+            for (let m = 0; m < 12; m++) {
+                const mm = String(m + 1).padStart(2, '0');
+                const prefixo = anoSel + '-' + mm;
+                meses.push(mesesNome[m] + '/' + String(anoSel).slice(2));
+                const ent = contasReceber.filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.startsWith(prefixo))
+                                         .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                const sai = contasPagar.filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(prefixo))
+                                       .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                entradas.push(ent); saidas.push(sai); liquidos.push(ent - sai);
+            }
+        } else {
+            // Últimos 12 meses
+            for (let i = 11; i >= 0; i--) {
+                const data = new Date();
+                data.setMonth(data.getMonth() - i);
+                const anoMes = data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0');
+                meses.push(data.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }));
+                const ent = contasReceber.filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.startsWith(anoMes))
+                                         .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                const sai = contasPagar.filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.startsWith(anoMes))
+                                       .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+                entradas.push(ent); saidas.push(sai); liquidos.push(ent - sai);
+            }
         }
 
         if (charts.dfc) { charts.dfc.destroy(); }
@@ -4267,85 +4454,185 @@
     // DRE
     async function carregarDRE() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
-
+        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
         if (!contasReceber || !contasPagar) return;
 
-        let filtrado_receber = contasReceber.filter(c => c.status === 'recebido');
-        let filtrado_pagar = contasPagar.filter(c => c.status === 'pago');
-
         const filtroAno = document.getElementById('filtroAnoDRE');
-        const filtroMes = document.getElementById('filtroMesDRE');
+        const anoSel    = filtroAno ? filtroAno.value : '';
 
-        if (filtroAno && filtroAno.value) {
-            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.startsWith(filtroAno.value));
-            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
+        // DRE usa data de recebimento/pagamento
+        let recebidos = contasReceber.filter(c => c.status === 'recebido');
+        let pagos     = contasPagar.filter(c => c.status === 'pago');
+
+        if (anoSel) {
+            recebidos = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(anoSel));
+            pagos     = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(anoSel));
         }
 
-        if (filtroMes && filtroMes.value) {
-            filtrado_receber = filtrado_receber.filter(c => c.data_recebimento && c.data_recebimento.includes('-' + filtroMes.value + '-'));
-            filtrado_pagar = filtrado_pagar.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
+        // ⚠️ Aviso: DRE só mostra lançamentos pagos/recebidos
+        const pendentes = contasReceber.filter(c => c.status === 'pendente').length
+                        + contasPagar.filter(c => c.status === 'pendente').length;
+        const avisoEl = document.getElementById('dreAviso');
+        if (avisoEl) {
+            avisoEl.textContent = pendentes > 0
+                ? '⚠️ Há ' + pendentes + ' lançamento(s) pendentes que NÃO aparecem aqui. DRE e DFC consideram apenas lançamentos com status Recebido/Pago.'
+                : '✅ Todos os lançamentos estão registrados na DRE.';
+            avisoEl.style.display = 'block';
+            avisoEl.style.background = pendentes > 0 ? '#fff3cd' : '#d4edda';
+            avisoEl.style.color = pendentes > 0 ? '#856404' : '#155724';
+            avisoEl.style.border = pendentes > 0 ? '1px solid #ffc107' : '1px solid #c3e6cb';
+            avisoEl.style.padding = '10px 14px';
+            avisoEl.style.borderRadius = '6px';
+            avisoEl.style.marginBottom = '16px';
+            avisoEl.style.fontSize = '13px';
         }
 
-        const receita = filtrado_receber.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        const custo = filtrado_pagar.reduce((sum, c) => sum + parseFloat(c.valor), 0);
+        const receita    = recebidos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const custo      = pagos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
         const lucroBruto = receita - custo;
-        const despesas = custo * 0.2; // Estimativa
-        const resultado = lucroBruto - despesas;
+        const margem     = receita > 0 ? ((lucroBruto / receita) * 100).toFixed(1) : '0';
 
-        document.getElementById('dreReceita').textContent = 'R$ ' + receita.toFixed(2).replace('.', ',');
-        document.getElementById('drePctReceita').textContent = '100%';
+        const pct = v => receita > 0 ? ((v / receita) * 100).toFixed(1) + '%' : '0%';
+        const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
-        document.getElementById('dreCusto').textContent = 'R$ ' + custo.toFixed(2).replace('.', ',');
-        document.getElementById('drePctCusto').textContent = receita > 0 ? ((custo / receita) * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('dreReceita').textContent    = fmt(receita);    document.getElementById('drePctReceita').textContent    = '100%';
+        document.getElementById('dreCusto').textContent      = fmt(custo);      document.getElementById('drePctCusto').textContent      = pct(custo);
+        document.getElementById('dreLucroBruto').textContent = fmt(lucroBruto); document.getElementById('drePctLucroBruto').textContent = pct(lucroBruto);
+        document.getElementById('dreDespesas').textContent   = '-';             document.getElementById('drePctDespesas').textContent   = '-';
+        document.getElementById('dreResultado').textContent  = fmt(lucroBruto); document.getElementById('drePctResultado').textContent  = margem + '%';
 
-        document.getElementById('dreLucroBruto').textContent = 'R$ ' + lucroBruto.toFixed(2).replace('.', ',');
-        document.getElementById('drePctLucroBruto').textContent = receita > 0 ? ((lucroBruto / receita) * 100).toFixed(1) + '%' : '0%';
+        // Tabela mensal Jan-Dez
+        const cardMensal = document.getElementById('cardDREMensal');
+        if (anoSel && cardMensal) {
+            cardMensal.style.display = '';
+            document.getElementById('tituloDREMensal').textContent = '📅 DRE Mensal — ' + anoSel;
+            gerarTabelaMensalDRE(recebidos, pagos, anoSel);
+        } else if (cardMensal) {
+            cardMensal.style.display = 'none';
+        }
 
-        document.getElementById('dreDespesas').textContent = 'R$ ' + despesas.toFixed(2).replace('.', ',');
-        document.getElementById('drePctDespesas').textContent = receita > 0 ? ((despesas / receita) * 100).toFixed(1) + '%' : '0%';
-
-        document.getElementById('dreResultado').textContent = 'R$ ' + resultado.toFixed(2).replace('.', ',');
-        document.getElementById('drePctResultado').textContent = receita > 0 ? ((resultado / receita) * 100).toFixed(1) + '%' : '0%';
-
-        // Gráfico DRE
-        criarGraficoDRE(receita, custo, despesas);
+        criarGraficoDRE(receita, custo, lucroBruto);
     }
 
-    function criarGraficoDRE(receita, custo, despesas) {
+    function gerarTabelaMensalDRE(recebidos, pagos, ano) {
+        const tbody = document.querySelector('#tabelaDREMensal tbody');
+        if (!tbody) return;
+        const mesesNome = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        tbody.innerHTML = '';
+        let totRec = 0, totCus = 0, totLuc = 0;
+        mesesNome.forEach((nome, idx) => {
+            const mm = String(idx + 1).padStart(2, '0');
+            const prefixo = ano + '-' + mm;
+            const rec = recebidos.filter(c => c.data_recebimento && c.data_recebimento.startsWith(prefixo))
+                                  .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+            const cus = pagos.filter(c => c.data_pagamento && c.data_pagamento.startsWith(prefixo))
+                              .reduce((s,c) => s + parseFloat(c.valor||0), 0);
+            const luc = rec - cus;
+            const mar = rec > 0 ? ((luc / rec) * 100).toFixed(1) + '%' : '-';
+            totRec += rec; totCus += cus; totLuc += luc;
+            const hasData = rec > 0 || cus > 0;
+            const lucCor  = luc >= 0 ? '#28a745' : '#dc3545';
+            tbody.innerHTML += `<tr style="${hasData ? '' : 'color:#ccc;'}">
+                <td style="font-weight:${hasData?'600':'400'};">${nome}</td>
+                <td style="color:${hasData?'#28a745':'#ccc'};">${rec > 0 ? 'R$ '+rec.toFixed(2).replace('.',',') : '-'}</td>
+                <td style="color:${hasData?'#dc3545':'#ccc'};">${cus > 0 ? 'R$ '+cus.toFixed(2).replace('.',',') : '-'}</td>
+                <td style="color:${hasData?lucCor:'#ccc'};font-weight:${hasData?'600':'400'};">${hasData ? fmtValSig(luc) : '-'}</td>
+                <td style="color:${hasData?lucCor:'#ccc'};">${hasData ? mar : '-'}</td>
+            </tr>`;
+        });
+        const totMar = totRec > 0 ? ((totLuc / totRec) * 100).toFixed(1) + '%' : '0%';
+        document.getElementById('dreMensalTotalRec').textContent = 'R$ ' + totRec.toFixed(2).replace('.',',');
+        document.getElementById('dreMensalTotalCus').textContent = 'R$ ' + totCus.toFixed(2).replace('.',',');
+        const elLuc = document.getElementById('dreMensalTotalLuc');
+        elLuc.textContent = fmtValSig(totLuc);
+        elLuc.style.color = totLuc >= 0 ? '#28a745' : '#dc3545';
+        document.getElementById('dreMensalTotalMar').textContent = totMar;
+        document.getElementById('dreMensalTotalMar').style.color = totLuc >= 0 ? '#28a745' : '#dc3545';
+    }
+
+    function criarGraficoDRE(receita, custo, lucroBruto) {
         const ctx = document.getElementById('chartDRE');
         if (!ctx) return;
-
-        if (charts.dre) {
-            charts.dre.destroy();
-        }
-
+        if (charts.dre) { charts.dre.destroy(); }
         charts.dre = new Chart(ctx, {
-            type: 'doughnut',
+            type: 'bar',
             data: {
-                labels: ['Receita Bruta', 'Custos', 'Despesas'],
+                labels: ['Receita Total', 'Total de Custos', 'Lucro Bruto'],
                 datasets: [{
-                    data: [receita, custo, despesas],
-                    backgroundColor: [
-                        '#28a745',
-                        '#FF7A42',
-                        '#dc3545'
-                    ]
+                    label: 'Valor (R$)',
+                    data: [receita, custo, lucroBruto],
+                    backgroundColor: ['rgba(40,167,69,0.75)', 'rgba(220,53,69,0.75)', lucroBruto >= 0 ? 'rgba(255,122,66,0.75)' : 'rgba(220,53,69,0.5)'],
+                    borderColor: ['#28a745', '#dc3545', lucroBruto >= 0 ? '#FF7A42' : '#dc3545'],
+                    borderWidth: 1, borderRadius: 6
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: true
-                    }
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => 'R$ ' + Math.abs(ctx.parsed.y).toFixed(2).replace('.',',') }}
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' }},
+                    x: { grid: { display: false }}
                 }
             }
         });
     }
 </script>
 
+
+<!-- MODAL EDITAR LANÇAMENTO -->
+<div class="modal" id="modalEditarLancamento">
+    <div class="modal-content" style="max-width:500px;">
+        <div class="modal-header">
+            <span id="editLancTituloModal">Editar Lançamento</span>
+            <button class="modal-close" onclick="closeModal('modalEditarLancamento')">&times;</button>
+        </div>
+        <form onsubmit="salvarEdicaoLancamento(event)">
+            <input type="hidden" id="editLancId">
+            <input type="hidden" id="editLancTipo">
+            <div class="form-group" id="editLancFornecedorWrap">
+                <label>Fornecedor*</label>
+                <select id="editLancFornecedor">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cliente*</label>
+                <select id="editLancCliente">
+                    <option value="">Selecione...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Descrição*</label>
+                <input type="text" id="editLancDescricao" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Valor*</label>
+                    <input type="number" id="editLancValor" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label>Competência</label>
+                    <input type="date" id="editLancCompetencia">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Data de Vencimento*</label>
+                <input type="date" id="editLancVencimento" required>
+            </div>
+            <div class="form-group">
+                <label>Observações</label>
+                <textarea id="editLancObs" rows="2"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarLancamento')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- MODAL DIAGNÓSTICO -->
 <div class="modal" id="modalDiagnostico" style="z-index:9999;">
