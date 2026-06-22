@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão Financeira CAP</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <style>
         * {
@@ -980,7 +981,10 @@
         <div id="lancar-receber" class="page">
             <div class="page-header">
                 <h1>📥 Contas a Receber</h1>
-                <button class="btn btn-primary" onclick="openModalLancarReceber()">+ Novo Lançamento</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary" onclick="gerarPDF('receber')" style="background:#e67e22;color:white;">📄 PDF</button>
+                    <button class="btn btn-primary" onclick="openModalLancarReceber()">+ Novo Lançamento</button>
+                </div>
             </div>
             <div class="alert alert-success" id="alertLancarReceber"></div>
 
@@ -1036,7 +1040,10 @@
         <div id="lancar-pagar" class="page">
             <div class="page-header">
                 <h1>📤 Contas a Pagar</h1>
-                <button class="btn btn-primary" onclick="openModalLancarPagar()">+ Novo Lançamento</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary" onclick="gerarPDF('pagar')" style="background:#e67e22;color:white;">📄 PDF</button>
+                    <button class="btn btn-primary" onclick="openModalLancarPagar()">+ Novo Lançamento</button>
+                </div>
             </div>
             <div class="alert alert-success" id="alertLancarPagar"></div>
 
@@ -1100,6 +1107,7 @@
         <div id="contas-recebidas" class="page">
             <div class="page-header">
                 <h1>Contas Recebidas</h1>
+                <button class="btn btn-secondary" onclick="gerarPDF('recebidas')" style="background:#e67e22;color:white;">📄 PDF</button>
             </div>
 
             <div class="filter-container">
@@ -1164,6 +1172,7 @@
         <div id="contas-pagas" class="page">
             <div class="page-header">
                 <h1>Contas Pagas</h1>
+                <button class="btn btn-secondary" onclick="gerarPDF('pagas')" style="background:#e67e22;color:white;">📄 PDF</button>
             </div>
 
             <div class="filter-container">
@@ -1485,6 +1494,7 @@
         <div id="dfc" class="page">
             <div class="page-header">
                 <h1>Demonstração de Fluxo de Caixa (DFC)</h1>
+                <button class="btn btn-secondary" onclick="gerarPDFDFC()" style="background:#e67e22;color:white;">📄 PDF</button>
             </div>
 
             <div id="dfcAviso" style="display:none;"></div>
@@ -1536,14 +1546,14 @@
             <div class="card" id="cardDFCMensal" style="display:none;">
                 <div class="card-title" id="tituloDFCMensal">📅 DFC Mensal</div>
                 <div class="table-container">
-                    <table id="tabelaDFCMensal">
+                    <table id="tabelaDFCMensal" style="width:auto;min-width:500px;max-width:800px;">
                         <thead>
                             <tr>
-                                <th>Mês</th>
-                                <th style="color:#28a745;">Entradas</th>
-                                <th style="color:#dc3545;">Saídas</th>
-                                <th>Fluxo Líquido</th>
-                                <th>Acumulado</th>
+                                <th style="width:100px;">Mês</th>
+                                <th style="width:140px;color:#28a745;">Entradas</th>
+                                <th style="width:140px;color:#dc3545;">Saídas</th>
+                                <th style="width:140px;">Fluxo Líquido</th>
+                                <th style="width:140px;">Acumulado</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -1635,6 +1645,7 @@
                     <div class="form-group" style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px;">
                         <button class="btn btn-primary btn-small" onclick="abrirModalLancDRE()">+ Lançar</button>
                         <button class="btn btn-secondary btn-small" onclick="exportarDRE()">📥 Exportar</button>
+                        <button class="btn btn-secondary btn-small" onclick="gerarPDFDRE()" style="background:#e67e22;color:white;">📄 PDF</button>
                     </div>
                 </div>
             </div>
@@ -1669,13 +1680,13 @@
             <div class="card">
                 <div class="card-title" id="dreTituloPeriodo">DRE por Competência</div>
                 <div class="table-container">
-                    <table id="tabelaDRE" style="font-size:13px;">
+                    <table id="tabelaDRE" style="font-size:13px;width:auto;min-width:600px;max-width:900px;">
                         <thead>
                             <tr>
-                                <th style="width:55%;">Descrição</th>
-                                <th style="width:20%;text-align:right;">Valor (R$)</th>
-                                <th style="width:15%;text-align:right;">AV %</th>
-                                <th style="width:10%;text-align:center;">Ver</th>
+                                <th style="width:auto;min-width:220px;">Descrição</th>
+                                <th style="width:160px;text-align:right;">Valor (R$)</th>
+                                <th style="width:100px;text-align:right;">AV %</th>
+                                <th style="width:60px;text-align:center;">Ver</th>
                             </tr>
                         </thead>
                         <tbody id="dreCorpo"></tbody>
@@ -5247,6 +5258,459 @@
         a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
         a.download = 'DRE_' + (document.getElementById('filtroAnoDRE').value || 'completo') + '.csv';
         a.click();
+    }
+
+
+    // ================================================================
+    // GERAÇÃO DE RELATÓRIO PDF
+    // ================================================================
+    function gerarPDF(tipo) {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+        const configs = {
+            receber: {
+                titulo: 'Contas a Receber (Pendentes)',
+                colunas: ['Cliente', 'Descrição', 'NF', 'Competência', 'Vencimento', 'Valor', 'Parcela', 'Status'],
+                larguras: [40, 55, 20, 22, 22, 22, 16, 18],
+                tableId: 'tabelaPendentesReceber'
+            },
+            pagar: {
+                titulo: 'Contas a Pagar (Pendentes)',
+                colunas: ['Fornecedor', 'Categoria', 'Descrição', 'NF', 'Competência', 'Vencimento', 'Valor', 'Parcela', 'Status'],
+                larguras: [32, 28, 40, 16, 20, 20, 22, 14, 16],
+                tableId: 'tabelaPendentesPagar'
+            },
+            recebidas: {
+                titulo: 'Contas Recebidas',
+                colunas: ['Cliente', 'Descrição', 'Valor', 'Vencimento', 'Recebimento'],
+                larguras: [50, 75, 30, 30, 30],
+                tableId: 'tabelaRecebidas'
+            },
+            pagas: {
+                titulo: 'Contas Pagas',
+                colunas: ['Fornecedor', 'Categoria', 'Descrição', 'NF', 'Parcela', 'Valor', 'Vencimento', 'Pagamento', 'Tipo', 'Banco'],
+                larguras: [28, 22, 35, 16, 12, 20, 20, 20, 18, 20],
+                tableId: 'tabelaPagas'
+            }
+        };
+
+        const cfg = configs[tipo];
+        if (!cfg) return;
+
+        const tabela = document.querySelector('#' + cfg.tableId + ' tbody');
+        if (!tabela) return;
+
+        const linhas = Array.from(tabela.querySelectorAll('tr'));
+        if (linhas.length === 0) {
+            alert('Não há dados para exportar.');
+            return;
+        }
+
+        // --- Cabeçalho do documento ---
+        const pageW = doc.internal.pageSize.getWidth();
+        doc.setFillColor(255, 122, 66); // cor primária
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        doc.text('Gerado em: ' + hoje, pageW - 10, 10, { align: 'right' });
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(cfg.titulo, pageW / 2, 24, { align: 'center' });
+
+        // --- Tabela ---
+        const margemEsq = 8;
+        let y = 32;
+        const alturaCelula = 7;
+        const alturaCabecalho = 8;
+
+        // Cabeçalho da tabela
+        doc.setFillColor(80, 80, 80);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7.5);
+        doc.setFont(undefined, 'bold');
+        let x = margemEsq;
+        cfg.colunas.forEach((col, i) => {
+            doc.rect(x, y, cfg.larguras[i], alturaCabecalho, 'F');
+            doc.text(col, x + 1.5, y + 5.5);
+            x += cfg.larguras[i];
+        });
+        y += alturaCabecalho;
+
+        // Linhas de dados
+        doc.setFont(undefined, 'normal');
+        let totalValor = 0;
+        linhas.forEach((linha, idx) => {
+            const cells = linha.querySelectorAll('td');
+            if (cells.length === 0) return;
+
+            // Verificar espaço na página
+            if (y + alturaCelula > doc.internal.pageSize.getHeight() - 15) {
+                doc.addPage();
+                y = 15;
+                // Repetir cabeçalho
+                doc.setFillColor(80, 80, 80);
+                doc.setTextColor(255, 255, 255);
+                doc.setFont(undefined, 'bold');
+                let xh = margemEsq;
+                cfg.colunas.forEach((col, i) => {
+                    doc.rect(xh, y, cfg.larguras[i], alturaCabecalho, 'F');
+                    doc.text(col, xh + 1.5, y + 5.5);
+                    xh += cfg.larguras[i];
+                });
+                y += alturaCabecalho;
+                doc.setFont(undefined, 'normal');
+            }
+
+            const bgColor = idx % 2 === 0 ? [255, 255, 255] : [245, 245, 245];
+            doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+            doc.setTextColor(50, 50, 50);
+
+            x = margemEsq;
+            // Número de colunas de dados (sem contar botões de ação)
+            const numCols = cfg.colunas.length;
+            for (let i = 0; i < numCols; i++) {
+                const celula = cells[i];
+                if (!celula) break;
+                let texto = celula.innerText.trim().replace(/\n/g, ' ');
+                // Truncar texto longo
+                const maxChars = Math.floor(cfg.larguras[i] / 1.9);
+                if (texto.length > maxChars) texto = texto.substring(0, maxChars - 1) + '…';
+
+                doc.rect(x, y, cfg.larguras[i], alturaCelula, 'FD');
+                // colorir status
+                const tdText = celula.innerText.trim().toLowerCase();
+                if (tdText === 'atrasado') doc.setTextColor(180, 0, 0);
+                else if (tdText === 'pendente') doc.setTextColor(150, 100, 0);
+                else doc.setTextColor(50, 50, 50);
+
+                doc.text(texto, x + 1.5, y + 4.8, { maxWidth: cfg.larguras[i] - 2 });
+                doc.setTextColor(50, 50, 50);
+                x += cfg.larguras[i];
+            }
+
+            // Somar valor (coluna com "R$")
+            for (let i = 0; i < cells.length - 1; i++) {
+                const t = cells[i].innerText.trim();
+                if (t.startsWith('R$')) {
+                    const v = parseFloat(t.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+                    if (!isNaN(v)) { totalValor += v; break; }
+                }
+            }
+
+            y += alturaCelula;
+        });
+
+        // --- Rodapé: total ---
+        if (totalValor > 0) {
+            y += 3;
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(9);
+            doc.text('Total: R$ ' + totalValor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
+                pageW - 10, y, { align: 'right' });
+        }
+
+        // Rodapé de página
+        const totalPaginas = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPaginas; p++) {
+            doc.setPage(p);
+            doc.setFontSize(7);
+            doc.setTextColor(120, 120, 120);
+            doc.text('Página ' + p + ' de ' + totalPaginas, pageW / 2, doc.internal.pageSize.getHeight() - 5, { align: 'center' });
+        }
+
+        doc.save('relatorio_' + tipo + '_' + hoje.replace(/\//g, '-') + '.pdf');
+    }
+
+
+    // ================================================================
+    // PDF — DRE
+    // ================================================================
+    function gerarPDFDRE() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+
+        // Cabeçalho
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        doc.text('Gerado em: ' + hoje, pageW - 10, 10, { align: 'right' });
+
+        // Título da DRE
+        const titElem = document.getElementById('dreTituloPeriodo');
+        const titulo = titElem ? titElem.textContent.trim() : 'DRE por Competência';
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(titulo, pageW / 2, 24, { align: 'center' });
+
+        // Colunas
+        const margem = 12;
+        const colDesc = 95;
+        const colValor = 45;
+        const colAV = 30;
+        const altLinha = 7;
+        let y = 32;
+
+        // Cabeçalho da tabela
+        doc.setFillColor(80, 80, 80);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.rect(margem, y, colDesc, altLinha, 'F');
+        doc.text('Descrição', margem + 2, y + 5);
+        doc.rect(margem + colDesc, y, colValor, altLinha, 'F');
+        doc.text('Valor (R$)', margem + colDesc + colValor / 2, y + 5, { align: 'center' });
+        doc.rect(margem + colDesc + colValor, y, colAV, altLinha, 'F');
+        doc.text('AV %', margem + colDesc + colValor + colAV / 2, y + 5, { align: 'center' });
+        y += altLinha;
+
+        const linhas = document.querySelectorAll('#dreCorpo tr');
+        doc.setFont(undefined, 'normal');
+
+        linhas.forEach((tr, idx) => {
+            if (y + altLinha > pageH - 15) {
+                doc.addPage();
+                y = 15;
+            }
+            const tds = tr.querySelectorAll('td');
+            if (tds.length < 2) return;
+
+            const isSection = tr.style.backgroundColor && tr.style.backgroundColor !== '' ||
+                              tr.querySelector('strong') !== null ||
+                              tr.classList.contains('dre-section');
+
+            const isBold = tr.style.fontWeight === '700' || tr.style.fontWeight === 'bold' ||
+                           tds[0].style.fontWeight === '700' || tds[0].style.fontWeight === 'bold';
+
+            // Cor de fundo
+            if (tr.style.backgroundColor && tr.style.backgroundColor !== '') {
+                const bg = tr.style.backgroundColor;
+                if (bg === 'rgb(255, 122, 66)' || bg === '#FF7A42' || bg.includes('255, 122, 66')) {
+                    doc.setFillColor(255, 122, 66);
+                    doc.setTextColor(255, 255, 255);
+                } else if (bg === 'rgb(240, 240, 240)' || bg === '#f0f0f0' || bg.includes('240, 240, 240')) {
+                    doc.setFillColor(230, 230, 230);
+                    doc.setTextColor(0, 0, 0);
+                } else {
+                    doc.setFillColor(248, 248, 248);
+                    doc.setTextColor(0, 0, 0);
+                }
+            } else if (idx % 2 === 0) {
+                doc.setFillColor(255, 255, 255);
+                doc.setTextColor(0, 0, 0);
+            } else {
+                doc.setFillColor(248, 248, 248);
+                doc.setTextColor(0, 0, 0);
+            }
+
+            const altAtual = altLinha;
+            doc.rect(margem, y, colDesc + colValor + colAV, altAtual, 'FD');
+
+            doc.setFontSize(isBold ? 8.5 : 8);
+            doc.setFont(undefined, isBold ? 'bold' : 'normal');
+
+            // Descrição
+            let descTxt = tds[0].innerText.trim();
+            if (descTxt.length > 45) descTxt = descTxt.substring(0, 44) + '…';
+            doc.text(descTxt, margem + 2, y + 4.8);
+
+            // Valor
+            if (tds[1]) {
+                let valTxt = tds[1].innerText.trim();
+                const corVal = tds[1].style.color;
+                if (corVal && corVal.includes('220') || corVal && corVal.includes('dc3545')) doc.setTextColor(180, 0, 0);
+                else if (corVal && corVal.includes('40') || corVal && corVal.includes('28a745')) doc.setTextColor(0, 128, 0);
+                doc.text(valTxt, margem + colDesc + colValor - 2, y + 4.8, { align: 'right' });
+                doc.setTextColor(0, 0, 0);
+            }
+
+            // AV%
+            if (tds[2]) {
+                let avTxt = tds[2].innerText.trim();
+                doc.text(avTxt, margem + colDesc + colValor + colAV - 2, y + 4.8, { align: 'right' });
+            }
+
+            y += altAtual;
+        });
+
+        // Rodapé de página
+        const total = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= total; p++) {
+            doc.setPage(p);
+            doc.setFontSize(7);
+            doc.setTextColor(120, 120, 120);
+            doc.setFont(undefined, 'normal');
+            doc.text('Página ' + p + ' de ' + total, pageW / 2, pageH - 5, { align: 'center' });
+        }
+
+        const tituloArq = titulo.replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/_+/g, '_');
+        doc.save('DRE_' + tituloArq + '_' + hoje.replace(/\//g, '-') + '.pdf');
+    }
+
+    // ================================================================
+    // PDF — DFC
+    // ================================================================
+    function gerarPDFDFC() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+
+        // Cabeçalho
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        doc.text('Gerado em: ' + hoje, pageW - 10, 10, { align: 'right' });
+
+        // Título
+        const titElem = document.getElementById('tituloDFCMensal');
+        const anoSel = document.getElementById('filtroAnoDFC') ? document.getElementById('filtroAnoDFC').value : '';
+        const titulo = anoSel ? (titElem ? titElem.textContent.trim() : 'DFC Mensal') : 'Demonstração de Fluxo de Caixa';
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(titulo, pageW / 2, 24, { align: 'center' });
+
+        let y = 32;
+        const margem = 12;
+        const altLinha = 7;
+
+        // ---- Seção 1: Análise de Fluxo (tabelaDFC) ----
+        const col1 = 90; const col2 = 45; const col3 = 35;
+        doc.setFillColor(80, 80, 80);
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.rect(margem, y, col1, altLinha, 'F');
+        doc.text('Descrição', margem + 2, y + 5);
+        doc.rect(margem + col1, y, col2, altLinha, 'F');
+        doc.text('Valor', margem + col1 + col2 / 2, y + 5, { align: 'center' });
+        doc.rect(margem + col1 + col2, y, col3, altLinha, 'F');
+        doc.text('% Mudança', margem + col1 + col2 + col3 / 2, y + 5, { align: 'center' });
+        y += altLinha;
+
+        const linhasDFC = document.querySelectorAll('#tabelaDFC tbody tr');
+        doc.setFont(undefined, 'normal');
+        linhasDFC.forEach((tr, idx) => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length === 0) return;
+            const isBold = tr.style.fontWeight === '600' || tr.style.fontWeight === 'bold';
+            const bgSec = tr.style.backgroundColor && (tr.style.backgroundColor.includes('240') || tr.style.backgroundColor.includes('f0f0f0'));
+            const bgPri = tr.style.backgroundColor && tr.style.backgroundColor.includes('255, 122, 66');
+
+            if (bgPri) {
+                doc.setFillColor(255, 122, 66); doc.setTextColor(255, 255, 255);
+            } else if (bgSec) {
+                doc.setFillColor(230, 230, 230); doc.setTextColor(0, 0, 0);
+            } else {
+                doc.setFillColor(idx % 2 === 0 ? 255 : 248, idx % 2 === 0 ? 255 : 248, idx % 2 === 0 ? 255 : 248);
+                doc.setTextColor(0, 0, 0);
+            }
+
+            doc.rect(margem, y, col1 + col2 + col3, altLinha, 'FD');
+            doc.setFontSize(8);
+            doc.setFont(undefined, isBold ? 'bold' : 'normal');
+
+            const colspan = tds[0].getAttribute('colspan');
+            if (colspan && parseInt(colspan) > 1) {
+                doc.text(tds[0].innerText.trim(), margem + 2, y + 4.8);
+            } else {
+                doc.text(tds[0] ? tds[0].innerText.trim() : '', margem + 2, y + 4.8);
+                if (tds[1]) doc.text(tds[1].innerText.trim(), margem + col1 + col2 - 2, y + 4.8, { align: 'right' });
+                if (tds[2]) doc.text(tds[2].innerText.trim(), margem + col1 + col2 + col3 - 2, y + 4.8, { align: 'right' });
+            }
+            doc.setTextColor(0, 0, 0);
+            y += altLinha;
+        });
+
+        // ---- Seção 2: DFC Mensal (se visível) ----
+        const cardMensal = document.getElementById('cardDFCMensal');
+        if (cardMensal && cardMensal.style.display !== 'none') {
+            y += 8;
+            if (y + 10 > pageH - 15) { doc.addPage(); y = 15; }
+
+            const titMensal = document.getElementById('tituloDFCMensal');
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(titMensal ? titMensal.textContent.trim() : 'DFC Mensal', margem, y + 5);
+            y += 9;
+
+            const cM = [35, 38, 38, 38, 38]; // Mês, Entradas, Saídas, Fluxo, Acumulado
+            const hMensal = ['Mês', 'Entradas', 'Saídas', 'Fluxo Líquido', 'Acumulado'];
+            doc.setFillColor(80, 80, 80);
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(7.5);
+            doc.setFont(undefined, 'bold');
+            let xh = margem;
+            hMensal.forEach((h, i) => {
+                doc.rect(xh, y, cM[i], altLinha, 'F');
+                doc.text(h, xh + cM[i] / 2, y + 4.8, { align: 'center' });
+                xh += cM[i];
+            });
+            y += altLinha;
+
+            const linhasMensal = document.querySelectorAll('#tabelaDFCMensal tbody tr');
+            const linhasFoot = document.querySelectorAll('#tabelaDFCMensal tfoot tr');
+            doc.setFont(undefined, 'normal');
+
+            const processarLinhaMensal = (tr, isBold) => {
+                if (y + altLinha > pageH - 15) { doc.addPage(); y = 15; }
+                const tds = tr.querySelectorAll('td');
+                doc.setFillColor(isBold ? 240 : 255, isBold ? 240 : 255, isBold ? 240 : 255);
+                doc.setTextColor(0, 0, 0);
+                let xc = margem;
+                cM.forEach((w, i) => {
+                    doc.rect(xc, y, w, altLinha, 'FD');
+                    if (tds[i]) {
+                        doc.setFontSize(7.5);
+                        doc.setFont(undefined, isBold ? 'bold' : 'normal');
+                        const t = tds[i].innerText.trim();
+                        doc.text(t, xc + w / 2, y + 4.8, { align: 'center' });
+                    }
+                    xc += w;
+                });
+                y += altLinha;
+            };
+
+            linhasMensal.forEach(tr => processarLinhaMensal(tr, false));
+            linhasFoot.forEach(tr => processarLinhaMensal(tr, true));
+        }
+
+        // Rodapé de página
+        const total = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= total; p++) {
+            doc.setPage(p);
+            doc.setFontSize(7);
+            doc.setTextColor(120, 120, 120);
+            doc.setFont(undefined, 'normal');
+            doc.text('Página ' + p + ' de ' + total, pageW / 2, pageH - 5, { align: 'center' });
+        }
+
+        doc.save('DFC_' + (anoSel || 'Completo') + '_' + hoje.replace(/\//g, '-') + '.pdf');
     }
 
 
