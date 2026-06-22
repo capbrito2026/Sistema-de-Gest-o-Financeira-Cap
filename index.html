@@ -1082,6 +1082,7 @@
                             <th>Fornecedor</th>
                             <th>Categoria</th>
                             <th>Descrição</th>
+                            <th>NF</th>
                             <th>Competência</th>
                             <th>Vencimento</th>
                             <th>Valor</th>
@@ -1213,6 +1214,7 @@
                             <th>Fornecedor</th>
                             <th>Categoria</th>
                             <th>Descrição</th>
+                            <th>NF</th>
                             <th>Parcela</th>
                             <th>Valor</th>
                             <th>Vencimento</th>
@@ -1800,9 +1802,15 @@
                 <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
                 <div id="listaParcelasReceber" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
-            <div class="form-group">
-                <label>Observações</label>
-                <textarea id="observacoesReceber" rows="2"></textarea>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nº Nota Fiscal</label>
+                    <input type="text" id="notaFiscalReceber" placeholder="Ex: 001234 (opcional)">
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="observacoesReceber" rows="2"></textarea>
+                </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">Salvar</button>
@@ -2920,6 +2928,7 @@
         const dataBase = document.getElementById('vencimentoReceber').value;
         const competencia = document.getElementById('competenciaReceber').value;
         const obs = document.getElementById('observacoesReceber').value;
+        const notaFiscalRec = document.getElementById('notaFiscalReceber').value.trim() || null;
         const clienteId = parseInt(document.getElementById('clienteReceber').value);
         const descricao = document.getElementById('descricaoReceber').value;
 
@@ -2936,7 +2945,8 @@
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs
+                observacoes: obs,
+                nota_fiscal: notaFiscalRec
             };
             const r = await fetchSupabase('contas_a_receber', 'POST', dados);
             if (r === null) erros++;
@@ -2992,6 +3002,7 @@
                 <td>${fornecedor ? fornecedor.nome : '-'}</td>
                 <td>${categoria ? categoria.nome : '-'}</td>
                 <td>${conta.descricao}</td>
+                <td style="font-size:11px;color:#555;">${conta.nota_fiscal || '-'}</td>
                 <td>${compLabel}</td>
                 <td>${venc.toLocaleDateString('pt-BR')}</td>
                 <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
@@ -3147,6 +3158,7 @@
                 <td>${fornecedor ? fornecedor.nome : '-'}</td>
                 <td>${categoria  ? categoria.nome  : '-'}</td>
                 <td>${conta.descricao}</td>
+                <td style="font-size:11px;color:#555;">${conta.nota_fiscal || '-'}</td>
                 <td style="text-align:center;">${parcLabel}</td>
                 <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${vencFmt}</td>
@@ -4339,6 +4351,7 @@
         document.getElementById('competenciaReceber').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoReceber').value = '';
         document.getElementById('parcelasReceber').value = '1';
+        document.getElementById('notaFiscalReceber').value = '';
         document.getElementById('observacoesReceber').value = '';
         document.getElementById('previewParcelasReceber').style.display = 'none';
         atualizarSelectCategorias();
