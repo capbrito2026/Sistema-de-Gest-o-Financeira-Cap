@@ -1879,9 +1879,15 @@
                 <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
                 <div id="listaParcelasPagar" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
-            <div class="form-group">
-                <label>Observações</label>
-                <textarea id="observacoesPagar" rows="2"></textarea>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nº Nota Fiscal</label>
+                    <input type="text" id="notaFiscalPagar" placeholder="Ex: 001234 (opcional)">
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="observacoesPagar" rows="2"></textarea>
+                </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-success">Salvar</button>
@@ -2893,7 +2899,7 @@
                 <td>${conta.descricao}</td>
                 <td>${compLabel}</td>
                 <td>${venc.toLocaleDateString('pt-BR')}</td>
-                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${parcLabel}</td>
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
@@ -2988,7 +2994,7 @@
                 <td>${conta.descricao}</td>
                 <td>${compLabel}</td>
                 <td>${venc.toLocaleDateString('pt-BR')}</td>
-                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${parcLabel}</td>
                 <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
                 <td>
@@ -3009,6 +3015,7 @@
         const dataBase = document.getElementById('vencimentoPagar').value;
         const competencia = document.getElementById('competenciaPagar').value;
         const obs = document.getElementById('observacoesPagar').value;
+        const notaFiscal = document.getElementById('notaFiscalPagar').value.trim() || null;
         const fornecedorId = parseInt(document.getElementById('fornecedorPagar').value);
         const categoriaId = document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null;
         const produtoId = document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null;
@@ -3029,7 +3036,8 @@
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs
+                observacoes: obs,
+                nota_fiscal: notaFiscal
             };
             const r = await fetchSupabase('contas_a_pagar', 'POST', dados);
             if (r === null) erros++;
@@ -3086,7 +3094,7 @@
                 <td>${cliente ? cliente.nome : '-'}</td>
                 <td>${conta.descricao}</td>
                 <td style="text-align:center;">${parcLabel}</td>
-                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${vencFmt}</td>
                 <td style="color:#28a745;">${recFmt}</td>
                 <td>${conta.tipo_recebimento || '-'}</td>
@@ -3140,7 +3148,7 @@
                 <td>${categoria  ? categoria.nome  : '-'}</td>
                 <td>${conta.descricao}</td>
                 <td style="text-align:center;">${parcLabel}</td>
-                <td>R$ ${parseFloat(conta.valor).toFixed(2).replace('.', ',')}</td>
+                <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${vencFmt}</td>
                 <td style="color:#dc3545;">${pagFmt}</td>
                 <td>${conta.tipo_pagamento || '-'}</td>
@@ -3167,7 +3175,7 @@
         document.getElementById('infoConfirmarRecebimento').innerHTML =
             '<b>Cliente:</b> ' + (cliente ? cliente.nome : '-') + '<br>' +
             '<b>Descrição:</b> ' + conta.descricao + '<br>' +
-            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') +
+            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) +
             (conta.total_parcelas > 1 ? ' &nbsp;<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>' : '') +
             '<br><b>Vencimento:</b> ' + new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
         atualizarSelectBancosModal('bancoRecebimentoConfirm');
@@ -3210,7 +3218,7 @@
         document.getElementById('infoConfirmarPagamento').innerHTML =
             '<b>Fornecedor:</b> ' + (forn ? forn.nome : '-') + '<br>' +
             '<b>Descrição:</b> ' + conta.descricao + '<br>' +
-            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toFixed(2).replace('.', ',') +
+            '<b>Valor:</b> R$ ' + parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) +
             (conta.total_parcelas > 1 ? ' &nbsp;<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">' + conta.parcela_atual + '/' + conta.total_parcelas + '</span>' : '') +
             '<br><b>Vencimento:</b> ' + new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR');
         atualizarSelectBancosModal('bancoPagamentoConfirm');
@@ -3315,6 +3323,8 @@
             document.getElementById('editLancVencimento').value = conta.data_vencimento || '';
             document.getElementById('editLancCompetencia').value= conta.data_competencia || '';
             document.getElementById('editLancObs').value        = conta.observacoes || '';
+            document.getElementById('editLancNota').value       = conta.nota_fiscal || '';
+            document.getElementById('editLancNotaWrap').style.display = tipo === 'contas_a_pagar' ? '' : 'none';
             document.getElementById('modalEditarLancamento').classList.add('active');
         }
     }
@@ -3332,6 +3342,9 @@
             observacoes:      document.getElementById('editLancObs').value || null,
             categoria_id:     catVal ? parseInt(catVal) : null
         };
+        if (tipo === 'contas_a_pagar') {
+            dados.nota_fiscal = document.getElementById('editLancNota').value.trim() || null;
+        }
         if (tipo === 'contas_a_receber') {
             dados.cliente_id = parseInt(document.getElementById('editLancCliente').value) || null;
         } else {
@@ -3375,13 +3388,13 @@
         // Contas a receber pendentes
         const recberPendentes = contasReceber.filter(c => c.status === 'pendente');
         const totalReceber = recberPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('totalReceber').textContent = 'R$ ' + totalReceber.toFixed(2).replace('.', ',');
+        document.getElementById('totalReceber').textContent = 'R$ ' + totalReceber.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('countReceber').textContent = recberPendentes.length + ' pendentes';
 
         // Contas a pagar pendentes
         const pagarPendentes = contasPagar.filter(c => c.status === 'pendente');
         const totalPagar = pagarPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('totalPagar').textContent = 'R$ ' + totalPagar.toFixed(2).replace('.', ',');
+        document.getElementById('totalPagar').textContent = 'R$ ' + totalPagar.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('countPagar').textContent = pagarPendentes.length + ' pendentes';
 
         // Este mês
@@ -3391,12 +3404,12 @@
 
         const recebidoMes = contasReceber.filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.includes(anoAtual + '-' + mesAtual));
         const totalRecebidoMes = recebidoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('recebidoMes').textContent = 'R$ ' + totalRecebidoMes.toFixed(2).replace('.', ',');
+        document.getElementById('recebidoMes').textContent = 'R$ ' + totalRecebidoMes.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('countRecebidoMes').textContent = recebidoMes.length + ' transações';
 
         const pagoMes = contasPagar.filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.includes(anoAtual + '-' + mesAtual));
         const totalPagoMes = pagoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('pagoMes').textContent = 'R$ ' + totalPagoMes.toFixed(2).replace('.', ',');
+        document.getElementById('pagoMes').textContent = 'R$ ' + totalPagoMes.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('countPagoMes').textContent = pagoMes.length + ' transações';
 
         // Gráficos
@@ -3470,7 +3483,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return 'R$ ' + value.toFixed(0);
+                                return 'R$ ' + value.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
                             }
                         }
                     }
@@ -3638,9 +3651,9 @@
         const quantidade = filtrado.length;
         const ticket = quantidade > 0 ? total / quantidade : 0;
 
-        document.getElementById('totalRecebidoRel').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+        document.getElementById('totalRecebidoRel').textContent = 'R$ ' + total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('qtdRecebidoRel').textContent = quantidade;
-        document.getElementById('ticketRecebidoRel').textContent = 'R$ ' + ticket.toFixed(2).replace('.', ',');
+        document.getElementById('ticketRecebidoRel').textContent = 'R$ ' + ticket.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
         // Ranking de clientes
         const ranking = {};
@@ -3671,7 +3684,7 @@
                         <td>${index + 1}</td>
                         <td>${item.nome}</td>
                         <td>${item.quantidade}</td>
-                        <td>R$ ${item.valor.toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                         <td>${item.pct}%</td>
                     </tr>
                 `;
@@ -3726,7 +3739,7 @@
                     x: {
                         ticks: {
                             callback: function(value) {
-                                return 'R$ ' + value.toFixed(0);
+                                return 'R$ ' + value.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
                             }
                         }
                     }
@@ -3761,9 +3774,9 @@
         const quantidade = filtrado.length;
         const ticket = quantidade > 0 ? total / quantidade : 0;
 
-        document.getElementById('totalPagoRel').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+        document.getElementById('totalPagoRel').textContent = 'R$ ' + total.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         document.getElementById('qtdPagoRel').textContent = quantidade;
-        document.getElementById('ticketPagoRel').textContent = 'R$ ' + ticket.toFixed(2).replace('.', ',');
+        document.getElementById('ticketPagoRel').textContent = 'R$ ' + ticket.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
         // Ranking de fornecedores
         const ranking = {};
@@ -3794,7 +3807,7 @@
                         <td>${index + 1}</td>
                         <td>${item.nome}</td>
                         <td>${item.quantidade}</td>
-                        <td>R$ ${item.valor.toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                         <td>${item.pct}%</td>
                     </tr>
                 `;
@@ -3849,7 +3862,7 @@
                     x: {
                         ticks: {
                             callback: function(value) {
-                                return 'R$ ' + value.toFixed(0);
+                                return 'R$ ' + value.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
                             }
                         }
                     }
@@ -3883,7 +3896,7 @@
         const totalR = rList.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
         const totalP = pList.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
         const saldo = totalR - totalP;
-        const fmtR = v => 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',');
+        const fmtR = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
         const elTR = document.getElementById('calTotalReceber');
         const elTP = document.getElementById('calTotalPagar');
@@ -4029,7 +4042,7 @@
             return b.totalR - a.totalR; // mais recebimento = melhor
         });
 
-        const fmtV = v => v > 0 ? 'R$ ' + v.toFixed(2).replace('.', ',') : '-';
+        const fmtV = v => v > 0 ? 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const medalhas = ['🥇','🥈','🥉'];
 
         tbody.innerHTML = '';
@@ -4037,7 +4050,7 @@
             const dtObj = new Date(dia.dataStr + 'T12:00:00');
             const dtFmt = dtObj.toLocaleDateString('pt-BR');
             const saldoCor = dia.saldo >= 0 ? '#28a745' : '#dc3545';
-            const saldoFmt = (dia.saldo < 0 ? '-' : '+') + 'R$ ' + Math.abs(dia.saldo).toFixed(2).replace('.', ',');
+            const saldoFmt = (dia.saldo < 0 ? '-' : '+') + 'R$ ' + Math.abs(dia.saldo).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
             const indicacao = i === 0 ? '⭐ Melhor dia' : i === 1 ? '✅ Ótima opção' : i === 2 ? '👍 Boa opção' : '';
             const bgRow = i < 3 ? (i === 0 ? 'background:#fffde7;' : 'background:#f0fdf4;') : '';
 
@@ -4103,8 +4116,8 @@
                 '<td>' + (banco.agencia || '-') + '</td>' +
                 '<td>' + (banco.conta || '-') + '</td>' +
                 '<td>' + (banco.tipo || '-') + '</td>' +
-                '<td>R$ ' + parseFloat(banco.saldo_inicial || 0).toFixed(2).replace('.', ',') + '</td>' +
-                '<td style="' + saldoClass + '">R$ ' + saldoAtual.toFixed(2).replace('.', ',') + '</td>' +
+                '<td>R$ ' + parseFloat(banco.saldo_inicial || 0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+                '<td style="' + saldoClass + '">R$ ' + saldoAtual.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
                 '<td><span class="status-badge ' + (banco.ativo ? 'status-recebido' : 'status-atrasado') + '">' + (banco.ativo ? 'Ativo' : 'Inativo') + '</span></td>' +
                 '<td><button class="btn btn-secondary btn-small" onclick="editarBanco(' + banco.id + ')">Editar</button> ' +
                 '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button></td></tr>';
@@ -4123,8 +4136,8 @@
             container.innerHTML += '<div class="stat-card" style="border-left-color:' + cor + ';">' +
                 '<div class="stat-label">🏦 ' + banco.nome + '</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">' + (banco.tipo || '') + '</div>' +
-                '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toFixed(2).replace('.', ',') + '</div>' +
-                '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
+                '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
                 '</div>';
         });
         if ((dadosCache.bancos || []).filter(b => b.ativo).length > 1) {
@@ -4132,7 +4145,7 @@
             container.innerHTML += '<div class="stat-card" style="border-left-color:' + corTotal + ';">' +
                 '<div class="stat-label">💰 Saldo Total</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">Todos os bancos</div>' +
-                '<div class="stat-value" style="color:' + corTotal + ';font-size:20px;">R$ ' + totalGeral.toFixed(2).replace('.', ',') + '</div>' +
+                '<div class="stat-value" style="color:' + corTotal + ';font-size:20px;">R$ ' + totalGeral.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
                 '</div>';
         }
     }
@@ -4203,7 +4216,7 @@
         const porDia = {};
         movimentos.forEach(m => { if (!porDia[m.data]) porDia[m.data]=[]; porDia[m.data].push(m); });
         const fmtData = d => { const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
-        const fmtVal  = v => 'R$ ' + v.toFixed(2).replace('.',',');
+        const fmtVal  = v => 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         tbody.innerHTML = ''; let acumulado=saldoInicial, totalCred=0, totalDeb=0;
         if (saldoInicial !== 0) {
             const cor = saldoInicial>=0?'#28a745':'#dc3545';
@@ -4342,6 +4355,7 @@
         document.getElementById('competenciaPagar').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoPagar').value = '';
         document.getElementById('parcelasPagar').value = '1';
+        document.getElementById('notaFiscalPagar').value = '';
         document.getElementById('observacoesPagar').value = '';
         document.getElementById('previewParcelasPagar').style.display = 'none';
         atualizarSelectCategorias();
@@ -4373,7 +4387,7 @@
             html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
                 '<span>' + (i+1) + '/' + n + '</span>' +
                 '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#28a745;font-weight:600;">R$ ' + parc.toFixed(2).replace('.', ',') + '</span>' +
+                '<span style="color:#28a745;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
                 '</div>';
         }
         lista.innerHTML = html;
@@ -4394,7 +4408,7 @@
             html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
                 '<span>' + (i+1) + '/' + n + '</span>' +
                 '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#dc3545;font-weight:600;">R$ ' + parc.toFixed(2).replace('.', ',') + '</span>' +
+                '<span style="color:#dc3545;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
                 '</div>';
         }
         lista.innerHTML = html;
@@ -4474,7 +4488,7 @@
     }
 
     // DFC
-    function fmtBRL(v) { return 'R$ ' + Math.abs(v).toFixed(2).replace('.', ','); }
+    function fmtBRL(v) { return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
     function fmtValSig(v) { return (v < 0 ? '-' : '') + fmtBRL(v); }
 
     async function carregarDFC() {
@@ -4668,7 +4682,7 @@
                     tooltip: {
                         callbacks: {
                             label: function(ctx) {
-                                return ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toFixed(2).replace('.', ',');
+                                return ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
                             }
                         }
                     }
@@ -4678,7 +4692,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return 'R$ ' + value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                return 'R$ ' + value.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
                             }
                         },
                         grid: { color: 'rgba(0,0,0,0.05)' }
@@ -4876,7 +4890,7 @@
     function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
         const tbody = document.getElementById('dreCorpo');
         if (!tbody) return;
-        const fmtV = v => v.toFixed(2).replace('.', ',');
+        const fmtV = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         const pct  = v => recBruta > 0 ? (v / recBruta * 100).toFixed(1) + '%' : '-';
         const cor  = v => v >= 0 ? '#28a745' : '#dc3545';
 
@@ -4952,7 +4966,7 @@
                 <td>${item.catNome || '-'}</td>
                 <td>${item.parte || '-'}</td>
                 <td>${item.centro || '-'}</td>
-                <td style="text-align:right;font-weight:600;">R$ ${val.toFixed(2).replace('.',',')}</td>
+                <td style="text-align:right;font-weight:600;">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${item.fonte === 'dre' && item.id ? '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️</button> <button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>' : '<span style="color:#aaa;font-size:11px;">automático</span>'}</td>
             </tr>`;
         });
@@ -5020,7 +5034,7 @@
             return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, emp, inv, or, od, res };
         };
 
-        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toFixed(2).replace('.',',') : '-';
+        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
 
         const linhas = [
@@ -5113,7 +5127,7 @@
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { display: true, position: 'top' },
-                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toFixed(2).replace('.',',') }}
+                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) }}
                 },
                 scales: {
                     y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' } },
@@ -5357,9 +5371,15 @@
                 <label>Data de Vencimento*</label>
                 <input type="date" id="editLancVencimento" required>
             </div>
-            <div class="form-group">
-                <label>Observações</label>
-                <textarea id="editLancObs" rows="2"></textarea>
+            <div class="form-row">
+                <div class="form-group" id="editLancNotaWrap">
+                    <label>Nº Nota Fiscal</label>
+                    <input type="text" id="editLancNota" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="editLancObs" rows="2"></textarea>
+                </div>
             </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">💾 Salvar</button>
