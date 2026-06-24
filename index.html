@@ -422,6 +422,13 @@
             color: white;
         }
 
+        /* Gauge cards no dashboard */
+        #dashGauges > div:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.13) !important;
+            transition: all 0.2s ease;
+        }
+
         th {
             padding: 15px;
             text-align: left;
@@ -731,6 +738,7 @@
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
             <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
             <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
+            <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
         </div>
 
               </div><!-- fim sidebar-menu -->
@@ -751,6 +759,46 @@
                 </div>
             </div>
 
+            <!-- Filtros do Dashboard -->
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row" style="gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:11px;">Ano</label>
+                        <select id="dashFiltroAno" onchange="atualizarDashboard()" style="padding:6px 10px;font-size:13px;">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="font-size:11px;">Mês</label>
+                        <select id="dashFiltroMes" onchange="atualizarDashboard()" style="padding:6px 10px;font-size:13px;">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px;">
+                        <label style="font-size:11px;">Pesquisar cliente/fornecedor</label>
+                        <input type="text" id="dashFiltroBusca" placeholder="Nome do cliente ou fornecedor..." oninput="atualizarDashboard()" style="padding:6px 10px;font-size:13px;width:100%;border:1px solid #ddd;border-radius:6px;">
+                    </div>
+                    <button onclick="limparFiltrosDash()" class="btn btn-secondary btn-small" style="margin-bottom:0;">✕ Limpar</button>
+                </div>
+            </div>
+
+            <!-- Gauges DRE — PRIMEIRO após os filtros -->
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-title">🎯 Indicadores DRE — Metas</div>
+                <div id="dashGaugeAviso" style="display:none;padding:8px 14px;background:#fff3cd;color:#856404;border-radius:6px;font-size:12px;margin-bottom:12px;"></div>
+                <div id="dashGauges" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:4px 0 8px;"></div>
+                <div style="font-size:11px;color:#bbb;text-align:center;margin-top:4px;">
+                    Metas: CPV≤40% · Desp.Adm≤20% · Lucro Bruto≥40% · EBITDA≥20% · Lucro Líq.≥15%
+                </div>
+            </div>
+
+            <!-- Cards resumo -->
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <div class="stat-label">A Receber</div>
@@ -774,17 +822,49 @@
                 </div>
             </div>
 
-            <div class="card">
+            <!-- Gráfico de fluxo -->
+            <div class="card" style="margin-top:16px;">
                 <div class="card-title">Fluxo de Caixa (Últimos 30 dias)</div>
                 <div class="chart-container">
                     <canvas id="chartFluxo"></canvas>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-title">Maiores Devedores</div>
-                <div class="chart-container">
-                    <canvas id="chartDevedores"></canvas>
+            <!-- Maiores Devedores — tabela -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">📋 Maiores Devedores (A Receber Pendente)</div>
+                <div class="table-container">
+                    <table id="tabelaDevedores" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Cliente</th>
+                                <th style="text-align:right;">Total Pendente</th>
+                                <th style="text-align:right;">Atrasado</th>
+                                <th style="text-align:center;">Contas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoDevedores"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Maiores Fornecedores — tabela -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">📋 Maiores Fornecedores (A Pagar Pendente)</div>
+                <div class="table-container">
+                    <table id="tabelaFornecedoresDash" style="font-size:13px;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fornecedor</th>
+                                <th style="text-align:right;">Total Pendente</th>
+                                <th style="text-align:right;">Atrasado</th>
+                                <th style="text-align:center;">Contas</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoFornecedoresDash"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -1017,6 +1097,22 @@
                 </div>
             </div>
 
+            <!-- Totais do filtro -->
+            <div style="display:flex;gap:12px;margin:0 0 12px 0;flex-wrap:wrap;">
+                <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#155724;font-weight:600;">💰 TOTAL FILTRADO</div>
+                    <div id="totalReceberFiltro" style="font-size:20px;font-weight:700;color:#155724;">R$ 0,00</div>
+                </div>
+                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#856404;font-weight:600;">⏳ ATRASADOS</div>
+                    <div id="totalReceberAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
+                </div>
+                <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
+                    <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
+                    <div id="countReceberFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
+                </div>
+            </div>
+
             <div class="table-container">
                 <table id="tabelaPendentesReceber">
                     <thead>
@@ -1079,6 +1175,22 @@
                             <option value="11">Novembro</option><option value="12">Dezembro</option>
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <!-- Totais do filtro -->
+            <div style="display:flex;gap:12px;margin:0 0 12px 0;flex-wrap:wrap;">
+                <div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#721c24;font-weight:600;">📤 TOTAL FILTRADO</div>
+                    <div id="totalPagarFiltro" style="font-size:20px;font-weight:700;color:#721c24;">R$ 0,00</div>
+                </div>
+                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#856404;font-weight:600;">⚠️ ATRASADOS</div>
+                    <div id="totalPagarAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
+                </div>
+                <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
+                    <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
+                    <div id="countPagarFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
                 </div>
             </div>
 
@@ -1613,6 +1725,75 @@
                 <div class="chart-container">
                     <canvas id="chartDFC"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <!-- FLUXO DE CAIXA PROJETADO -->
+        <div id="fcp" class="page">
+            <div class="page-header">
+                <h1>🔮 Fluxo de Caixa Projetado</h1>
+            </div>
+
+            <div id="fcpAviso" style="display:none;"></div>
+
+            <div class="filter-container">
+                <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                    <div class="form-group">
+                        <label>Ano de Projeção</label>
+                        <select id="filtroAnoFCP" onchange="carregarFCP()">
+                            <option value="">Selecione um ano</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                        <button class="btn btn-secondary btn-small" onclick="gerarPDFFCP()" style="background:#e67e22;color:white;">📄 PDF</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards resumo FCP -->
+            <div class="dashboard-grid" style="margin-bottom:20px;">
+                <div class="stat-card" style="border-left-color:#28a745;">
+                    <div class="stat-label">💰 Total Entradas</div>
+                    <div class="stat-value" id="fcpCardEntradas" style="color:#28a745;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Recebimentos projetados (ano)</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">📤 Total Saídas</div>
+                    <div class="stat-value" id="fcpCardSaidas" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Pagamentos projetados (ano)</div>
+                </div>
+                <div class="stat-card" id="fcpCardLiquidoBox">
+                    <div class="stat-label">📊 Saldo Projetado</div>
+                    <div class="stat-value" id="fcpCardLiquido" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="fcpCardLiquidoLabel">Resultado do ano</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#17a2b8;">
+                    <div class="stat-label">⏳ Pendentes a Receber</div>
+                    <div class="stat-value" id="fcpCardPendRec" style="color:#17a2b8;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="fcpCardPendRecCount">0 contas</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#ffc107;">
+                    <div class="stat-label">⏳ Pendentes a Pagar</div>
+                    <div class="stat-value" id="fcpCardPendPag" style="color:#e6a817;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="fcpCardPendPagCount">0 contas</div>
+                </div>
+            </div>
+
+            <!-- Tabela mensal Jan-Dez (igual à DRE mensal) -->
+            <div class="card" id="cardFCPMensal" style="display:none;">
+                <div class="card-title" id="fcpTituloTabela">📅 Fluxo de Caixa Projetado — Jan a Dez</div>
+                <div style="overflow-x:auto;">
+                    <table id="tabelaFCPMensal" style="font-size:12px;min-width:900px;border-collapse:collapse;">
+                        <thead><tr id="fcpHeaderMeses"><th style="min-width:200px;text-align:left;padding:6px 8px;">Descrição</th></tr></thead>
+                        <tbody id="fcpCorpoMensal"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Gráfico projetado -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">Evolução do Saldo Projetado — Mês a Mês</div>
+                <div class="chart-container"><canvas id="chartFCP"></canvas></div>
             </div>
         </div>
 
@@ -2207,7 +2388,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -2902,9 +3083,24 @@
         if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
         if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
 
+        // Calcular totais
+        const hoje = new Date(); hoje.setHours(0,0,0,0);
+        let totalFiltro = 0, totalAtrasado = 0;
+        filtrado.forEach(c => {
+            const v = parseFloat(c.valor || 0);
+            totalFiltro += v;
+            const venc = new Date(c.data_vencimento + 'T12:00:00');
+            if (venc < hoje) totalAtrasado += v;
+        });
+        const elTF = document.getElementById('totalReceberFiltro');
+        const elTA = document.getElementById('totalReceberAtrasado');
+        const elCF = document.getElementById('countReceberFiltro');
+        if (elTF) elTF.textContent = 'R$ ' + totalFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elTA) elTA.textContent = 'R$ ' + totalAtrasado.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elCF) elCF.textContent = filtrado.length;
+
         filtrado.forEach(conta => {
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
-            const hoje = new Date(); hoje.setHours(0,0,0,0);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
             const status = venc < hoje ? 'atrasado' : 'pendente';
             const parcLabel = conta.total_parcelas > 1
@@ -2997,10 +3193,25 @@
         if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
         if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
 
+        // Calcular totais
+        const hoje = new Date(); hoje.setHours(0,0,0,0);
+        let totalFiltro = 0, totalAtrasado = 0;
+        filtrado.forEach(c => {
+            const v = parseFloat(c.valor || 0);
+            totalFiltro += v;
+            const venc = new Date(c.data_vencimento + 'T12:00:00');
+            if (venc < hoje) totalAtrasado += v;
+        });
+        const elTF = document.getElementById('totalPagarFiltro');
+        const elTA = document.getElementById('totalPagarAtrasado');
+        const elCF = document.getElementById('countPagarFiltro');
+        if (elTF) elTF.textContent = 'R$ ' + totalFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elTA) elTA.textContent = 'R$ ' + totalAtrasado.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elCF) elCF.textContent = filtrado.length;
+
         filtrado.forEach(conta => {
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
             const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
-            const hoje = new Date(); hoje.setHours(0,0,0,0);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
             const status = venc < hoje ? 'atrasado' : 'pendente';
             const parcLabel = conta.total_parcelas > 1
@@ -3401,43 +3612,284 @@
     }
 
     // DASHBOARD
+    let _dashContasRec = [], _dashContasPag = [];
+
+    function limparFiltrosDash() {
+        ['dashFiltroAno','dashFiltroMes'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        const b = document.getElementById('dashFiltroBusca');
+        if (b) b.value = '';
+        renderizarDashboard(_dashContasRec, _dashContasPag);
+    }
+
     async function atualizarDashboard() {
-        // Carrega todas as contas
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
-
+        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
         if (!contasReceber || !contasPagar) return;
+        _dashContasRec = contasReceber;
+        _dashContasPag = contasPagar;
+        renderizarDashboard(contasReceber, contasPagar);
+    }
 
-        // Contas a receber pendentes
-        const recberPendentes = contasReceber.filter(c => c.status === 'pendente');
-        const totalReceber = recberPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('totalReceber').textContent = 'R$ ' + totalReceber.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-        document.getElementById('countReceber').textContent = recberPendentes.length + ' pendentes';
+    function renderizarDashboard(contasReceber, contasPagar) {
+        const anoF  = (document.getElementById('dashFiltroAno')  || {}).value || '';
+        const mesF  = (document.getElementById('dashFiltroMes')  || {}).value || '';
+        const busca = ((document.getElementById('dashFiltroBusca') || {}).value || '').toLowerCase().trim();
 
-        // Contas a pagar pendentes
-        const pagarPendentes = contasPagar.filter(c => c.status === 'pendente');
-        const totalPagar = pagarPendentes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('totalPagar').textContent = 'R$ ' + totalPagar.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-        document.getElementById('countPagar').textContent = pagarPendentes.length + ' pendentes';
+        // ── Cards de topo: sempre mostram totais globais (sem filtro de busca) ──
+        const recPend = contasReceber.filter(c => c.status === 'pendente');
+        const pagPend = contasPagar.filter(c => c.status === 'pendente');
+        document.getElementById('totalReceber').textContent = 'R$ ' + recPend.reduce((s,c)=>s+parseFloat(c.valor||0),0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('countReceber').textContent = recPend.length + ' pendentes';
+        document.getElementById('totalPagar').textContent   = 'R$ ' + pagPend.reduce((s,c)=>s+parseFloat(c.valor||0),0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('countPagar').textContent   = pagPend.length + ' pendentes';
 
-        // Este mês
-        const hoje = new Date();
-        const mesAtual = String(hoje.getMonth() + 1).padStart(2, '0');
+        const hoje    = new Date();
+        const mesAtual = String(hoje.getMonth()+1).padStart(2,'0');
         const anoAtual = String(hoje.getFullYear());
+        const recMes  = contasReceber.filter(c => c.status==='recebido' && c.data_recebimento && c.data_recebimento.startsWith(anoAtual+'-'+mesAtual));
+        const pagMes  = contasPagar.filter(c => c.status==='pago' && c.data_pagamento && c.data_pagamento.startsWith(anoAtual+'-'+mesAtual));
+        document.getElementById('recebidoMes').textContent     = 'R$ ' + recMes.reduce((s,c)=>s+parseFloat(c.valor||0),0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('countRecebidoMes').textContent = recMes.length + ' transações';
+        document.getElementById('pagoMes').textContent          = 'R$ ' + pagMes.reduce((s,c)=>s+parseFloat(c.valor||0),0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        document.getElementById('countPagoMes').textContent     = pagMes.length + ' transações';
 
-        const recebidoMes = contasReceber.filter(c => c.status === 'recebido' && c.data_recebimento && c.data_recebimento.includes(anoAtual + '-' + mesAtual));
-        const totalRecebidoMes = recebidoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('recebidoMes').textContent = 'R$ ' + totalRecebidoMes.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-        document.getElementById('countRecebidoMes').textContent = recebidoMes.length + ' transações';
+        // ── Aplicar filtros para tabelas e gauges ──
+        function aplicarFiltrosConta(lista, tipoData, statusAlvo) {
+            return lista.filter(c => {
+                if (c.status !== statusAlvo) return false;
+                const d = c.data_vencimento || '';
+                if (anoF && !d.startsWith(anoF)) return false;
+                if (mesF && !d.includes('-'+mesF+'-')) return false;
+                return true;
+            });
+        }
 
-        const pagoMes = contasPagar.filter(c => c.status === 'pago' && c.data_pagamento && c.data_pagamento.includes(anoAtual + '-' + mesAtual));
-        const totalPagoMes = pagoMes.reduce((sum, c) => sum + parseFloat(c.valor), 0);
-        document.getElementById('pagoMes').textContent = 'R$ ' + totalPagoMes.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-        document.getElementById('countPagoMes').textContent = pagoMes.length + ' transações';
+        const recFiltrado = aplicarFiltrosConta(contasReceber, 'data_vencimento', 'pendente');
+        const pagFiltrado = aplicarFiltrosConta(contasPagar,   'data_vencimento', 'pendente');
 
-        // Gráficos
+        // ── Tabela Maiores Devedores ──
+        const devedoresMap = {};
+        recFiltrado.forEach(c => {
+            const cli  = dadosCache.clientes.find(x => x.id === c.cliente_id);
+            const nome = cli ? cli.nome : 'Desconhecido';
+            if (busca && !nome.toLowerCase().includes(busca)) return;
+            if (!devedoresMap[nome]) devedoresMap[nome] = { total: 0, atrasado: 0, count: 0 };
+            const v = parseFloat(c.valor||0);
+            devedoresMap[nome].total += v;
+            devedoresMap[nome].count++;
+            const venc = new Date(c.data_vencimento + 'T12:00:00');
+            if (venc < hoje) devedoresMap[nome].atrasado += v;
+        });
+        const devedoresOrdenados = Object.entries(devedoresMap).sort((a,b) => b[1].total - a[1].total);
+        const tbDev = document.getElementById('corpoDevedores');
+        if (tbDev) {
+            if (devedoresOrdenados.length === 0) {
+                tbDev.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;">Nenhum devedor encontrado</td></tr>';
+            } else {
+                tbDev.innerHTML = devedoresOrdenados.map(([nome, d], i) => {
+                    const fmtR = v => 'R$&nbsp;' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const bg = i % 2 === 0 ? '' : 'background:#fafafa;';
+                    return `<tr style="${bg}">
+                        <td style="color:#aaa;font-size:12px;">${i+1}</td>
+                        <td style="font-weight:600;">${nome}</td>
+                        <td style="text-align:right;color:#17a2b8;font-weight:600;">${fmtR(d.total)}</td>
+                        <td style="text-align:right;color:${d.atrasado>0?'#dc3545':'#28a745'};font-weight:${d.atrasado>0?'700':'400'};">${d.atrasado>0?fmtR(d.atrasado):'-'}</td>
+                        <td style="text-align:center;"><span style="background:#e3f2fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-size:11px;">${d.count}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // ── Tabela Maiores Fornecedores ──
+        const fornMap = {};
+        pagFiltrado.forEach(c => {
+            const forn = dadosCache.fornecedores.find(x => x.id === c.fornecedor_id);
+            const nome = forn ? forn.nome : 'Desconhecido';
+            if (busca && !nome.toLowerCase().includes(busca)) return;
+            if (!fornMap[nome]) fornMap[nome] = { total: 0, atrasado: 0, count: 0 };
+            const v = parseFloat(c.valor||0);
+            fornMap[nome].total += v;
+            fornMap[nome].count++;
+            const venc = new Date(c.data_vencimento + 'T12:00:00');
+            if (venc < hoje) fornMap[nome].atrasado += v;
+        });
+        const fornOrdenados = Object.entries(fornMap).sort((a,b) => b[1].total - a[1].total);
+        const tbForn = document.getElementById('corpoFornecedoresDash');
+        if (tbForn) {
+            if (fornOrdenados.length === 0) {
+                tbForn.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;">Nenhum fornecedor encontrado</td></tr>';
+            } else {
+                tbForn.innerHTML = fornOrdenados.map(([nome, d], i) => {
+                    const fmtR = v => 'R$&nbsp;' + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const bg = i % 2 === 0 ? '' : 'background:#fafafa;';
+                    return `<tr style="${bg}">
+                        <td style="color:#aaa;font-size:12px;">${i+1}</td>
+                        <td style="font-weight:600;">${nome}</td>
+                        <td style="text-align:right;color:#dc3545;font-weight:600;">${fmtR(d.total)}</td>
+                        <td style="text-align:right;color:${d.atrasado>0?'#dc3545':'#28a745'};font-weight:${d.atrasado>0?'700':'400'};">${d.atrasado>0?fmtR(d.atrasado):'-'}</td>
+                        <td style="text-align:center;"><span style="background:#fde8e8;color:#721c24;padding:2px 8px;border-radius:10px;font-size:11px;">${d.count}</span></td>
+                    </tr>`;
+                }).join('');
+            }
+        }
+
+        // ── Gauges DRE (baseados em data_competencia, filtro de ano/mês) ──
+        criarGaugesDRE(contasReceber, contasPagar, anoF, mesF);
+
+        // ── Gráfico fluxo (sempre últimos 30 dias) ──
         criarGraficoFluxo(contasReceber, contasPagar);
-        criarGraficoDevedores(contasReceber);
+    }
+
+    // ── GAUGES DRE ────────────────────────────────────────────────────────────
+    function criarGaugesDRE(contasRec, contasPag, anoF, mesF) {
+        const gavelAviso = document.getElementById('dashGaugeAviso');
+        const container  = document.getElementById('dashGauges');
+        if (!container) return;
+
+        // Calcular valores DRE por competência com filtros
+        const grupos = {};
+        const agrupar = (contas, defaultGrupo) => {
+            contas.forEach(c => {
+                const comp = c.data_competencia || '';
+                if (!comp) return;
+                if (anoF && !comp.startsWith(anoF)) return;
+                if (mesF && !comp.includes('-'+mesF+'-')) return;
+                const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+                const g   = (cat && cat.grupo_dre) ? cat.grupo_dre : defaultGrupo;
+                grupos[g] = (grupos[g] || 0) + parseFloat(c.valor || 0);
+            });
+        };
+        (dadosCache.dreLancs || []).forEach(l => {
+            const comp = l.competencia || '';
+            if (anoF && !comp.startsWith(anoF)) return;
+            if (mesF && !comp.includes('-'+mesF.padStart(2,'0'))) return;
+            grupos[l.grupo] = (grupos[l.grupo] || 0) + parseFloat(l.valor || 0);
+        });
+        agrupar(contasRec, 'RECEITA_BRUTA');
+        agrupar(contasPag, 'DESP_ADMIN');
+
+        const gv = k => grupos[k] || 0;
+        const rb  = gv('RECEITA_BRUTA');
+        const ded = gv('DEDUCOES');
+        const rl  = rb - ded;
+        const cpv = gv('CPV');
+        const lb  = rl - cpv;
+        const dc  = gv('DESP_COMERCIAL');
+        const da  = gv('DESP_ADMIN');
+        const rf  = gv('RECEITA_FINANCEIRA');
+        const df  = gv('DESP_FINANCEIRA');
+        const ebt = lb - dc - da + rf - df;
+        const emp = gv('EMPRESTIMO');
+        const inv = gv('INVESTIMENTO');
+        const or  = gv('OUTRAS_RECEITAS');
+        const od  = gv('OUTRAS_DESPESAS');
+        const res = ebt - emp - inv + or - od;
+
+        const pct = (v, base) => base > 0 ? (v / base * 100) : 0;
+
+        const metricas = [
+            { label: 'Receita Bruta',  valor: rb,             meta: null, unidade: 'R$', positivo: true,  cor: '#17a2b8' },
+            { label: 'CPV %',          valor: pct(cpv,rl),    meta: 40,   unidade: '%',  positivo: false, cor: '#e67e22' },
+            { label: 'Lucro Bruto %',  valor: pct(lb,rl),     meta: 40,   unidade: '%',  positivo: true,  cor: '#27ae60' },
+            { label: 'Desp. Adm %',    valor: pct(da,rl),     meta: 20,   unidade: '%',  positivo: false, cor: '#8e44ad' },
+            { label: 'EBITDA %',       valor: pct(ebt,rl),    meta: 20,   unidade: '%',  positivo: true,  cor: '#2980b9' },
+            { label: 'Lucro Líq. %',   valor: pct(res,rl),    meta: 15,   unidade: '%',  positivo: true,  cor: '#FF7A42' },
+        ];
+
+        if (!anoF && !mesF && gavelAviso) {
+            gavelAviso.style.display = '';
+            gavelAviso.textContent = '📌 Nenhum filtro selecionado — indicadores consideram todos os lançamentos com data de competência.';
+        } else if (gavelAviso) {
+            gavelAviso.style.display = 'none';
+        }
+
+        // ── SVG Gauge: semicírculo de 180°, centro na base ─────────────────
+        // viewBox: 0 0 160 100  |  cx=80, cy=90, r=70, stroke=14
+        // O semicírculo vai de 180° (esquerda) até 0° (direita)
+        // angulo em radianos: 180°=PI → 0°=0  ⟹ varredura = progress × PI (da esquerda para a direita)
+        const R   = 68;   // raio do arco
+        const SW  = 13;   // stroke-width
+        const CX  = 80;   // centro X
+        const CY  = 90;   // centro Y — na base do viewBox para semicírculo visível
+        const VW  = 160;
+        const VH  = 100;
+
+        // Ponto no arco para um dado ângulo em graus (0°=direita, 180°=esquerda)
+        const ptArc = (deg) => {
+            const rad = deg * Math.PI / 180;
+            return { x: CX + R * Math.cos(rad), y: CY - R * Math.sin(rad) };
+        };
+
+        // Arco SVG de startDeg até endDeg (anti-horário, 0 a 180)
+        const arcPath = (startDeg, endDeg, r) => {
+            const s = ptArc(startDeg);
+            const e = ptArc(endDeg);
+            const span = endDeg - startDeg;
+            const large = span > 180 ? 1 : 0;
+            // sweep=0: sentido anti-horário quando y aumenta para baixo → usamos sweep=1 pois vamos de 0→180 (esquerda para direita vai de 180→0 em graus matemáticos)
+            return `M ${s.x.toFixed(2)} ${s.y.toFixed(2)} A ${r} ${r} 0 ${large} 0 ${e.x.toFixed(2)} ${e.y.toFixed(2)}`;
+        };
+
+        // Trilha: 0° a 180° (direita → esquerda = sentido CCW no padrão SVG)
+        const trackD = arcPath(0, 180, R);
+
+        container.innerHTML = metricas.map(m => {
+            const val      = isNaN(m.valor) || !isFinite(m.valor) ? 0 : m.valor;
+            const isOK     = m.meta === null ? true : (m.positivo ? val >= m.meta : val <= m.meta);
+            const cor      = m.meta === null ? m.cor : (isOK ? '#28a745' : '#dc3545');
+
+            // progress 0→1 mapeado para 0°→180° no gauge
+            let progress = 0;
+            if (m.unidade === '%') {
+                progress = Math.min(Math.max(val / 100, 0), 1);
+            } else {
+                // Receita Bruta: visual de 0 até 100% do valor atual (sempre cheio como referência)
+                progress = rb > 0 ? 1 : 0; // mostra cheio pois é valor absoluto, não %
+            }
+
+            const fillDeg  = progress * 180;   // quantos graus preencher (de 0° até fillDeg)
+            const fillD    = fillDeg > 0.5 ? arcPath(0, fillDeg, R) : '';
+
+            // Exibição do valor
+            const exibVal = m.unidade === 'R$'
+                ? 'R$ ' + Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})
+                : val.toFixed(1) + '%';
+
+            const metaStr    = m.meta !== null ? `Meta: ${m.positivo?'≥':'≤'}${m.meta}%` : '';
+            const statusStr  = m.meta !== null ? (isOK ? '✅ OK' : '⚠️ Fora da meta') : '';
+            const statusCor  = isOK ? '#28a745' : '#dc3545';
+
+            return `<div style="
+                    background:white;
+                    border-radius:14px;
+                    padding:14px 12px 10px;
+                    width:172px;
+                    text-align:center;
+                    box-shadow:0 2px 10px rgba(0,0,0,0.09);
+                    border-top:3px solid ${cor};
+                    transition:transform 0.18s,box-shadow 0.18s;
+                    cursor:default;
+                ">
+                <div style="font-size:12px;font-weight:700;color:#444;margin-bottom:4px;letter-spacing:0.2px;">${m.label}</div>
+                <svg viewBox="0 0 ${VW} ${VH}" width="148" height="92" style="display:block;margin:0 auto;overflow:visible;">
+                    <!-- Trilha de fundo -->
+                    <path d="${trackD}" fill="none" stroke="#ebebeb" stroke-width="${SW}" stroke-linecap="round"/>
+                    <!-- Arco preenchido -->
+                    ${fillD ? `<path d="${fillD}" fill="none" stroke="${cor}" stroke-width="${SW}" stroke-linecap="round"/>` : ''}
+                    <!-- Valor principal -->
+                    <text x="${CX}" y="${CY - 18}" text-anchor="middle" font-size="16" font-weight="800" fill="${cor}" font-family="'Segoe UI',sans-serif">${exibVal}</text>
+                    <!-- Meta -->
+                    ${metaStr ? `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-size="9.5" fill="#bbb" font-family="'Segoe UI',sans-serif">${metaStr}</text>` : ''}
+                    <!-- Marcadores nas extremidades -->
+                    <circle cx="${ptArc(0).x.toFixed(1)}" cy="${ptArc(0).y.toFixed(1)}" r="4" fill="#ebebeb"/>
+                    <circle cx="${ptArc(180).x.toFixed(1)}" cy="${ptArc(180).y.toFixed(1)}" r="4" fill="#ebebeb"/>
+                </svg>
+                <div style="font-size:11px;font-weight:700;color:${statusCor};margin-top:2px;min-height:16px;">${statusStr}</div>
+            </div>`;
+        }).join('');
     }
 
     // GRÁFICOS
@@ -3515,61 +3967,18 @@
         });
     }
 
-    function criarGraficoDevedores(contasReceber) {
-        const ctx = document.getElementById('chartDevedores');
-        if (!ctx) return;
-
-        // Top 5 devedores
-        const devedores = {};
-        contasReceber.filter(c => c.status === 'pendente').forEach(c => {
-            const cliente = dadosCache.clientes.find(cl => cl.id === c.cliente_id);
-            const nome = cliente ? cliente.nome : 'Desconhecido';
-            devedores[nome] = (devedores[nome] || 0) + parseFloat(c.valor);
-        });
-
-        const top5 = Object.entries(devedores)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-
-        if (charts.devedores) {
-            charts.devedores.destroy();
-        }
-
-        charts.devedores = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: top5.map(d => d[0]),
-                datasets: [{
-                    data: top5.map(d => d[1]),
-                    backgroundColor: [
-                        '#FF7A42',
-                        '#FF6B2E',
-                        '#E85A1F',
-                        '#D04A11',
-                        '#B83A03'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true
-                    }
-                }
-            }
-        });
-    }
-
     // UTILITÁRIOS
     function preencherAnos() {
         const selects = document.querySelectorAll('select[id*="Ano"]');
         const anoAtual = new Date().getFullYear();
         
         selects.forEach(select => {
-            for (let ano = anoAtual; ano >= anoAtual - 5; ano--) {
-                select.innerHTML += `<option value="${ano}">${ano}</option>`;
+            // Para o filtro de Fluxo Projetado, incluir anos futuros
+            const isFCP = select.id === 'filtroAnoFCP';
+            const anoFim   = isFCP ? anoAtual + 2 : anoAtual;
+            const anoInicio = anoAtual - 5;
+            for (let ano = anoFim; ano >= anoInicio; ano--) {
+                select.innerHTML += `<option value="${ano}">${ano}${ano === anoAtual ? ' (atual)' : ''}</option>`;
             }
         });
     }
@@ -3631,6 +4040,7 @@
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
+            else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
             else if (pageId === 'dashboard') atualizarDashboard();
         }
@@ -4728,6 +5138,210 @@
     }
 
     // ================================================================
+    // FLUXO DE CAIXA PROJETADO — igual à DRE mensal Jan→Dez
+    // ================================================================
+
+    async function carregarFCP() {
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
+        if (!contasReceber || !contasPagar) return;
+
+        const filtroAno = document.getElementById('filtroAnoFCP');
+        const anoSel    = filtroAno ? filtroAno.value : '';
+
+        // Aviso
+        const avisoEl = document.getElementById('fcpAviso');
+        if (avisoEl) {
+            const qtdPend = contasReceber.filter(c => c.status === 'pendente').length
+                          + contasPagar.filter(c => c.status === 'pendente').length;
+            avisoEl.textContent = '📌 Lançamentos pendentes usam a data de vencimento como data projetada. '
+                + (qtdPend > 0 ? qtdPend + ' lançamento(s) pendente(s) incluídos.' : 'Todos já confirmados.');
+            avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;';
+        }
+
+        if (!anoSel) {
+            const card = document.getElementById('cardFCPMensal');
+            if (card) card.style.display = 'none';
+            return;
+        }
+
+        // FCP: apenas lançamentos PENDENTES — usa data_vencimento como data projetada
+        // Lançamentos já pagos/recebidos aparecem no DFC (fluxo real), não aqui
+        function dataFCP(conta, tipo) {
+            return conta.data_vencimento || '';
+        }
+
+        // Filtrar apenas pendentes do ano selecionado
+        const recAno = contasReceber.filter(c => c.status === 'pendente' && dataFCP(c,'rec').startsWith(anoSel));
+        const pagAno = contasPagar.filter(c => c.status === 'pendente' && dataFCP(c,'pag').startsWith(anoSel));
+
+        // Totais para cards
+        const totalEnt   = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const totalSai   = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const saldoLiq   = totalEnt - totalSai;
+        const pendRec    = contasReceber.filter(c => c.status === 'pendente');
+        const pendPag    = contasPagar.filter(c => c.status === 'pendente');
+        const totPendRec = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0); // já filtrado por ano
+        const totPendPag = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+
+        document.getElementById('fcpCardEntradas').textContent   = fmtBRL(totalEnt);
+        document.getElementById('fcpCardSaidas').textContent     = fmtBRL(totalSai);
+        const cardLiq = document.getElementById('fcpCardLiquido');
+        const cardBox = document.getElementById('fcpCardLiquidoBox');
+        if (cardLiq) { cardLiq.textContent = fmtValSig(saldoLiq); cardLiq.style.color = saldoLiq >= 0 ? '#28a745' : '#dc3545'; }
+        if (cardBox) cardBox.style.borderLeftColor = saldoLiq >= 0 ? '#28a745' : '#dc3545';
+        document.getElementById('fcpCardLiquidoLabel').textContent = saldoLiq >= 0 ? 'Saldo positivo' : 'Saldo negativo';
+        document.getElementById('fcpCardPendRec').textContent       = fmtBRL(totPendRec);
+        document.getElementById('fcpCardPendRecCount').textContent  = recAno.length + ' conta' + (recAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
+        document.getElementById('fcpCardPendPag').textContent       = fmtBRL(totPendPag);
+        document.getElementById('fcpCardPendPagCount').textContent  = pagAno.length + ' conta' + (pagAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
+
+        // Título
+        document.getElementById('fcpTituloTabela').textContent = '📅 Fluxo de Caixa Projetado — Jan a Dez ' + anoSel;
+
+        // ── Montar tabela mensal horizontal (igual à DRE mensal) ─────────────
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+        // Cabeçalho
+        const headerRow = document.getElementById('fcpHeaderMeses');
+        if (headerRow) {
+            headerRow.innerHTML = '<th style="min-width:200px;text-align:left;padding:6px 10px;background:#2c3e50;color:#fff;">Descrição</th>' +
+                mNomes.map(m => '<th style="text-align:right;min-width:95px;padding:6px 8px;background:#2c3e50;color:#fff;">' + m + '/' + String(anoSel).slice(2) + '</th>').join('') +
+                '<th style="text-align:right;min-width:105px;padding:6px 8px;background:#1a252f;color:#fff;font-weight:700;">Total</th>';
+        }
+
+        // Calcular entradas e saídas por mês
+        // Entradas: agrupar recebimentos por categoria (ou "Receita" se sem categoria)
+        const catRec = {}; // { catNome: [val_m0..val_m11] }
+        recAno.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const key = cat ? cat.nome : 'Receita';
+            if (!catRec[key]) catRec[key] = Array(12).fill(0);
+            const m = parseInt(dataFCP(c,'rec').substring(5,7)) - 1;
+            if (m >= 0 && m <= 11) catRec[key][m] += parseFloat(c.valor || 0);
+        });
+
+        // Saídas: agrupar pagamentos por categoria
+        const catPag = {};
+        pagAno.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const key = cat ? cat.nome : 'Pagamento';
+            if (!catPag[key]) catPag[key] = Array(12).fill(0);
+            const m = parseInt(dataFCP(c,'pag').substring(5,7)) - 1;
+            if (m >= 0 && m <= 11) catPag[key][m] += parseFloat(c.valor || 0);
+        });
+
+        // Totais por mês
+        const totEntMes = Array(12).fill(0);
+        const totSaiMes = Array(12).fill(0);
+        Object.values(catRec).forEach(arr => arr.forEach((v,m) => { totEntMes[m] += v; }));
+        Object.values(catPag).forEach(arr => arr.forEach((v,m) => { totSaiMes[m] += v; }));
+        const saldoMes = totEntMes.map((e,m) => e - totSaiMes[m]);
+        let acumArr = [];
+        saldoMes.reduce((acc, v, m) => { acumArr[m] = acc + v; return acc + v; }, 0);
+
+        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+        const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
+
+        const tbody = document.getElementById('fcpCorpoMensal');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        // ── Função auxiliar para uma linha ──
+        function linhaTabela(label, vals, opts = {}) {
+            const { bg = '', fc = '', bold = false, indent = false } = opts;
+            const total = vals.reduce((s,v) => s + v, 0);
+            const rowStyle = (bg ? 'background:' + bg + ';' : '') + (fc ? 'color:' + fc + ';' : '') + (bold ? 'font-weight:700;' : '');
+            const lbl = (indent ? '&nbsp;&nbsp;&nbsp;↳ ' : '') + label;
+            return '<tr style="' + rowStyle + '">' +
+                '<td style="padding:5px 8px;' + (bold ? 'font-weight:700;' : '') + (indent ? 'color:#555;' : '') + '">' + lbl + '</td>' +
+                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (fc ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
+                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (fc ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
+                '</tr>';
+        }
+
+        function linhaSeparador(label) {
+            return '<tr style="background:#e9ecef;"><td colspan="' + (13+1) + '" style="font-weight:700;font-size:11px;color:#555;padding:5px 10px;text-transform:uppercase;letter-spacing:0.5px;">' + label + '</td></tr>';
+        }
+
+        // ── Seção ENTRADAS ──
+        tbody.innerHTML += linhaSeparador('ENTRADAS DE CAIXA');
+        if (Object.keys(catRec).length === 0) {
+            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>';
+        } else {
+            Object.entries(catRec).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
+                tbody.innerHTML += linhaTabela(cat, arr, { indent: true });
+            });
+        }
+        tbody.innerHTML += linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true });
+
+        // ── Seção SAÍDAS ──
+        tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
+        if (Object.keys(catPag).length === 0) {
+            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum pagamento no período</td></tr>';
+        } else {
+            Object.entries(catPag).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
+                const negArr = arr.map(v => -v);
+                tbody.innerHTML += linhaTabela(cat, negArr, { indent: true });
+            });
+        }
+        tbody.innerHTML += linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true });
+
+        // ── Saldo mensal e acumulado ──
+        tbody.innerHTML += linhaSeparador('SALDO');
+        tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true });
+        tbody.innerHTML += linhaTabela('Saldo Acumulado', acumArr, { bg: 'var(--cor-primaria)', fc: 'white', bold: true });
+
+        // Mostrar card
+        const cardMensal = document.getElementById('cardFCPMensal');
+        if (cardMensal) cardMensal.style.display = '';
+
+        // ── Gráfico ──
+        const ctx = document.getElementById('chartFCP');
+        if (ctx) {
+            if (charts.fcp) charts.fcp.destroy();
+            charts.fcp = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: mNomes.map(m => m + '/' + String(anoSel).slice(2)),
+                    datasets: [
+                        { label: 'Entradas', data: totEntMes, backgroundColor: 'rgba(40,167,69,0.65)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Saídas',   data: totSaiMes, backgroundColor: 'rgba(220,53,69,0.65)',  borderColor: '#dc3545', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Saldo Acumulado', data: acumArr, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.1)', borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) } }
+                    },
+                    scales: {
+                        y: { ticks: { callback: v => 'R$ ' + v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0}) }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
+
+    function gerarPDFFCP() {
+        const anoSel = document.getElementById('filtroAnoFCP')?.value || '';
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        doc.setFontSize(14);
+        doc.text('Fluxo de Caixa Projetado — ' + (anoSel || 'Todos'), 14, 16);
+        doc.setFontSize(9);
+        doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), 14, 22);
+
+        const table = document.getElementById('tabelaFCPMensal');
+        if (table && window.autoTable) {
+            doc.autoTable({ html: table, startY: 26, styles: { fontSize: 7, cellPadding: 2 }, headStyles: { fillColor: [230,102,34] } });
+        }
+        doc.save('FluxoProjetado_' + (anoSel || 'todos') + '.pdf');
+    }
+
+    // ================================================================
     // DRE COMPLETA — por Competência
     // ================================================================
 
@@ -4779,14 +5393,14 @@
             return true;
         });
 
-        // Contas recebidas por competência (status recebido, usa data_competencia ou data_recebimento)
+        // Contas recebidas/pendentes por competência — DRE por regime de competência inclui TODOS os lançamentos
         const recComp = filtrarComp(
-            contasRec.filter(c => c.status === 'recebido'),
+            contasRec,
             'data_competencia'
         );
-        // Contas pagas por competência
+        // Contas pagas/pendentes por competência
         const pagComp = filtrarComp(
-            contasPag.filter(c => c.status === 'pago'),
+            contasPag,
             'data_competencia'
         );
 
@@ -4796,10 +5410,10 @@
         const avisoEl = document.getElementById('dreAviso');
         if (avisoEl) {
             avisoEl.textContent = pendentes > 0
-                ? '⚠️ ' + pendentes + ' lançamento(s) pendentes não aparecem na DRE. Marque como Recebido/Pago para incluir.'
+                ? '📌 ' + pendentes + ' lançamento(s) pendentes incluídos na DRE pelo regime de competência (data de competência). Para excluí-los, marque-os como Recebido/Pago ou use a DFC para fluxo de caixa real.'
                 : '✅ Todos os lançamentos confirmados estão na DRE.';
             avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;' +
-                (pendentes > 0 ? 'background:#fff3cd;color:#856404;border:1px solid #ffc107;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
+                (pendentes > 0 ? 'background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;' : 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;');
         }
 
         // Título do período
@@ -4912,6 +5526,10 @@
     }
 
     function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
+        // Popular cache de detalhe para o botão "Ver"
+        _dreDetalheCache = {};
+        DRE_GRUPOS.forEach(g => { _dreDetalheCache[g.id] = porGrupo[g.id] ? porGrupo[g.id].itens : []; });
+
         const tbody = document.getElementById('dreCorpo');
         if (!tbody) return;
         const fmtV = v => v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -4951,6 +5569,25 @@
 
         html += linhaSecao('CUSTOS');
         html += linhaGrupo(DRE_GRUPOS[2].label, -porGrupo['CPV'].total, 'CPV');
+        // Sub-linhas CPV por categoria
+        if (porGrupo['CPV'] && porGrupo['CPV'].itens.length > 0) {
+            // Agrupar itens CPV por categoria
+            const cpvPorCat = {};
+            porGrupo['CPV'].itens.forEach(item => {
+                const key = item.catNome || 'Sem categoria';
+                if (!cpvPorCat[key]) cpvPorCat[key] = 0;
+                cpvPorCat[key] += parseFloat(item.valor || 0);
+            });
+            // Ordenar por valor desc
+            Object.entries(cpvPorCat).sort((a,b) => b[1]-a[1]).forEach(([cat, val]) => {
+                html += `<tr style="font-size:12px;color:#666;background:#fafafa;">
+                    <td style="padding-left:36px;">↳ ${cat}</td>
+                    <td style="text-align:right;color:#dc3545;">R$ ${fmtV(val)}</td>
+                    <td style="text-align:right;color:#aaa;">${recBruta > 0 ? (val/recBruta*100).toFixed(1)+'%' : '-'}</td>
+                    <td></td>
+                </tr>`;
+            });
+        }
         html += linhaSubtotal('= Lucro Bruto', lucroBruto, false);
 
         html += linhaSecao('DESPESAS OPERACIONAIS');
@@ -5020,8 +5657,8 @@
             dados[l.grupo][m] += parseFloat(l.valor || 0);
         });
 
-        // Contas recebidas
-        contasRec.filter(c => c.status === 'recebido' && c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
+        // Contas recebidas — por competência (inclui pendentes no regime de competência)
+        contasRec.filter(c => c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
@@ -5029,8 +5666,8 @@
             dados[g][m] += parseFloat(c.valor || 0);
         });
 
-        // Contas pagas
-        contasPag.filter(c => c.status === 'pago' && c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
+        // Contas pagas — por competência (inclui pendentes no regime de competência)
+        contasPag.filter(c => c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
@@ -5112,12 +5749,12 @@
 
                 let rb = (dreLancs || []).filter(l => l.grupo === 'RECEITA_BRUTA' && l.competencia && l.competencia.startsWith(pref))
                                           .reduce((s,l) => s + parseFloat(l.valor||0), 0);
-                rb += contasRec.filter(c => c.status === 'recebido' && c.data_competencia && c.data_competencia.startsWith(pref))
+                rb += contasRec.filter(c => c.data_competencia && c.data_competencia.startsWith(pref))
                                .reduce((s,c) => s + parseFloat(c.valor||0), 0);
 
                 let costs = (dreLancs || []).filter(l => l.grupo !== 'RECEITA_BRUTA' && l.grupo !== 'RECEITA_FINANCEIRA' && l.grupo !== 'OUTRAS_RECEITAS' && l.competencia && l.competencia.startsWith(pref))
                                              .reduce((s,l) => s + parseFloat(l.valor||0), 0);
-                costs += contasPag.filter(c => c.status === 'pago' && c.data_competencia && c.data_competencia.startsWith(pref))
+                costs += contasPag.filter(c => c.data_competencia && c.data_competencia.startsWith(pref))
                                    .reduce((s,c) => s + parseFloat(c.valor||0), 0);
 
                 receitasData.push(rb);
@@ -5129,9 +5766,9 @@
                 const d = new Date(); d.setMonth(d.getMonth() - i);
                 const pref = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
                 labels.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
-                let rb = contasRec.filter(c => c.status === 'recebido' && (c.data_competencia || c.data_recebimento || '').startsWith(pref))
+                let rb = contasRec.filter(c => (c.data_competencia || c.data_recebimento || '').startsWith(pref))
                                    .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-                let costs = contasPag.filter(c => c.status === 'pago' && (c.data_competencia || c.data_pagamento || '').startsWith(pref))
+                let costs = contasPag.filter(c => (c.data_competencia || c.data_pagamento || '').startsWith(pref))
                                       .reduce((s,c) => s + parseFloat(c.valor||0), 0);
                 receitasData.push(rb); resultadosData.push(rb - costs);
             }
