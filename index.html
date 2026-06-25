@@ -14,6 +14,7 @@
         }
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
     <style>
         * {
@@ -800,7 +801,7 @@
             <div class="card" style="margin-bottom:16px;">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;"><span>🎯 Indicadores DRE — Metas</span><button onclick="abrirModalMetas()" class="btn btn-secondary btn-small" style="font-size:11px;">✏️ Editar Metas</button></div>
                 <div id="dashGaugeAviso" style="display:none;padding:8px 14px;background:#fff3cd;color:#856404;border-radius:6px;font-size:12px;margin-bottom:12px;"></div>
-                <div id="dashGauges" style="display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:4px 0 8px;"></div>
+                <div id="dashGauges" style="display:flex;flex-wrap:nowrap;gap:10px;align-items:stretch;padding:6px 0 10px;width:100%;"></div>
                 <div style="font-size:11px;color:#bbb;text-align:center;margin-top:4px;">
                     <span id="dashGaugeLegenda">Metas: CPV≤40% · Desp.Adm≤20% · Lucro Bruto≥40% · EBITDA≥20% · Lucro Líq.≥15%</span>
                 </div>
@@ -1129,6 +1130,16 @@
 
             <div class="table-container">
                 <table id="tabelaPendentesReceber">
+                    <colgroup>
+                        <col style="min-width:130px;">
+                        <col style="min-width:160px;">
+                        <col style="min-width:90px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:110px;">
+                        <col style="min-width:70px;">
+                        <col style="min-width:90px;">
+                        <col style="min-width:170px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Cliente</th>
@@ -1210,6 +1221,18 @@
 
             <div class="table-container">
                 <table id="tabelaPendentesPagar">
+                    <colgroup>
+                        <col style="min-width:130px;">
+                        <col style="min-width:120px;">
+                        <col style="min-width:160px;">
+                        <col style="min-width:70px;">
+                        <col style="min-width:90px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:110px;">
+                        <col style="min-width:70px;">
+                        <col style="min-width:90px;">
+                        <col style="min-width:170px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Fornecedor</th>
@@ -1279,6 +1302,14 @@
 
             <div class="table-container">
                 <table id="tabelaRecebidas">
+                    <colgroup>
+                        <col style="min-width:140px;">
+                        <col style="min-width:180px;">
+                        <col style="min-width:110px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:100px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Cliente</th>
@@ -1344,6 +1375,19 @@
 
             <div class="table-container">
                 <table id="tabelaPagas">
+                    <colgroup>
+                        <col style="min-width:130px;">
+                        <col style="min-width:110px;">
+                        <col style="min-width:150px;">
+                        <col style="min-width:70px;">
+                        <col style="min-width:70px;">
+                        <col style="min-width:110px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:100px;">
+                        <col style="min-width:80px;">
+                        <col style="min-width:90px;">
+                        <col style="min-width:100px;">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Fornecedor</th>
@@ -4003,30 +4047,37 @@
 
             return `<div style="
                     background:white;
-                    border-radius:14px;
-                    padding:14px 12px 10px;
-                    width:210px;
+                    border-radius:16px;
+                    padding:14px 6px 12px;
+                    flex:1 1 0;
+                    min-width:0;
                     text-align:center;
-                    box-shadow:0 2px 10px rgba(0,0,0,0.09);
-                    border-top:3px solid ${cor};
-                    transition:transform 0.18s,box-shadow 0.18s;
+                    box-shadow:0 2px 12px rgba(0,0,0,0.08);
+                    border-top:4px solid ${cor};
+                    transition:transform 0.15s,box-shadow 0.15s;
                     cursor:default;
-                ">
-                <div style="font-size:12px;font-weight:700;color:#444;margin-bottom:4px;letter-spacing:0.2px;">${m.label}</div>
-                <svg viewBox="0 0 ${VW} ${VH}" width="180" height="112" style="display:block;margin:0 auto;overflow:visible;">
+                    overflow:hidden;
+                " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(0,0,0,0.13)'"
+                   onmouseout="this.style.transform='';this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)'">
+                <div style="font-size:10.5px;font-weight:700;color:#555;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${m.label}</div>
+                <svg viewBox="0 0 ${VW} ${VH}" style="display:block;margin:0 auto;overflow:visible;width:100%;max-width:170px;">
                     <!-- Trilha de fundo -->
-                    <path d="${trackD}" fill="none" stroke="#ebebeb" stroke-width="${SW}" stroke-linecap="round"/>
+                    <path d="${trackD}" fill="none" stroke="#f0f0f0" stroke-width="${SW}" stroke-linecap="round"/>
+                    <!-- Halo colorido translúcido -->
+                    <path d="${trackD}" fill="none" stroke="${cor}" stroke-width="${SW}" stroke-linecap="round" opacity="0.12"/>
                     <!-- Arco preenchido -->
                     ${fillD ? `<path d="${fillD}" fill="none" stroke="${cor}" stroke-width="${SW}" stroke-linecap="round"/>` : ''}
                     <!-- Valor principal -->
-                    <text x="${CX}" y="${CY - 18}" text-anchor="middle" font-size="16" font-weight="800" fill="${cor}" font-family="'Segoe UI',sans-serif">${exibVal}</text>
+                    <text x="${CX}" y="${CY - 20}" text-anchor="middle" font-size="17" font-weight="800" fill="${cor}" font-family="'Segoe UI',sans-serif">${exibVal}</text>
                     <!-- Meta -->
-                    ${metaStr ? `<text x="${CX}" y="${CY - 2}" text-anchor="middle" font-size="9.5" fill="#bbb" font-family="'Segoe UI',sans-serif">${metaStr}</text>` : ''}
+                    ${metaStr ? `<text x="${CX}" y="${CY - 4}" text-anchor="middle" font-size="9" fill="#bbb" font-family="'Segoe UI',sans-serif">${metaStr}</text>` : ''}
                     <!-- Marcadores nas extremidades -->
-                    <circle cx="${ptArc(0).x.toFixed(1)}" cy="${ptArc(0).y.toFixed(1)}" r="4" fill="#ebebeb"/>
-                    <circle cx="${ptArc(180).x.toFixed(1)}" cy="${ptArc(180).y.toFixed(1)}" r="4" fill="#ebebeb"/>
+                    <circle cx="${ptArc(0).x.toFixed(1)}" cy="${ptArc(0).y.toFixed(1)}" r="4.5" fill="${cor}" opacity="0.3"/>
+                    <circle cx="${ptArc(180).x.toFixed(1)}" cy="${ptArc(180).y.toFixed(1)}" r="4.5" fill="${cor}" opacity="0.3"/>
                 </svg>
-                <div style="font-size:11px;font-weight:700;color:${statusCor};margin-top:2px;min-height:16px;">${statusStr}</div>
+                ${m.meta !== null
+                    ? `<div style="font-size:10px;font-weight:700;color:${statusCor};background:${statusCor}18;border-radius:20px;padding:2px 10px;display:inline-block;margin-top:1px;">${statusStr}</div>`
+                    : '<div style="min-height:20px;"></div>'}
             </div>`;
         }).join('');
     }
@@ -6371,7 +6422,7 @@
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
         doc.setFontSize(14);
-        doc.text('Fluxo de Caixa Projetado — ' + (anoSel || 'Todos'), 14, 16);
+        doc.text(normalizarTexto('Fluxo de Caixa Projetado — ' + (anoSel || 'Todos')), 14, 16);
         doc.setFontSize(9);
         doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), 14, 22);
 
@@ -6996,6 +7047,26 @@
     // ================================================================
     // GERAÇÃO DE RELATÓRIO PDF
     // ================================================================
+
+    // Converte caracteres especiais do português para equivalentes ASCII
+    // compatíveis com a fonte Helvetica padrão do jsPDF
+    function normalizarTexto(txt) {
+        if (!txt) return '';
+        return String(txt)
+            .replace(/[àáâãäå]/g, 'a').replace(/[ÀÁÂÃÄÅ]/g, 'A')
+            .replace(/[èéêë]/g,   'e').replace(/[ÈÉÊË]/g,   'E')
+            .replace(/[ìíîï]/g,   'i').replace(/[ÌÍÎÏ]/g,   'I')
+            .replace(/[òóôõö]/g,  'o').replace(/[ÒÓÔÕÖ]/g,  'O')
+            .replace(/[ùúûü]/g,   'u').replace(/[ÙÚÛÜ]/g,   'U')
+            .replace(/[ç]/g,      'c').replace(/[Ç]/g,       'C')
+            .replace(/[ñ]/g,      'n').replace(/[Ñ]/g,       'N')
+            .replace(/[ý]/g,      'y').replace(/[Ý]/g,       'Y')
+            .replace(/[ß]/g,      'ss')
+            .replace(/[–—]/g,     '-')
+            .replace(/[""]/g,     '"')
+            .replace(/['']/g,     "'");
+    }
+
     function gerarPDF(tipo) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
@@ -7041,12 +7112,13 @@
 
         // --- Cabeçalho do documento ---
         const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
         doc.setFillColor(255, 122, 66); // cor primária
         doc.rect(0, 0, pageW, 16, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(13);
         doc.setFont(undefined, 'bold');
-        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.text('CAP Gestao Financeira', 10, 10);
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
         const hoje = new Date().toLocaleDateString('pt-BR');
@@ -7055,79 +7127,24 @@
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
-        doc.text(cfg.titulo, pageW / 2, 24, { align: 'center' });
+        doc.text(normalizarTexto(cfg.titulo), pageW / 2, 24, { align: 'center' });
 
-        // --- Tabela ---
-        const margemEsq = 8;
-        let y = 32;
-        const alturaCelula = 7;
-        const alturaCabecalho = 8;
-
-        // Cabeçalho da tabela
-        doc.setFillColor(80, 80, 80);
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(7.5);
-        doc.setFont(undefined, 'bold');
-        let x = margemEsq;
-        cfg.colunas.forEach((col, i) => {
-            doc.rect(x, y, cfg.larguras[i], alturaCabecalho, 'F');
-            doc.text(col, x + 1.5, y + 5.5);
-            x += cfg.larguras[i];
-        });
-        y += alturaCabecalho;
-
-        // Linhas de dados
-        doc.setFont(undefined, 'normal');
+        // --- Construir dados da tabela ---
+        const numCols = cfg.colunas.length;
+        const head = [cfg.colunas.map(c => normalizarTexto(c))];
+        const body = [];
         let totalValor = 0;
-        linhas.forEach((linha, idx) => {
+
+        linhas.forEach((linha) => {
             const cells = linha.querySelectorAll('td');
             if (cells.length === 0) return;
-
-            // Verificar espaço na página
-            if (y + alturaCelula > doc.internal.pageSize.getHeight() - 15) {
-                doc.addPage();
-                y = 15;
-                // Repetir cabeçalho
-                doc.setFillColor(80, 80, 80);
-                doc.setTextColor(255, 255, 255);
-                doc.setFont(undefined, 'bold');
-                let xh = margemEsq;
-                cfg.colunas.forEach((col, i) => {
-                    doc.rect(xh, y, cfg.larguras[i], alturaCabecalho, 'F');
-                    doc.text(col, xh + 1.5, y + 5.5);
-                    xh += cfg.larguras[i];
-                });
-                y += alturaCabecalho;
-                doc.setFont(undefined, 'normal');
-            }
-
-            const bgColor = idx % 2 === 0 ? [255, 255, 255] : [245, 245, 245];
-            doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-            doc.setTextColor(50, 50, 50);
-
-            x = margemEsq;
-            // Número de colunas de dados (sem contar botões de ação)
-            const numCols = cfg.colunas.length;
+            const row = [];
             for (let i = 0; i < numCols; i++) {
                 const celula = cells[i];
-                if (!celula) break;
-                let texto = celula.innerText.trim().replace(/\n/g, ' ');
-                // Truncar texto longo
-                const maxChars = Math.floor(cfg.larguras[i] / 1.9);
-                if (texto.length > maxChars) texto = texto.substring(0, maxChars - 1) + '…';
-
-                doc.rect(x, y, cfg.larguras[i], alturaCelula, 'FD');
-                // colorir status
-                const tdText = celula.innerText.trim().toLowerCase();
-                if (tdText === 'atrasado') doc.setTextColor(180, 0, 0);
-                else if (tdText === 'pendente') doc.setTextColor(150, 100, 0);
-                else doc.setTextColor(50, 50, 50);
-
-                doc.text(texto, x + 1.5, y + 4.8, { maxWidth: cfg.larguras[i] - 2 });
-                doc.setTextColor(50, 50, 50);
-                x += cfg.larguras[i];
+                if (!celula) { row.push(''); continue; }
+                row.push(normalizarTexto(celula.innerText.trim().replace(/\n/g, ' ')));
             }
-
+            body.push(row);
             // Somar valor (coluna com "R$")
             for (let i = 0; i < cells.length - 1; i++) {
                 const t = cells[i].innerText.trim();
@@ -7136,27 +7153,77 @@
                     if (!isNaN(v)) { totalValor += v; break; }
                 }
             }
-
-            y += alturaCelula;
         });
 
-        // --- Rodapé: total ---
+        // --- Configurar columnStyles com larguras fixas ---
+        const columnStyles = {};
+        cfg.larguras.forEach((w, i) => {
+            columnStyles[i] = { cellWidth: w };
+        });
+
+        // --- Gerar tabela usando autoTable ---
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: 28,
+            margin: { left: 8, right: 8, bottom: 12 },
+            tableWidth: 'wrap',
+            styles: {
+                fontSize: 7.5,
+                cellPadding: 1.5,
+                overflow: 'linebreak',
+                valign: 'middle',
+                lineColor: [200, 200, 200],
+                lineWidth: 0.1,
+                textColor: [50, 50, 50],
+                fillColor: [255, 255, 255]
+            },
+            headStyles: {
+                fillColor: [80, 80, 80],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'left',
+                cellPadding: 2
+            },
+            bodyStyles: {
+                fillColor: [255, 255, 255],
+                textColor: [50, 50, 50]
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245]
+            },
+            columnStyles: columnStyles,
+            didParseCell: function (data) {
+                if (data.section === 'body') {
+                    const t = (data.cell.text[0] || '').toLowerCase();
+                    if (t === 'atrasado') {
+                        data.cell.styles.textColor = [180, 0, 0];
+                        data.cell.styles.fontStyle = 'bold';
+                    } else if (t === 'pendente') {
+                        data.cell.styles.textColor = [150, 100, 0];
+                        data.cell.styles.fontStyle = 'bold';
+                    }
+                }
+            },
+            didDrawPage: function (data) {
+                // Rodapé de página
+                doc.setFontSize(7);
+                doc.setTextColor(120, 120, 120);
+                doc.setFont(undefined, 'normal');
+                const pageNum = doc.internal.getNumberOfPages();
+                doc.text('Pagina ' + data.pageNumber + ' de ' + pageNum,
+                    pageW / 2, pageH - 5, { align: 'center' });
+            }
+        });
+
+        // --- Total ---
         if (totalValor > 0) {
-            y += 3;
+            const finalY = doc.lastAutoTable.finalY + 6;
             doc.setFont(undefined, 'bold');
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(9);
-            doc.text('Total: R$ ' + totalValor.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}),
-                pageW - 10, y, { align: 'right' });
-        }
-
-        // Rodapé de página
-        const totalPaginas = doc.internal.getNumberOfPages();
-        for (let p = 1; p <= totalPaginas; p++) {
-            doc.setPage(p);
-            doc.setFontSize(7);
-            doc.setTextColor(120, 120, 120);
-            doc.text('Página ' + p + ' de ' + totalPaginas, pageW / 2, doc.internal.pageSize.getHeight() - 5, { align: 'center' });
+            doc.text('Total: R$ ' + totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                pageW - 10, finalY, { align: 'right' });
         }
 
         doc.save('relatorio_' + tipo + '_' + hoje.replace(/\//g, '-') + '.pdf');
@@ -7186,11 +7253,11 @@
 
         // Título da DRE
         const titElem = document.getElementById('dreTituloPeriodo');
-        const titulo = titElem ? titElem.textContent.trim() : 'DRE por Competência';
+        const titulo = titElem ? titElem.textContent.trim() : 'DRE por Competencia';
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
-        doc.text(titulo, pageW / 2, 24, { align: 'center' });
+        doc.text(normalizarTexto(titulo), pageW / 2, 24, { align: 'center' });
 
         // Colunas
         const margem = 12;
@@ -7206,7 +7273,7 @@
         doc.setFontSize(8);
         doc.setFont(undefined, 'bold');
         doc.rect(margem, y, colDesc, altLinha, 'F');
-        doc.text('Descrição', margem + 2, y + 5);
+        doc.text('Descricao', margem + 2, y + 5);
         doc.rect(margem + colDesc, y, colValor, altLinha, 'F');
         doc.text('Valor (R$)', margem + colDesc + colValor / 2, y + 5, { align: 'center' });
         doc.rect(margem + colDesc + colValor, y, colAV, altLinha, 'F');
@@ -7259,13 +7326,13 @@
             doc.setFont(undefined, isBold ? 'bold' : 'normal');
 
             // Descrição
-            let descTxt = tds[0].innerText.trim();
-            if (descTxt.length > 45) descTxt = descTxt.substring(0, 44) + '…';
+            let descTxt = normalizarTexto(tds[0].innerText.trim());
+            if (descTxt.length > 45) descTxt = descTxt.substring(0, 44) + '...';
             doc.text(descTxt, margem + 2, y + 4.8);
 
             // Valor
             if (tds[1]) {
-                let valTxt = tds[1].innerText.trim();
+                let valTxt = normalizarTexto(tds[1].innerText.trim());
                 const corVal = tds[1].style.color;
                 if (corVal && corVal.includes('220') || corVal && corVal.includes('dc3545')) doc.setTextColor(180, 0, 0);
                 else if (corVal && corVal.includes('40') || corVal && corVal.includes('28a745')) doc.setTextColor(0, 128, 0);
@@ -7275,7 +7342,7 @@
 
             // AV%
             if (tds[2]) {
-                let avTxt = tds[2].innerText.trim();
+                let avTxt = normalizarTexto(tds[2].innerText.trim());
                 doc.text(avTxt, margem + colDesc + colValor + colAV - 2, y + 4.8, { align: 'right' });
             }
 
@@ -7368,11 +7435,11 @@
 
             const colspan = tds[0].getAttribute('colspan');
             if (colspan && parseInt(colspan) > 1) {
-                doc.text(tds[0].innerText.trim(), margem + 2, y + 4.8);
+                doc.text(normalizarTexto(tds[0].innerText.trim()), margem + 2, y + 4.8);
             } else {
-                doc.text(tds[0] ? tds[0].innerText.trim() : '', margem + 2, y + 4.8);
-                if (tds[1]) doc.text(tds[1].innerText.trim(), margem + col1 + col2 - 2, y + 4.8, { align: 'right' });
-                if (tds[2]) doc.text(tds[2].innerText.trim(), margem + col1 + col2 + col3 - 2, y + 4.8, { align: 'right' });
+                doc.text(normalizarTexto(tds[0] ? tds[0].innerText.trim() : ''), margem + 2, y + 4.8);
+                if (tds[1]) doc.text(normalizarTexto(tds[1].innerText.trim()), margem + col1 + col2 - 2, y + 4.8, { align: 'right' });
+                if (tds[2]) doc.text(normalizarTexto(tds[2].innerText.trim()), margem + col1 + col2 + col3 - 2, y + 4.8, { align: 'right' });
             }
             doc.setTextColor(0, 0, 0);
             y += altLinha;
@@ -7388,7 +7455,7 @@
             doc.setFont(undefined, 'bold');
             doc.setFontSize(10);
             doc.setTextColor(0, 0, 0);
-            doc.text(titMensal ? titMensal.textContent.trim() : 'DFC Mensal', margem, y + 5);
+            doc.text(normalizarTexto(titMensal ? titMensal.textContent.trim() : 'DFC Mensal'), margem, y + 5);
             y += 9;
 
             const cM = [35, 38, 38, 38, 38]; // Mês, Entradas, Saídas, Fluxo, Acumulado
@@ -7400,7 +7467,7 @@
             let xh = margem;
             hMensal.forEach((h, i) => {
                 doc.rect(xh, y, cM[i], altLinha, 'F');
-                doc.text(h, xh + cM[i] / 2, y + 4.8, { align: 'center' });
+                doc.text(normalizarTexto(h), xh + cM[i] / 2, y + 4.8, { align: 'center' });
                 xh += cM[i];
             });
             y += altLinha;
@@ -7420,7 +7487,7 @@
                     if (tds[i]) {
                         doc.setFontSize(7.5);
                         doc.setFont(undefined, isBold ? 'bold' : 'normal');
-                        const t = tds[i].innerText.trim();
+                        const t = normalizarTexto(tds[i].innerText.trim());
                         doc.text(t, xc + w / 2, y + 4.8, { align: 'center' });
                     }
                     xc += w;
