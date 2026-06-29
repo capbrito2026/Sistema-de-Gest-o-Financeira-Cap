@@ -1921,52 +1921,47 @@
                             <option value="">Selecione um ano</option>
                         </select>
                     </div>
-                    <!-- Toggle de modo: Projetado / Real / Comparativo -->
-                    <div class="form-group">
-                        <label>Modo de visualização</label>
-                        <div style="display:flex;gap:0;border:1px solid #ddd;border-radius:6px;overflow:hidden;">
-                            <button id="fcpBtnProjetado" onclick="setFcpModo('projetado')"
-                                style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#FF7A42;color:#fff;">
-                                🔮 Projetado
-                            </button>
-                            <button id="fcpBtnReal" onclick="setFcpModo('real')"
-                                style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#f5f5f5;color:#555;">
-                                ✅ Real
-                            </button>
-                            <button id="fcpBtnComparativo" onclick="setFcpModo('comparativo')"
-                                style="padding:7px 14px;font-size:13px;font-weight:600;border:none;cursor:pointer;background:#f5f5f5;color:#555;">
-                                📊 Comparativo
-                            </button>
-                        </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 14px;border:1.5px solid #17a2b8;border-radius:6px;background:#f0fafd;font-size:13px;font-weight:600;color:#0c5460;user-select:none;white-space:nowrap;">
+                            <input type="checkbox" id="fcpUsarSaldoReal" onchange="carregarFCP()" style="width:16px;height:16px;accent-color:#17a2b8;cursor:pointer;">
+                            🏦 Incluir saldo real do caixa (DFC)
+                        </label>
                     </div>
                     <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
                         <button class="btn btn-secondary btn-small" onclick="gerarPDFFCP()" style="background:#e67e22;color:white;">📄 PDF</button>
                     </div>
                 </div>
+                <div id="fcpSaldoRealAviso" style="display:none;margin-top:6px;padding:7px 12px;background:#e8f4fd;border-left:3px solid #17a2b8;border-radius:0 4px 4px 0;font-size:12px;color:#0c5460;">
+                    📌 Saldo do DFC de <strong id="fcpSaldoRealAvisoVal"></strong> incluído como ponto de partida. O saldo acumulado projetado parte desse valor.
+                </div>
             </div>
 
             <!-- Cards resumo FCP -->
             <div class="dashboard-grid" style="margin-bottom:20px;">
+                <div class="stat-card" id="fcpCardSaldoRealBox" style="border-left-color:#17a2b8;display:none;">
+                    <div class="stat-label">🏦 Saldo Real do Caixa</div>
+                    <div class="stat-value" id="fcpCardSaldoReal" style="color:#17a2b8;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Ponto de partida informado</div>
+                </div>
                 <div class="stat-card" style="border-left-color:#28a745;">
-                    <div class="stat-label" id="fcpLabelEntradas">💰 Total Entradas</div>
+                    <div class="stat-label">💰 Total Entradas</div>
                     <div class="stat-value" id="fcpCardEntradas" style="color:#28a745;font-size:20px;">R$ 0,00</div>
-                    <div class="stat-change" id="fcpSubEntradas">Recebimentos projetados (ano)</div>
+                    <div class="stat-change">Recebimentos projetados (ano)</div>
                 </div>
                 <div class="stat-card" style="border-left-color:#dc3545;">
-                    <div class="stat-label" id="fcpLabelSaidas">📤 Total Saídas</div>
+                    <div class="stat-label">📤 Total Saídas</div>
                     <div class="stat-value" id="fcpCardSaidas" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
-                    <div class="stat-change" id="fcpSubSaidas">Pagamentos projetados (ano)</div>
+                    <div class="stat-change">Pagamentos projetados (ano)</div>
                 </div>
                 <div class="stat-card" id="fcpCardLiquidoBox">
-                    <div class="stat-label" id="fcpLabelLiquido">📊 Saldo Projetado</div>
+                    <div class="stat-label">📊 Saldo Projetado</div>
                     <div class="stat-value" id="fcpCardLiquido" style="font-size:20px;">R$ 0,00</div>
                     <div class="stat-change" id="fcpCardLiquidoLabel">Resultado do ano</div>
                 </div>
-                <!-- Card Saldo Real — visível no modo Real e Comparativo -->
-                <div class="stat-card" id="fcpCardRealBox" style="border-left-color:#6f42c1;display:none;">
-                    <div class="stat-label">✅ Saldo Real</div>
-                    <div class="stat-value" id="fcpCardReal" style="font-size:20px;">R$ 0,00</div>
-                    <div class="stat-change" id="fcpCardRealLabel">Realizado no ano</div>
+                <div class="stat-card" id="fcpCardFinalBox" style="border-left-color:#6f42c1;display:none;">
+                    <div class="stat-label">🔮 Saldo Final Projetado</div>
+                    <div class="stat-value" id="fcpCardFinal" style="color:#6f42c1;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Saldo real + resultado do ano</div>
                 </div>
                 <div class="stat-card" style="border-left-color:#17a2b8;">
                     <div class="stat-label">⏳ Pendentes a Receber</div>
@@ -1993,7 +1988,7 @@
 
             <!-- Gráfico projetado -->
             <div class="card" style="margin-top:16px;">
-                <div class="card-title" id="fcpTituloGrafico">Evolução do Saldo — Mês a Mês</div>
+                <div class="card-title">Evolução do Saldo Projetado — Mês a Mês</div>
                 <div class="chart-container"><canvas id="chartFCP"></canvas></div>
             </div>
         </div>
@@ -6257,27 +6252,6 @@
     // FLUXO DE CAIXA PROJETADO — igual à DRE mensal Jan→Dez
     // ================================================================
 
-    // ── Estado global do modo FCP ──────────────────────────────────────────
-    window._fcpModo = 'projetado'; // 'projetado' | 'real' | 'comparativo'
-
-    function setFcpModo(modo) {
-        window._fcpModo = modo;
-        // Atualizar visual dos botões
-        const btns = { projetado: 'fcpBtnProjetado', real: 'fcpBtnReal', comparativo: 'fcpBtnComparativo' };
-        Object.entries(btns).forEach(([k, id]) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (k === modo) {
-                el.style.background = '#FF7A42';
-                el.style.color = '#fff';
-            } else {
-                el.style.background = '#f5f5f5';
-                el.style.color = '#555';
-            }
-        });
-        carregarFCP();
-    }
-
     async function carregarFCP() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
         const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
@@ -6285,24 +6259,15 @@
 
         const filtroAno = document.getElementById('filtroAnoFCP');
         const anoSel    = filtroAno ? filtroAno.value : '';
-        const modo      = window._fcpModo || 'projetado';
 
-        // ── Aviso ──────────────────────────────────────────────────────────
+        // Aviso
         const avisoEl = document.getElementById('fcpAviso');
         if (avisoEl) {
             const qtdPend = contasReceber.filter(c => c.status === 'pendente').length
                           + contasPagar.filter(c => c.status === 'pendente').length;
-            if (modo === 'real') {
-                avisoEl.textContent = '✅ Modo Real: exibe apenas lançamentos já recebidos/pagos, usando a data efetiva de pagamento/recebimento.';
-                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;';
-            } else if (modo === 'comparativo') {
-                avisoEl.textContent = '📊 Modo Comparativo: exibe lado a lado o saldo projetado (pendentes) e o saldo real (realizado) por mês.';
-                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#f3e5f5;color:#4a148c;border:1px solid #ce93d8;';
-            } else {
-                avisoEl.textContent = '📌 Lançamentos pendentes usam a data de vencimento como data projetada. '
-                    + (qtdPend > 0 ? qtdPend + ' lançamento(s) pendente(s) incluídos.' : 'Todos já confirmados.');
-                avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;';
-            }
+            avisoEl.textContent = '📌 Lançamentos pendentes usam a data de vencimento como data projetada. '
+                + (qtdPend > 0 ? qtdPend + ' lançamento(s) pendente(s) incluídos.' : 'Todos já confirmados.');
+            avisoEl.style.cssText = 'display:block;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;';
         }
 
         if (!anoSel) {
@@ -6311,124 +6276,79 @@
             return;
         }
 
-        // ── Dados PROJETADOS (pendentes, usa data_vencimento) ──────────────
-        const recPendAno = contasReceber.filter(c => c.status === 'pendente' && (c.data_vencimento||'').startsWith(anoSel));
-        const pagPendAno = contasPagar.filter(c => c.status === 'pendente' && (c.data_vencimento||'').startsWith(anoSel));
-
-        // ── Dados REAIS (recebidos/pagos, usa data efetiva) ────────────────
-        const recRealAno = contasReceber.filter(c => c.status === 'recebido' && (c.data_recebimento||'').startsWith(anoSel));
-        const pagRealAno = contasPagar.filter(c => c.status === 'pago' && (c.data_pagamento||'').startsWith(anoSel));
-
-        // ── Decidir quais dados mostrar nos cards principais ───────────────
-        const recAno = modo === 'real' ? recRealAno : recPendAno;
-        const pagAno = modo === 'real' ? pagRealAno : pagPendAno;
-
-        const totalEnt = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const totalSai = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const saldoLiq = totalEnt - totalSai;
-
-        // Saldo real (sempre calculado para card extra nos modos real/comparativo)
-        const totalEntReal = recRealAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const totalSaiReal = pagRealAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const saldoReal    = totalEntReal - totalSaiReal;
-
-        // Pendentes (para os cards de pendência)
-        const totPendRec = recPendAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-        const totPendPag = pagPendAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
-
-        // ── Atualizar labels dos cards conforme modo ───────────────────────
-        const labEnt = document.getElementById('fcpLabelEntradas');
-        const labSai = document.getElementById('fcpLabelSaidas');
-        const labLiq = document.getElementById('fcpLabelLiquido');
-        const subEnt = document.getElementById('fcpSubEntradas');
-        const subSai = document.getElementById('fcpSubSaidas');
-        if (modo === 'real') {
-            if (labEnt) labEnt.textContent = '💰 Entradas Reais';
-            if (labSai) labSai.textContent = '📤 Saídas Reais';
-            if (labLiq) labLiq.textContent = '✅ Saldo Real';
-            if (subEnt) subEnt.textContent = 'Recebimentos no ano';
-            if (subSai) subSai.textContent = 'Pagamentos no ano';
-        } else {
-            if (labEnt) labEnt.textContent = '💰 Total Entradas';
-            if (labSai) labSai.textContent = '📤 Total Saídas';
-            if (labLiq) labLiq.textContent = '📊 Saldo Projetado';
-            if (subEnt) subEnt.textContent = 'Recebimentos projetados (ano)';
-            if (subSai) subSai.textContent = 'Pagamentos projetados (ano)';
+        // FCP: apenas lançamentos PENDENTES — usa data_vencimento como data projetada
+        // Lançamentos já pagos/recebidos aparecem no DFC (fluxo real), não aqui
+        function dataFCP(conta, tipo) {
+            return conta.data_vencimento || '';
         }
 
-        // ── Preencher cards ────────────────────────────────────────────────
-        document.getElementById('fcpCardEntradas').textContent = fmtBRL(totalEnt);
-        document.getElementById('fcpCardSaidas').textContent   = fmtBRL(totalSai);
+        // Filtrar apenas pendentes do ano selecionado
+        const recAno = contasReceber.filter(c => c.status === 'pendente' && dataFCP(c,'rec').startsWith(anoSel));
+        const pagAno = contasPagar.filter(c => c.status === 'pendente' && dataFCP(c,'pag').startsWith(anoSel));
+
+        // Totais para cards
+        const totalEnt   = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const totalSai   = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        const saldoLiq   = totalEnt - totalSai;
+        const pendRec    = contasReceber.filter(c => c.status === 'pendente');
+        const pendPag    = contasPagar.filter(c => c.status === 'pendente');
+        const totPendRec = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0); // já filtrado por ano
+        const totPendPag = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+
+        // Saldo real do caixa — buscado automaticamente do DFC quando checkbox marcado
+        const usarSaldoReal = document.getElementById('fcpUsarSaldoReal')?.checked || false;
+        let saldoRealCaixa = 0;
+        if (usarSaldoReal) {
+            // Recalcular fluxo líquido real do DFC (lançamentos já recebidos/pagos — todos os anos)
+            const todosRecebidos = contasReceber.filter(c => c.status === 'recebido');
+            const todosPagos     = contasPagar.filter(c => c.status === 'pago');
+            saldoRealCaixa = todosRecebidos.reduce((s,c) => s + parseFloat(c.valor||0), 0)
+                           - todosPagos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        }
+        const saldoFinalProjetado = saldoRealCaixa + saldoLiq;
+
+        // Card saldo real: mostrar apenas quando ativo
+        const cardSaldoRealBox = document.getElementById('fcpCardSaldoRealBox');
+        const cardSaldoRealEl  = document.getElementById('fcpCardSaldoReal');
+        const cardFinalBox     = document.getElementById('fcpCardFinalBox');
+        const cardFinalEl      = document.getElementById('fcpCardFinal');
+        if (cardSaldoRealBox) cardSaldoRealBox.style.display = usarSaldoReal ? '' : 'none';
+        if (cardFinalBox)     cardFinalBox.style.display     = usarSaldoReal ? '' : 'none';
+        if (cardSaldoRealEl) { cardSaldoRealEl.textContent = fmtBRL(saldoRealCaixa); cardSaldoRealEl.style.color = saldoRealCaixa >= 0 ? '#17a2b8' : '#dc3545'; }
+        if (cardFinalEl)     { cardFinalEl.textContent = fmtValSig(saldoFinalProjetado); cardFinalEl.style.color = saldoFinalProjetado >= 0 ? '#6f42c1' : '#dc3545'; }
+        if (cardFinalBox)    cardFinalBox.style.borderLeftColor = saldoFinalProjetado >= 0 ? '#6f42c1' : '#dc3545';
+
+        // Aviso saldo real
+        const avisoSaldoReal    = document.getElementById('fcpSaldoRealAviso');
+        const avisoSaldoRealVal = document.getElementById('fcpSaldoRealAvisoVal');
+        if (avisoSaldoReal && avisoSaldoRealVal) {
+            if (usarSaldoReal && saldoRealCaixa !== 0) {
+                avisoSaldoRealVal.textContent = fmtBRL(saldoRealCaixa);
+                avisoSaldoReal.style.display = 'block';
+            } else {
+                avisoSaldoReal.style.display = 'none';
+            }
+        }
+
+        document.getElementById('fcpCardEntradas').textContent   = fmtBRL(totalEnt);
+        document.getElementById('fcpCardSaidas').textContent     = fmtBRL(totalSai);
         const cardLiq = document.getElementById('fcpCardLiquido');
         const cardBox = document.getElementById('fcpCardLiquidoBox');
         if (cardLiq) { cardLiq.textContent = fmtValSig(saldoLiq); cardLiq.style.color = saldoLiq >= 0 ? '#28a745' : '#dc3545'; }
         if (cardBox) cardBox.style.borderLeftColor = saldoLiq >= 0 ? '#28a745' : '#dc3545';
         document.getElementById('fcpCardLiquidoLabel').textContent = saldoLiq >= 0 ? 'Saldo positivo' : 'Saldo negativo';
-
-        // Card Saldo Real — visível apenas no modo comparativo
-        const cardRealBox = document.getElementById('fcpCardRealBox');
-        const cardReal    = document.getElementById('fcpCardReal');
-        const cardRealLbl = document.getElementById('fcpCardRealLabel');
-        if (cardRealBox) cardRealBox.style.display = (modo === 'comparativo') ? '' : 'none';
-        if (cardReal) { cardReal.textContent = fmtValSig(saldoReal); cardReal.style.color = saldoReal >= 0 ? '#28a745' : '#dc3545'; }
-        if (cardRealLbl) cardRealLbl.textContent = saldoReal >= 0 ? 'Resultado positivo' : 'Resultado negativo';
-        if (cardRealBox) cardRealBox.style.borderLeftColor = saldoReal >= 0 ? '#28a745' : '#dc3545';
-
-        document.getElementById('fcpCardPendRec').textContent      = fmtBRL(totPendRec);
-        document.getElementById('fcpCardPendRecCount').textContent  = recPendAno.length + ' conta' + (recPendAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
+        document.getElementById('fcpCardPendRec').textContent       = fmtBRL(totPendRec);
+        document.getElementById('fcpCardPendRecCount').textContent  = recAno.length + ' conta' + (recAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
         document.getElementById('fcpCardPendPag').textContent       = fmtBRL(totPendPag);
-        document.getElementById('fcpCardPendPagCount').textContent  = pagPendAno.length + ' conta' + (pagPendAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
+        document.getElementById('fcpCardPendPagCount').textContent  = pagAno.length + ' conta' + (pagAno.length !== 1 ? 's' : '') + ' (pendentes ' + anoSel + ')';
 
-        // ── Título ─────────────────────────────────────────────────────────
-        const titulosTabela = { projetado: '📅 Fluxo Projetado — Jan a Dez ', real: '✅ Fluxo Real — Jan a Dez ', comparativo: '📊 Projetado vs Real — Jan a Dez ' };
-        document.getElementById('fcpTituloTabela').textContent = (titulosTabela[modo] || '') + anoSel;
-        const titulosGraf = { projetado: 'Evolução do Saldo Projetado — Mês a Mês', real: 'Evolução do Saldo Real — Mês a Mês', comparativo: 'Saldo Projetado vs Real — Mês a Mês' };
-        const elTitGraf = document.getElementById('fcpTituloGrafico');
-        if (elTitGraf) elTitGraf.textContent = titulosGraf[modo] || '';
+        // Título
+        document.getElementById('fcpTituloTabela').textContent = '📅 Fluxo de Caixa Projetado — Jan a Dez ' + anoSel;
 
-        // ── Montar vetores mensais ─────────────────────────────────────────
+        // ── Montar tabela mensal horizontal (igual à DRE mensal) ─────────────
         const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-        function vetoresMensais(listaRec, listaPag, campoRec, campoPag) {
-            const catRec = {};
-            listaRec.forEach(c => {
-                const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
-                const key = cat ? cat.nome : 'Receita';
-                if (!catRec[key]) catRec[key] = Array(12).fill(0);
-                const m = parseInt((c[campoRec]||'').substring(5,7)) - 1;
-                if (m >= 0 && m <= 11) catRec[key][m] += parseFloat(c.valor || 0);
-            });
-            const catPag = {};
-            listaPag.forEach(c => {
-                const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
-                const key = cat ? cat.nome : 'Pagamento';
-                if (!catPag[key]) catPag[key] = Array(12).fill(0);
-                const m = parseInt((c[campoPag]||'').substring(5,7)) - 1;
-                if (m >= 0 && m <= 11) catPag[key][m] += parseFloat(c.valor || 0);
-            });
-            const totEntMes = Array(12).fill(0);
-            const totSaiMes = Array(12).fill(0);
-            Object.values(catRec).forEach(arr => arr.forEach((v,m) => { totEntMes[m] += v; }));
-            Object.values(catPag).forEach(arr => arr.forEach((v,m) => { totSaiMes[m] += v; }));
-            const saldoMes = totEntMes.map((e,m) => e - totSaiMes[m]);
-            const acumArr = [];
-            saldoMes.reduce((acc, v, i) => { acumArr[i] = acc + v; return acc + v; }, 0);
-            return { catRec, catPag, totEntMes, totSaiMes, saldoMes, acumArr };
-        }
-
-        // Calcular projetado e real independentemente
-        const proj = vetoresMensais(recPendAno, pagPendAno, 'data_vencimento', 'data_vencimento');
-        const real  = vetoresMensais(recRealAno, pagRealAno, 'data_recebimento', 'data_pagamento');
-
-        // Qual usar para a tabela de categorias
-        const dados = modo === 'real' ? real : proj;
-
-        // ── Formatar ───────────────────────────────────────────────────────
-        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
-        const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
-        const COLS = 14; // 1 desc + 12 meses + 1 total
-
-        // ── Cabeçalho ──────────────────────────────────────────────────────
+        // Cabeçalho
         const headerRow = document.getElementById('fcpHeaderMeses');
         if (headerRow) {
             headerRow.innerHTML = '<th style="min-width:200px;text-align:left;padding:6px 10px;background:#2c3e50;color:#fff;">Descrição</th>' +
@@ -6436,7 +6356,44 @@
                 '<th style="text-align:right;min-width:105px;padding:6px 8px;background:#1a252f;color:#fff;font-weight:700;">Total</th>';
         }
 
-        // ── Funções auxiliares de linha ────────────────────────────────────
+        // Calcular entradas e saídas por mês
+        // Entradas: agrupar recebimentos por categoria (ou "Receita" se sem categoria)
+        const catRec = {}; // { catNome: [val_m0..val_m11] }
+        recAno.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const key = cat ? cat.nome : 'Receita';
+            if (!catRec[key]) catRec[key] = Array(12).fill(0);
+            const m = parseInt(dataFCP(c,'rec').substring(5,7)) - 1;
+            if (m >= 0 && m <= 11) catRec[key][m] += parseFloat(c.valor || 0);
+        });
+
+        // Saídas: agrupar pagamentos por categoria
+        const catPag = {};
+        pagAno.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const key = cat ? cat.nome : 'Pagamento';
+            if (!catPag[key]) catPag[key] = Array(12).fill(0);
+            const m = parseInt(dataFCP(c,'pag').substring(5,7)) - 1;
+            if (m >= 0 && m <= 11) catPag[key][m] += parseFloat(c.valor || 0);
+        });
+
+        // Totais por mês
+        const totEntMes = Array(12).fill(0);
+        const totSaiMes = Array(12).fill(0);
+        Object.values(catRec).forEach(arr => arr.forEach((v,m) => { totEntMes[m] += v; }));
+        Object.values(catPag).forEach(arr => arr.forEach((v,m) => { totSaiMes[m] += v; }));
+        const saldoMes = totEntMes.map((e,m) => e - totSaiMes[m]);
+        let acumArr = [];
+        saldoMes.reduce((acc, v, m) => { acumArr[m] = acc + v; return acc + v; }, saldoRealCaixa);
+
+        const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+        const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
+
+        const tbody = document.getElementById('fcpCorpoMensal');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        // ── Função auxiliar para uma linha ──
         function linhaTabela(label, vals, opts = {}) {
             const { bg = '', fc = '', bold = false, indent = false } = opts;
             const total = vals.reduce((s,v) => s + v, 0);
@@ -6450,124 +6407,76 @@
         }
 
         function linhaSeparador(label) {
-            return '<tr style="background:#e9ecef;"><td colspan="' + COLS + '" style="font-weight:700;font-size:11px;color:#555;padding:5px 10px;text-transform:uppercase;letter-spacing:0.5px;">' + label + '</td></tr>';
+            return '<tr style="background:#e9ecef;"><td colspan="' + (13+1) + '" style="font-weight:700;font-size:11px;color:#555;padding:5px 10px;text-transform:uppercase;letter-spacing:0.5px;">' + label + '</td></tr>';
         }
 
-        // Linha de comparação (dois valores por mês: proj vs real) para modo comparativo
-        function linhaComparativo(label, valsProj, valsReal, opts = {}) {
-            const { bg = '', bold = false } = opts;
-            const totalP = valsProj.reduce((s,v) => s + v, 0);
-            const totalR = valsReal.reduce((s,v) => s + v, 0);
-            const rowStyle = (bg ? 'background:' + bg + ';' : '') + (bold ? 'font-weight:700;' : '');
-            let cells = '';
-            for (let i = 0; i < 12; i++) {
-                const p = valsProj[i], r = valsReal[i];
-                cells += '<td style="text-align:right;padding:3px 6px;font-size:11px;">' +
-                    '<div style="' + cor(p) + (bold?'font-weight:700;':'') + '">' + fmtV(p) + '</div>' +
-                    '<div style="color:#6f42c1;font-size:10px;">' + (r !== 0 ? fmtV(r) : '-') + '</div>' +
-                    '</td>';
-            }
-            cells += '<td style="text-align:right;padding:3px 8px;font-size:11px;">' +
-                '<div style="' + cor(totalP) + 'font-weight:700;">' + fmtV(totalP) + '</div>' +
-                '<div style="color:#6f42c1;font-size:10px;font-weight:700;">' + (totalR !== 0 ? fmtV(totalR) : '-') + '</div>' +
-                '</td>';
-            return '<tr style="' + rowStyle + '">' +
-                '<td style="padding:5px 8px;' + (bold ? 'font-weight:700;' : '') + '">' + label + '</td>' +
-                cells + '</tr>';
-        }
-
-        // ── Montar tbody ───────────────────────────────────────────────────
-        const tbody = document.getElementById('fcpCorpoMensal');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        if (modo === 'comparativo') {
-            // Legenda rápida
-            tbody.innerHTML += '<tr><td colspan="' + COLS + '" style="padding:5px 10px;font-size:11px;color:#555;background:#fafafa;">' +
-                '<span style="color:#28a745;font-weight:700;">■</span> Projetado &nbsp;&nbsp;' +
-                '<span style="color:#6f42c1;font-weight:700;">■</span> Realizado</td></tr>';
-
-            tbody.innerHTML += linhaSeparador('ENTRADAS DE CAIXA');
-            // Merge das categorias de ambos
-            const allRecCats = new Set([...Object.keys(proj.catRec), ...Object.keys(real.catRec)]);
-            allRecCats.forEach(cat => {
-                const p = proj.catRec[cat] || Array(12).fill(0);
-                const r = real.catRec[cat] || Array(12).fill(0);
-                tbody.innerHTML += linhaComparativo('&nbsp;&nbsp;&nbsp;↳ ' + cat, p, r);
-            });
-            tbody.innerHTML += linhaComparativo('= Total Entradas', proj.totEntMes, real.totEntMes, { bg: '#d4edda', bold: true });
-
-            tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
-            const allPagCats = new Set([...Object.keys(proj.catPag), ...Object.keys(real.catPag)]);
-            allPagCats.forEach(cat => {
-                const p = (proj.catPag[cat] || Array(12).fill(0)).map(v => -v);
-                const r = (real.catPag[cat] || Array(12).fill(0)).map(v => -v);
-                tbody.innerHTML += linhaComparativo('&nbsp;&nbsp;&nbsp;↳ ' + cat, p, r);
-            });
-            tbody.innerHTML += linhaComparativo('= Total Saídas', proj.totSaiMes.map(v => -v), real.totSaiMes.map(v => -v), { bg: '#f8d7da', bold: true });
-
-            tbody.innerHTML += linhaSeparador('SALDO');
-            tbody.innerHTML += linhaComparativo('Saldo Mensal', proj.saldoMes, real.saldoMes, { bg: '#f5f5f5', bold: true });
-            tbody.innerHTML += linhaComparativo('Saldo Acumulado', proj.acumArr, real.acumArr, { bg: '#2c3e50', bold: true });
-
+        // ── Seção ENTRADAS ──
+        tbody.innerHTML += linhaSeparador('ENTRADAS DE CAIXA');
+        if (Object.keys(catRec).length === 0) {
+            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>';
         } else {
-            // Modo projetado ou real — tabela simples
-            tbody.innerHTML += linhaSeparador('ENTRADAS DE CAIXA');
-            if (Object.keys(dados.catRec).length === 0) {
-                tbody.innerHTML += '<tr><td colspan="' + COLS + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>';
-            } else {
-                Object.entries(dados.catRec).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
-                    tbody.innerHTML += linhaTabela(cat, arr, { indent: true });
-                });
-            }
-            tbody.innerHTML += linhaTabela('= Total Entradas', dados.totEntMes, { bg: '#d4edda', fc: '#155724', bold: true });
-
-            tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
-            if (Object.keys(dados.catPag).length === 0) {
-                tbody.innerHTML += '<tr><td colspan="' + COLS + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum pagamento no período</td></tr>';
-            } else {
-                Object.entries(dados.catPag).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
-                    tbody.innerHTML += linhaTabela(cat, arr.map(v => -v), { indent: true });
-                });
-            }
-            tbody.innerHTML += linhaTabela('= Total Saídas', dados.totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true });
-
-            tbody.innerHTML += linhaSeparador('SALDO');
-            tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', dados.saldoMes, { bg: '#f5f5f5', bold: true });
-            tbody.innerHTML += linhaTabela('Saldo Acumulado', dados.acumArr, { bg: 'var(--cor-primaria)', fc: 'white', bold: true });
+            Object.entries(catRec).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
+                tbody.innerHTML += linhaTabela(cat, arr, { indent: true });
+            });
         }
+        tbody.innerHTML += linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true });
 
-        // ── Mostrar card ───────────────────────────────────────────────────
+        // ── Seção SAÍDAS ──
+        tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
+        if (Object.keys(catPag).length === 0) {
+            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum pagamento no período</td></tr>';
+        } else {
+            Object.entries(catPag).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
+                const negArr = arr.map(v => -v);
+                tbody.innerHTML += linhaTabela(cat, negArr, { indent: true });
+            });
+        }
+        tbody.innerHTML += linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true });
+
+        // ── Saldo mensal e acumulado ──
+        tbody.innerHTML += linhaSeparador('SALDO');
+        tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true });
+
+        // Saldo Acumulado: cada célula tem fundo e cor próprios (verde/vermelho)
+        const labelAcum = usarSaldoReal && saldoRealCaixa !== 0
+            ? 'Saldo Acumulado (c/ Saldo Real: ' + fmtBRL(saldoRealCaixa) + ')'
+            : 'Saldo Acumulado';
+        const totalAcum = acumArr[acumArr.length - 1] ?? 0;
+        const corAcumTotal = totalAcum >= 0 ? '#155724' : '#721c24';
+        const bgAcumTotal  = totalAcum >= 0 ? '#d4edda' : '#f8d7da';
+        const celulaAcum   = acumArr.map(v => {
+            const bg  = v >= 0 ? '#d4edda' : '#f8d7da';
+            const cor = v >= 0 ? '#155724' : '#721c24';
+            const sinal = v > 0 ? '+' : '';
+            const txt = v !== 0 ? 'R$&nbsp;' + sinal + v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+            return '<td style="text-align:right;padding:5px 8px;font-weight:700;background:' + bg + ';color:' + cor + ';">' + txt + '</td>';
+        }).join('');
+        const totalAcumSinal = totalAcum > 0 ? '+' : '';
+        const totalAcumTxt = totalAcum !== 0 ? 'R$&nbsp;' + totalAcumSinal + totalAcum.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+        tbody.innerHTML += '<tr style="border-top:2px solid #aaa;">'
+            + '<td style="padding:5px 8px;font-weight:700;">' + labelAcum + '</td>'
+            + celulaAcum
+            + '<td style="text-align:right;padding:5px 8px;font-weight:800;font-size:13px;background:' + bgAcumTotal + ';color:' + corAcumTotal + ';">' + totalAcumTxt + '</td>'
+            + '</tr>';
+
+        // Mostrar card
         const cardMensal = document.getElementById('cardFCPMensal');
         if (cardMensal) cardMensal.style.display = '';
 
-        // ── Gráfico ────────────────────────────────────────────────────────
+        // ── Gráfico ──
         const ctx = document.getElementById('chartFCP');
         if (ctx) {
             if (charts.fcp) charts.fcp.destroy();
-            const labels = mNomes.map(m => m + '/' + String(anoSel).slice(2));
-            let datasets = [];
-            if (modo === 'comparativo') {
-                datasets = [
-                    { label: 'Saldo Projetado', data: proj.acumArr, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.1)', borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false },
-                    { label: 'Saldo Real',      data: real.acumArr, type: 'line', borderColor: '#6f42c1', backgroundColor: 'rgba(111,66,193,0.1)', borderWidth: 2, pointBackgroundColor: '#6f42c1', pointRadius: 4, tension: 0.3, fill: false, borderDash: [5,3] }
-                ];
-            } else if (modo === 'real') {
-                datasets = [
-                    { label: 'Entradas Reais', data: real.totEntMes, backgroundColor: 'rgba(40,167,69,0.65)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
-                    { label: 'Saídas Reais',   data: real.totSaiMes, backgroundColor: 'rgba(220,53,69,0.65)', borderColor: '#dc3545', borderWidth: 1, borderRadius: 4 },
-                    { label: 'Saldo Acumulado Real', data: real.acumArr, type: 'line', borderColor: '#6f42c1', backgroundColor: 'rgba(111,66,193,0.1)', borderWidth: 2, pointBackgroundColor: '#6f42c1', pointRadius: 4, tension: 0.3, fill: false }
-                ];
-            } else {
-                datasets = [
-                    { label: 'Entradas', data: proj.totEntMes, backgroundColor: 'rgba(40,167,69,0.65)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
-                    { label: 'Saídas',   data: proj.totSaiMes, backgroundColor: 'rgba(220,53,69,0.65)', borderColor: '#dc3545', borderWidth: 1, borderRadius: 4 },
-                    { label: 'Saldo Acumulado', data: proj.acumArr, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.1)', borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false }
-                ];
-            }
             charts.fcp = new Chart(ctx, {
                 type: 'bar',
-                data: { labels, datasets },
+                data: {
+                    labels: mNomes.map(m => m + '/' + String(anoSel).slice(2)),
+                    datasets: [
+                        { label: 'Entradas', data: totEntMes, backgroundColor: 'rgba(40,167,69,0.65)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Saídas',   data: totSaiMes, backgroundColor: 'rgba(220,53,69,0.65)',  borderColor: '#dc3545', borderWidth: 1, borderRadius: 4 },
+                        { label: 'Saldo Acumulado', data: acumArr, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.1)', borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false }
+                    ]
+                },
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: {
