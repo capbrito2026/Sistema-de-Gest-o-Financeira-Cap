@@ -1922,13 +1922,27 @@
                         </select>
                     </div>
                     <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:9px 14px;border:1.5px solid #17a2b8;border-radius:6px;background:#f0fafd;font-size:13px;font-weight:600;color:#0c5460;user-select:none;white-space:nowrap;">
+                            <input type="checkbox" id="fcpUsarSaldoReal" onchange="carregarFCP()" style="width:16px;height:16px;accent-color:#17a2b8;cursor:pointer;">
+                            🏦 Incluir saldo real do caixa (DFC)
+                        </label>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
                         <button class="btn btn-secondary btn-small" onclick="gerarPDFFCP()" style="background:#e67e22;color:white;">📄 PDF</button>
                     </div>
+                </div>
+                <div id="fcpSaldoRealAviso" style="display:none;margin-top:6px;padding:7px 12px;background:#e8f4fd;border-left:3px solid #17a2b8;border-radius:0 4px 4px 0;font-size:12px;color:#0c5460;">
+                    📌 Saldo do DFC de <strong id="fcpSaldoRealAvisoVal"></strong> incluído como ponto de partida. O saldo acumulado projetado parte desse valor.
                 </div>
             </div>
 
             <!-- Cards resumo FCP -->
             <div class="dashboard-grid" style="margin-bottom:20px;">
+                <div class="stat-card" id="fcpCardSaldoRealBox" style="border-left-color:#17a2b8;display:none;">
+                    <div class="stat-label">🏦 Saldo Real do Caixa</div>
+                    <div class="stat-value" id="fcpCardSaldoReal" style="color:#17a2b8;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Ponto de partida informado</div>
+                </div>
                 <div class="stat-card" style="border-left-color:#28a745;">
                     <div class="stat-label">💰 Total Entradas</div>
                     <div class="stat-value" id="fcpCardEntradas" style="color:#28a745;font-size:20px;">R$ 0,00</div>
@@ -1943,6 +1957,11 @@
                     <div class="stat-label">📊 Saldo Projetado</div>
                     <div class="stat-value" id="fcpCardLiquido" style="font-size:20px;">R$ 0,00</div>
                     <div class="stat-change" id="fcpCardLiquidoLabel">Resultado do ano</div>
+                </div>
+                <div class="stat-card" id="fcpCardFinalBox" style="border-left-color:#6f42c1;display:none;">
+                    <div class="stat-label">🔮 Saldo Final Projetado</div>
+                    <div class="stat-value" id="fcpCardFinal" style="color:#6f42c1;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change">Saldo real + resultado do ano</div>
                 </div>
                 <div class="stat-card" style="border-left-color:#17a2b8;">
                     <div class="stat-label">⏳ Pendentes a Receber</div>
@@ -6276,6 +6295,41 @@
         const totPendRec = recAno.reduce((s,c) => s + parseFloat(c.valor||0), 0); // já filtrado por ano
         const totPendPag = pagAno.reduce((s,c) => s + parseFloat(c.valor||0), 0);
 
+        // Saldo real do caixa — buscado automaticamente do DFC quando checkbox marcado
+        const usarSaldoReal = document.getElementById('fcpUsarSaldoReal')?.checked || false;
+        let saldoRealCaixa = 0;
+        if (usarSaldoReal) {
+            // Recalcular fluxo líquido real do DFC (lançamentos já recebidos/pagos — todos os anos)
+            const todosRecebidos = contasReceber.filter(c => c.status === 'recebido');
+            const todosPagos     = contasPagar.filter(c => c.status === 'pago');
+            saldoRealCaixa = todosRecebidos.reduce((s,c) => s + parseFloat(c.valor||0), 0)
+                           - todosPagos.reduce((s,c) => s + parseFloat(c.valor||0), 0);
+        }
+        const saldoFinalProjetado = saldoRealCaixa + saldoLiq;
+
+        // Card saldo real: mostrar apenas quando ativo
+        const cardSaldoRealBox = document.getElementById('fcpCardSaldoRealBox');
+        const cardSaldoRealEl  = document.getElementById('fcpCardSaldoReal');
+        const cardFinalBox     = document.getElementById('fcpCardFinalBox');
+        const cardFinalEl      = document.getElementById('fcpCardFinal');
+        if (cardSaldoRealBox) cardSaldoRealBox.style.display = usarSaldoReal ? '' : 'none';
+        if (cardFinalBox)     cardFinalBox.style.display     = usarSaldoReal ? '' : 'none';
+        if (cardSaldoRealEl) { cardSaldoRealEl.textContent = fmtBRL(saldoRealCaixa); cardSaldoRealEl.style.color = saldoRealCaixa >= 0 ? '#17a2b8' : '#dc3545'; }
+        if (cardFinalEl)     { cardFinalEl.textContent = fmtValSig(saldoFinalProjetado); cardFinalEl.style.color = saldoFinalProjetado >= 0 ? '#6f42c1' : '#dc3545'; }
+        if (cardFinalBox)    cardFinalBox.style.borderLeftColor = saldoFinalProjetado >= 0 ? '#6f42c1' : '#dc3545';
+
+        // Aviso saldo real
+        const avisoSaldoReal    = document.getElementById('fcpSaldoRealAviso');
+        const avisoSaldoRealVal = document.getElementById('fcpSaldoRealAvisoVal');
+        if (avisoSaldoReal && avisoSaldoRealVal) {
+            if (usarSaldoReal && saldoRealCaixa !== 0) {
+                avisoSaldoRealVal.textContent = fmtBRL(saldoRealCaixa);
+                avisoSaldoReal.style.display = 'block';
+            } else {
+                avisoSaldoReal.style.display = 'none';
+            }
+        }
+
         document.getElementById('fcpCardEntradas').textContent   = fmtBRL(totalEnt);
         document.getElementById('fcpCardSaidas').textContent     = fmtBRL(totalSai);
         const cardLiq = document.getElementById('fcpCardLiquido');
@@ -6330,7 +6384,7 @@
         Object.values(catPag).forEach(arr => arr.forEach((v,m) => { totSaiMes[m] += v; }));
         const saldoMes = totEntMes.map((e,m) => e - totSaiMes[m]);
         let acumArr = [];
-        saldoMes.reduce((acc, v, m) => { acumArr[m] = acc + v; return acc + v; }, 0);
+        saldoMes.reduce((acc, v, m) => { acumArr[m] = acc + v; return acc + v; }, saldoRealCaixa);
 
         const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
@@ -6382,7 +6436,10 @@
         // ── Saldo mensal e acumulado ──
         tbody.innerHTML += linhaSeparador('SALDO');
         tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true });
-        tbody.innerHTML += linhaTabela('Saldo Acumulado', acumArr, { bg: 'var(--cor-primaria)', fc: 'white', bold: true });
+        const labelAcum = usarSaldoReal && saldoRealCaixa !== 0
+            ? 'Saldo Acumulado (c/ Saldo Real: ' + fmtBRL(saldoRealCaixa) + ')'
+            : 'Saldo Acumulado';
+        tbody.innerHTML += linhaTabela(labelAcum, acumArr, { bg: 'var(--cor-primaria)', fc: 'white', bold: true });
 
         // Mostrar card
         const cardMensal = document.getElementById('cardFCPMensal');
