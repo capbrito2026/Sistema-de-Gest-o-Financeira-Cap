@@ -746,6 +746,7 @@
             <div class="menu-item" onclick="showPage('relatorio-receber')">📈 Resumo Recebimentos</div>
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
             <div class="menu-item" onclick="showPage('analise-categoria')">🗂️ Análise por Categoria</div>
+            <div class="menu-item" onclick="showPage('analise-grupo-dre')">📁 Análise por Grupo DRE</div>
             <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
             <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
             <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
@@ -1342,6 +1343,12 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaPaga" onchange="carregarContasPagas()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoPaga" onchange="carregarContasPagas()">
                             <option value="">Todos</option>
@@ -1371,6 +1378,21 @@
                             <option value="">Todos</option>
                         </select>
                     </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-bottom:16px;">
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">💸 Total Pago (filtro atual)</div>
+                    <div class="stat-value" id="totalPagasFiltro" style="color:#dc3545;">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🧾 Quantidade</div>
+                    <div class="stat-value" id="qtdPagasFiltro">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">📊 Ticket Médio</div>
+                    <div class="stat-value" id="ticketPagasFiltro">R$ 0,00</div>
                 </div>
             </div>
 
@@ -1835,6 +1857,85 @@
                         </thead>
                         <tbody id="analiseCatBody"></tbody>
                         <tfoot id="analiseCatFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANÁLISE POR GRUPO DRE -->
+        <div id="analise-grupo-dre" class="page">
+            <div class="page-header">
+                <h1>Análise por Grupo DRE</h1>
+                <button class="btn btn-secondary" onclick="exportarAnaliseGrupoDRE()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row" style="flex-wrap:wrap;gap:12px;align-items:flex-end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Grupo DRE</label>
+                        <select id="filtroGrupoAnaliseDRE" onchange="carregarAnaliseGrupoDRE()">
+                            <option value="">Todos os grupos</option>
+                            <option value="RECEITA_BRUTA">Receita Bruta</option>
+                            <option value="DEDUCOES">Deduções / Impostos s/ Receita</option>
+                            <option value="CPV">CPV / Custo dos Serviços</option>
+                            <option value="DESP_COMERCIAL">Despesas Comerciais</option>
+                            <option value="DESP_ADMIN">Despesas Administrativas</option>
+                            <option value="RECEITA_FINANCEIRA">Receitas Financeiras</option>
+                            <option value="DESP_FINANCEIRA">Despesas Financeiras</option>
+                            <option value="EMPRESTIMO">Empréstimos e Financiamentos</option>
+                            <option value="INVESTIMENTO">Investimentos</option>
+                            <option value="OUTRAS_RECEITAS">Outras Receitas</option>
+                            <option value="OUTRAS_DESPESAS">Outras Despesas</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaGrupoDRE" onchange="carregarAnaliseGrupoDRE()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Ano (competência)</label>
+                        <select id="filtroAnoGrupoDRE" onchange="carregarAnaliseGrupoDRE()">
+                            <option value="">Todos os anos</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <button class="btn btn-secondary btn-small" onclick="limparFiltrosGrupoDRE()">🧹 Limpar filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="grupoDREAviso" style="display:none;"></div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card" style="border-left-color:#17a2b8;">
+                    <div class="stat-label">📁 Grupo Selecionado</div>
+                    <div class="stat-value" id="grupoDRESelecionadoLabel" style="font-size:15px;">Todos os grupos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">💰 Total no Período</div>
+                    <div class="stat-value" id="grupoDRETotal">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🧾 Lançamentos</div>
+                    <div class="stat-value" id="grupoDREQtd">0</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title" id="grupoDRETitulo">📊 Categorias x Mês (Janeiro a Dezembro)</div>
+                <div class="table-container" style="overflow-x:auto;">
+                    <table id="tabelaGrupoDRE" style="font-size:12px;min-width:950px;">
+                        <thead>
+                            <tr id="grupoDREHeaderRow">
+                                <th style="text-align:left;min-width:150px;">Grupo DRE</th>
+                                <th style="text-align:left;min-width:160px;">Categoria</th>
+                                <th style="text-align:right;min-width:100px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grupoDREBody"></tbody>
+                        <tfoot id="grupoDREFoot"></tfoot>
                     </table>
                 </div>
             </div>
@@ -2666,7 +2767,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -2911,7 +3012,7 @@
 
     function atualizarSelectCategorias() {
         // IDs de todos os selects que recebem lista de categorias
-        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat'];
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat', 'filtroCategoriaPaga'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -3140,7 +3241,7 @@
     }
 
     function atualizarSelectFornecedores() {
-        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor'];
+        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor', 'filtroFornecedorPaga'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -3625,9 +3726,13 @@
     async function carregarContasPagas() {
         let filtro = `status=eq.pago`;
         const filtroFornecedor = document.getElementById('filtroFornecedorPaga');
+        const filtroCategoria  = document.getElementById('filtroCategoriaPaga');
 
         if (filtroFornecedor && filtroFornecedor.value) {
             filtro += `&fornecedor_id=eq.${filtroFornecedor.value}`;
+        }
+        if (filtroCategoria && filtroCategoria.value) {
+            filtro += `&categoria_id=eq.${filtroCategoria.value}`;
         }
 
         const dados = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
@@ -3648,6 +3753,17 @@
         if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.startsWith(filtroAno.value));
         if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.includes('-' + filtroMes.value + '-'));
         if (filtroDia && filtroDia.value) filtrado = filtrado.filter(c => c.data_pagamento && c.data_pagamento.endsWith('-' + filtroDia.value));
+
+        // Caixa com total gasto na pesquisa atual
+        const totalFiltro = filtrado.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+        const qtdFiltro = filtrado.length;
+        const ticketFiltro = qtdFiltro > 0 ? totalFiltro / qtdFiltro : 0;
+        const elTotal = document.getElementById('totalPagasFiltro');
+        const elQtd = document.getElementById('qtdPagasFiltro');
+        const elTicket = document.getElementById('ticketPagasFiltro');
+        if (elTotal) elTotal.textContent = 'R$ ' + totalFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elQtd) elQtd.textContent = qtdFiltro;
+        if (elTicket) elTicket.textContent = 'R$ ' + ticketFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
         filtrado.forEach(conta => {
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
@@ -4332,6 +4448,7 @@
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
             else if (pageId === 'analise-categoria') carregarAnaliseCategoria();
+            else if (pageId === 'analise-grupo-dre') carregarAnaliseGrupoDRE();
             else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
             else if (pageId === 'dashboard') atualizarDashboard();
@@ -7330,6 +7447,188 @@
         a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
         const anoAtivo = document.getElementById('filtroAnoAnaliseCat').value || 'completo';
         a.download = 'Analise_Categoria_' + anoAtivo + '.csv';
+        a.click();
+    }
+
+    // ================================================================
+    // ANÁLISE POR GRUPO DRE (Categorias x Mês, Jan a Dez)
+    // ================================================================
+    const _GRUPOS_DRE_RECEITA = new Set(['RECEITA_BRUTA', 'RECEITA_FINANCEIRA', 'OUTRAS_RECEITAS']);
+
+    function _ordemGrupoDRE(id) {
+        const i = DRE_GRUPOS.findIndex(g => g.id === id);
+        return i === -1 ? 999 : i;
+    }
+
+    // Preenche o filtro de Categoria com base no Grupo DRE selecionado
+    function filtrarCategoriasGrupoDRE() {
+        const grupoSel = document.getElementById('filtroGrupoAnaliseDRE').value;
+        const select = document.getElementById('filtroCategoriaGrupoDRE');
+        if (!select) return;
+        const valorAtual = select.value;
+        select.innerHTML = '<option value="">Todas</option>';
+        dadosCache.categorias
+            .filter(c => c.ativo !== false)
+            .filter(c => !grupoSel || c.grupo_dre === grupoSel)
+            .sort((a, b) => a.nome.localeCompare(b.nome))
+            .forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.nome;
+                select.appendChild(opt);
+            });
+        if (valorAtual && Array.from(select.options).some(o => o.value === valorAtual)) {
+            select.value = valorAtual;
+        }
+    }
+
+    async function carregarAnaliseGrupoDRE() {
+        filtrarCategoriasGrupoDRE();
+
+        const contasRec = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        if (contasRec === null || contasPag === null) return;
+
+        const grupoSel = document.getElementById('filtroGrupoAnaliseDRE').value;
+        const catSel   = document.getElementById('filtroCategoriaGrupoDRE').value;
+        const anoSel   = document.getElementById('filtroAnoGrupoDRE').value;
+
+        // Unifica contas a receber e a pagar, resolvendo o grupo DRE de cada uma
+        // (mesma regra de fallback usada na DRE: receber → RECEITA_BRUTA, pagar → DESP_ADMIN)
+        let registros = [];
+        contasRec.filter(c => !!c.data_competencia).forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            registros.push({
+                data_competencia: c.data_competencia,
+                valor: c.valor,
+                grupo: (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA',
+                catNome: cat ? cat.nome : 'Sem Categoria',
+                catId: c.categoria_id
+            });
+        });
+        contasPag.filter(c => !!c.data_competencia).forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            registros.push({
+                data_competencia: c.data_competencia,
+                valor: c.valor,
+                grupo: (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN',
+                catNome: cat ? cat.nome : 'Sem Categoria',
+                catId: c.categoria_id
+            });
+        });
+
+        if (grupoSel) registros = registros.filter(r => r.grupo === grupoSel);
+        if (catSel)   registros = registros.filter(r => String(r.catId) === String(catSel));
+        if (anoSel)   registros = registros.filter(r => r.data_competencia.startsWith(anoSel));
+
+        // Aviso de filtros ativos
+        const avisoEl = document.getElementById('grupoDREAviso');
+        if (avisoEl) {
+            const ativos = [];
+            if (grupoSel) ativos.push('Grupo "' + (_GRUPOS_DRE_LABELS[grupoSel] || grupoSel) + '"');
+            if (catSel) {
+                const cat = dadosCache.categorias.find(c => String(c.id) === String(catSel));
+                ativos.push('Categoria "' + (cat ? cat.nome : catSel) + '"');
+            }
+            if (anoSel) ativos.push('Ano ' + anoSel);
+            avisoEl.style.cssText = 'display:block;padding:8px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;';
+            avisoEl.textContent = ativos.length > 0
+                ? '📌 Filtros ativos: ' + ativos.join(' • ') + '. Valores agrupados por mês de competência (Contas a Pagar + Contas a Receber).'
+                : '✅ Mostrando todas as categorias de todos os grupos DRE, agrupadas por mês de competência (Jan–Dez).';
+        }
+
+        document.getElementById('grupoDRESelecionadoLabel').textContent =
+            grupoSel ? (_GRUPOS_DRE_LABELS[grupoSel] || grupoSel) : 'Todos os grupos';
+
+        // Pivô: grupo + categoria -> [12 meses]
+        const pivot = {};
+        registros.forEach(r => {
+            const m = parseInt(r.data_competencia.substring(5, 7), 10) - 1;
+            if (m < 0 || m > 11) return;
+            const key = r.grupo + '||' + r.catNome;
+            if (!pivot[key]) pivot[key] = { grupo: r.grupo, catNome: r.catNome, meses: Array(12).fill(0) };
+            pivot[key].meses[m] += parseFloat(r.valor || 0);
+        });
+
+        const linhas = Object.values(pivot)
+            .map(l => ({ ...l, total: l.meses.reduce((s, v) => s + v, 0) }))
+            .sort((a, b) => _ordemGrupoDRE(a.grupo) - _ordemGrupoDRE(b.grupo) || b.total - a.total);
+
+        const totalGeral = linhas.reduce((s, l) => s + l.total, 0);
+        const totalPorMes = Array(12).fill(0);
+        linhas.forEach(l => l.meses.forEach((v, i) => totalPorMes[i] += v));
+
+        // Cards
+        document.getElementById('grupoDRETotal').textContent = fmtBRL(totalGeral);
+        document.getElementById('grupoDREQtd').textContent = registros.length;
+
+        // Cabeçalho (Jan a Dez sempre fixo)
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const headerRow = document.getElementById('grupoDREHeaderRow');
+        headerRow.innerHTML = '<th style="text-align:left;min-width:150px;">Grupo DRE</th>' +
+            '<th style="text-align:left;min-width:160px;">Categoria</th>' +
+            mNomes.map(m => '<th style="text-align:right;min-width:80px;">' + m + '</th>').join('') +
+            '<th style="text-align:right;min-width:100px;">Total</th>';
+
+        // Corpo (com separador visual por grupo)
+        const tbody = document.getElementById('grupoDREBody');
+        if (linhas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para os filtros selecionados.</td></tr>';
+        } else {
+            let grupoAnterior = null;
+            let html = '';
+            linhas.forEach(l => {
+                if (l.grupo !== grupoAnterior) {
+                    html += '<tr style="background:#f5f5f5;"><td colspan="15" style="font-weight:700;font-size:11px;color:#555;padding:6px 10px;text-transform:uppercase;letter-spacing:0.5px;">' +
+                        (_GRUPOS_DRE_LABELS[l.grupo] || l.grupo) + '</td></tr>';
+                    grupoAnterior = l.grupo;
+                }
+                const cor = _GRUPOS_DRE_RECEITA.has(l.grupo) ? '#28a745' : '#dc3545';
+                html += '<tr>' +
+                    '<td style="text-align:left;color:#999;font-size:11px;">' + (_GRUPOS_DRE_LABELS[l.grupo] || l.grupo) + '</td>' +
+                    '<td style="text-align:left;font-weight:600;">' + l.catNome + '</td>' +
+                    l.meses.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:' + cor + ';' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+                    '<td style="text-align:right;font-weight:700;color:' + cor + ';">' + fmtBRL(l.total) + '</td>' +
+                    '</tr>';
+            });
+            tbody.innerHTML = html;
+        }
+
+        // Rodapé (totais gerais)
+        const tfoot = document.getElementById('grupoDREFoot');
+        tfoot.innerHTML = '<tr style="font-weight:700;background:#f5f5f5;">' +
+            '<td colspan="2" style="text-align:left;">TOTAL</td>' +
+            totalPorMes.map(v => '<td style="text-align:right;' + (v > 0 ? '' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+            '<td style="text-align:right;">' + fmtBRL(totalGeral) + '</td>' +
+            '</tr>';
+    }
+
+    function limparFiltrosGrupoDRE() {
+        document.getElementById('filtroGrupoAnaliseDRE').value = '';
+        document.getElementById('filtroCategoriaGrupoDRE').value = '';
+        document.getElementById('filtroAnoGrupoDRE').value = '';
+        if (typeof salvarFiltros === 'function') salvarFiltros();
+        carregarAnaliseGrupoDRE();
+    }
+
+    function exportarAnaliseGrupoDRE() {
+        const rows = [];
+        const head = [];
+        document.querySelectorAll('#grupoDREHeaderRow th').forEach(th => head.push(th.textContent.trim()));
+        rows.push(head);
+        document.querySelectorAll('#grupoDREBody tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length > 2) rows.push(Array.from(tds).map(td => td.textContent.trim()));
+        });
+        document.querySelectorAll('#grupoDREFoot tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length > 1) rows.push(Array.from(tds).map(td => td.textContent.trim()));
+        });
+        const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        const grupoAtivo = document.getElementById('filtroGrupoAnaliseDRE').value || 'todos_grupos';
+        a.download = 'Analise_Grupo_DRE_' + grupoAtivo + '.csv';
         a.click();
     }
 
