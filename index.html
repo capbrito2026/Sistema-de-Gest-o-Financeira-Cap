@@ -745,6 +745,7 @@
             <div class="menu-section-title">Análises</div>
             <div class="menu-item" onclick="showPage('relatorio-receber')">📈 Resumo Recebimentos</div>
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
+            <div class="menu-item" onclick="showPage('analise-categoria')">🗂️ Análise por Categoria</div>
             <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
             <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
             <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
@@ -1758,6 +1759,87 @@
             </div>
         </div>
 
+        <!-- ANÁLISE POR CATEGORIA -->
+        <div id="analise-categoria" class="page">
+            <div class="page-header">
+                <h1>Análise por Categoria (Contas a Pagar)</h1>
+                <button class="btn btn-secondary" onclick="exportarAnaliseCategoria()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row" style="flex-wrap:wrap;gap:12px;align-items:flex-end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Ano (competência)</label>
+                        <select id="filtroAnoAnaliseCat" onchange="carregarAnaliseCategoria()">
+                            <option value="">Todos os anos</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Mês (competência)</label>
+                        <select id="filtroMesAnaliseCat" onchange="carregarAnaliseCategoria()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaAnaliseCat" onchange="carregarAnaliseCategoria()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Competência de</label>
+                        <input type="date" id="filtroDataDeAnaliseCat" onchange="carregarAnaliseCategoria()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Competência até</label>
+                        <input type="date" id="filtroDataAteAnaliseCat" onchange="carregarAnaliseCategoria()">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <button class="btn btn-secondary btn-small" onclick="limparFiltrosAnaliseCat()">🧹 Limpar filtros</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analiseCatAviso" style="display:none;"></div>
+
+            <div class="dashboard-grid">
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">💸 Total no Período</div>
+                    <div class="stat-value" id="analiseCatTotal" style="color:#dc3545;">R$ 0,00</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🧾 Lançamentos</div>
+                    <div class="stat-value" id="analiseCatQtd">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">🏆 Categoria de Maior Gasto</div>
+                    <div class="stat-value" id="analiseCatMaior" style="font-size:15px;">-</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title" id="analiseCatTitulo">📊 Categoria x Mês (Janeiro a Dezembro)</div>
+                <div class="table-container" style="overflow-x:auto;">
+                    <table id="tabelaAnaliseCategoria" style="font-size:12px;min-width:900px;">
+                        <thead>
+                            <tr id="analiseCatHeaderRow">
+                                <th style="text-align:left;min-width:160px;">Categoria</th>
+                                <th style="text-align:right;min-width:100px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analiseCatBody"></tbody>
+                        <tfoot id="analiseCatFoot"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- DFC -->
         <div id="dfc" class="page">
             <div class="page-header">
@@ -2584,7 +2666,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -2829,7 +2911,7 @@
 
     function atualizarSelectCategorias() {
         // IDs de todos os selects que recebem lista de categorias
-        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria'];
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -4249,6 +4331,7 @@
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
             else if (pageId === 'dre') carregarDRE();
+            else if (pageId === 'analise-categoria') carregarAnaliseCategoria();
             else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
             else if (pageId === 'dashboard') atualizarDashboard();
@@ -7115,6 +7198,138 @@
         const a = document.createElement('a');
         a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
         a.download = 'DRE_' + (document.getElementById('filtroAnoDRE').value || 'completo') + '.csv';
+        a.click();
+    }
+
+    // ================================================================
+    // ANÁLISE POR CATEGORIA (Contas a Pagar — Jan a Dez, por competência)
+    // ================================================================
+    function _formatarDataBR(iso) {
+        if (!iso) return '';
+        const p = iso.split('-');
+        return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso;
+    }
+
+    async function carregarAnaliseCategoria() {
+        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        if (contasPag === null) return;
+
+        const anoSel = document.getElementById('filtroAnoAnaliseCat').value;
+        const mesSel = document.getElementById('filtroMesAnaliseCat').value;
+        const catSel = document.getElementById('filtroCategoriaAnaliseCat').value;
+        const deSel  = document.getElementById('filtroDataDeAnaliseCat').value;
+        const ateSel = document.getElementById('filtroDataAteAnaliseCat').value;
+
+        // Só entram lançamentos com competência preenchida (regime de competência)
+        let filtrado = contasPag.filter(c => !!c.data_competencia);
+
+        if (anoSel) filtrado = filtrado.filter(c => c.data_competencia.startsWith(anoSel));
+        if (mesSel) filtrado = filtrado.filter(c => c.data_competencia.substring(5, 7) === mesSel);
+        if (catSel) filtrado = filtrado.filter(c => String(c.categoria_id) === String(catSel));
+        if (deSel)  filtrado = filtrado.filter(c => c.data_competencia >= deSel);
+        if (ateSel) filtrado = filtrado.filter(c => c.data_competencia <= ateSel);
+
+        // Aviso de filtros ativos
+        const avisoEl = document.getElementById('analiseCatAviso');
+        if (avisoEl) {
+            const ativos = [];
+            if (anoSel) ativos.push('Ano ' + anoSel);
+            if (mesSel) ativos.push('Mês ' + mesSel);
+            if (catSel) {
+                const cat = dadosCache.categorias.find(c => String(c.id) === String(catSel));
+                ativos.push('Categoria "' + (cat ? cat.nome : catSel) + '"');
+            }
+            if (deSel || ateSel) ativos.push('Competência entre ' + (deSel ? _formatarDataBR(deSel) : '...') + ' e ' + (ateSel ? _formatarDataBR(ateSel) : '...'));
+            avisoEl.style.cssText = 'display:block;padding:8px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;background:#e8f4fd;color:#0c5460;border:1px solid #bee5eb;';
+            avisoEl.textContent = ativos.length > 0
+                ? '📌 Filtros ativos: ' + ativos.join(' • ') + '. Os valores são agrupados por mês de competência (não por vencimento).'
+                : '✅ Mostrando todos os lançamentos de Contas a Pagar com competência preenchida, agrupados por mês (Jan–Dez).';
+        }
+
+        // Pivô: categoria -> [12 meses]
+        const pivot = {};
+        filtrado.forEach(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const nome = cat ? cat.nome : 'Sem Categoria';
+            const m = parseInt(c.data_competencia.substring(5, 7), 10) - 1;
+            if (m < 0 || m > 11) return;
+            if (!pivot[nome]) pivot[nome] = Array(12).fill(0);
+            pivot[nome][m] += parseFloat(c.valor || 0);
+        });
+
+        const linhas = Object.entries(pivot)
+            .map(([nome, meses]) => ({ nome, meses, total: meses.reduce((s, v) => s + v, 0) }))
+            .sort((a, b) => b.total - a.total);
+
+        const totalGeral = linhas.reduce((s, l) => s + l.total, 0);
+        const totalPorMes = Array(12).fill(0);
+        linhas.forEach(l => l.meses.forEach((v, i) => totalPorMes[i] += v));
+
+        // Cards
+        document.getElementById('analiseCatTotal').textContent = fmtBRL(totalGeral);
+        document.getElementById('analiseCatQtd').textContent = filtrado.length;
+        document.getElementById('analiseCatMaior').textContent = linhas.length > 0
+            ? linhas[0].nome + ' (' + fmtBRL(linhas[0].total) + ')'
+            : '-';
+
+        // Cabeçalho (Jan a Dez sempre fixo)
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        const headerRow = document.getElementById('analiseCatHeaderRow');
+        headerRow.innerHTML = '<th style="text-align:left;min-width:160px;">Categoria</th>' +
+            mNomes.map(m => '<th style="text-align:right;min-width:80px;">' + m + '</th>').join('') +
+            '<th style="text-align:right;min-width:100px;">Total</th>';
+
+        // Corpo
+        const tbody = document.getElementById('analiseCatBody');
+        if (linhas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para os filtros selecionados.</td></tr>';
+        } else {
+            tbody.innerHTML = linhas.map(l =>
+                '<tr>' +
+                '<td style="text-align:left;font-weight:600;">' + l.nome + '</td>' +
+                l.meses.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:#dc3545;' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+                '<td style="text-align:right;font-weight:700;color:#dc3545;">' + fmtBRL(l.total) + '</td>' +
+                '</tr>'
+            ).join('');
+        }
+
+        // Rodapé (totais)
+        const tfoot = document.getElementById('analiseCatFoot');
+        tfoot.innerHTML = '<tr style="font-weight:700;background:#f5f5f5;">' +
+            '<td style="text-align:left;">TOTAL</td>' +
+            totalPorMes.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:#dc3545;' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+            '<td style="text-align:right;color:#dc3545;">' + fmtBRL(totalGeral) + '</td>' +
+            '</tr>';
+    }
+
+    function limparFiltrosAnaliseCat() {
+        document.getElementById('filtroAnoAnaliseCat').value = '';
+        document.getElementById('filtroMesAnaliseCat').value = '';
+        document.getElementById('filtroCategoriaAnaliseCat').value = '';
+        document.getElementById('filtroDataDeAnaliseCat').value = '';
+        document.getElementById('filtroDataAteAnaliseCat').value = '';
+        if (typeof salvarFiltros === 'function') salvarFiltros();
+        carregarAnaliseCategoria();
+    }
+
+    function exportarAnaliseCategoria() {
+        const rows = [];
+        const head = [];
+        document.querySelectorAll('#analiseCatHeaderRow th').forEach(th => head.push(th.textContent.trim()));
+        rows.push(head);
+        document.querySelectorAll('#analiseCatBody tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length > 1) rows.push(Array.from(tds).map(td => td.textContent.trim()));
+        });
+        document.querySelectorAll('#analiseCatFoot tr').forEach(tr => {
+            const tds = tr.querySelectorAll('td');
+            if (tds.length > 1) rows.push(Array.from(tds).map(td => td.textContent.trim()));
+        });
+        const csv = rows.map(r => r.map(c => '"' + c.replace(/"/g, '""') + '"').join(',')).join('\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+        const anoAtivo = document.getElementById('filtroAnoAnaliseCat').value || 'completo';
+        a.download = 'Analise_Categoria_' + anoAtivo + '.csv';
         a.click();
     }
 
