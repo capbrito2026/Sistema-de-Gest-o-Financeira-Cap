@@ -6004,7 +6004,7 @@
         const qtdPend = pendentes_receber.length + pendentes_pagar.length;
         if (avisoEl) {
             avisoEl.textContent = qtdPend > 0
-                ? '⚠️ Há ' + qtdPend + ' lançamento(s) com status "pendente" que NÃO são exibidos aqui. DFC e DRE consideram apenas lançamentos marcados como Recebido/Pago.'
+                ? '⚠️ Há ' + qtdPend + ' lançamento(s) com status "pendente" que NÃO são exibidos aqui na DFC (ela usa fluxo de caixa real — data de recebimento/pagamento). A DRE, por regime de competência, já inclui esses pendentes normalmente.'
                 : '✅ Todos os lançamentos estão registrados no DFC.';
             avisoEl.style.display = 'block';
             avisoEl.style.background = qtdPend > 0 ? '#fff3cd' : '#d4edda';
