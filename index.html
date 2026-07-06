@@ -1058,14 +1058,11 @@
                 <div class="table-container">
                     <table id="tabelaExtrato" style="font-size:13px;">
                         <thead><tr>
-                            <th style="width:90px;">Data</th>
-                            <th>Descrição</th>
-                            <th style="width:110px;">Banco</th>
-                            <th style="width:80px;">Tipo</th>
-                            <th style="text-align:right;width:120px;">Crédito</th>
-                            <th style="text-align:right;width:120px;">Débito</th>
-                            <th style="text-align:right;width:120px;">Saldo Dia</th>
-                            <th style="text-align:right;width:130px;">Saldo Acumulado</th>
+                            <th style="width:110px;">Data</th>
+                            <th style="text-align:right;width:150px;">Crédito</th>
+                            <th style="text-align:right;width:150px;">Débito</th>
+                            <th style="text-align:right;width:150px;">Saldo Dia</th>
+                            <th style="text-align:right;width:160px;">Saldo Acumulado</th>
                         </tr></thead>
                         <tbody id="extratoCorpo"></tbody>
                         <tfoot id="extratoRodape"></tfoot>
@@ -5665,35 +5662,58 @@
         const busca         = ((document.getElementById('extratoBusca')||{}).value||'').toLowerCase();
         const recebidas = dadosCache.contasRecebidas || [];
         const pagas     = dadosCache.contasPagas     || [];
-        const movimentos = [];
+
+        // Lista com TODOS os movimentos do(s) banco(s) selecionado(s), sem filtro de ano/mês/busca.
+        // É usada para calcular o saldo acumulado até o início do período filtrado (saldo anterior).
+        const todosMovimentos = [];
         recebidas.forEach(c => {
             const data = c.data_recebimento || ''; if (!data) return;
             if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
-            if (anoFiltro  && !data.startsWith(anoFiltro)) return;
-            if (mesFiltro  && !data.includes('-' + mesFiltro + '-')) return;
-            if (busca && !(c.descricao||'').toLowerCase().includes(busca)) return;
             const banco   = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
             const cliente = (dadosCache.clientes||[]).find(x => x.id === c.cliente_id);
-            movimentos.push({ data, tipo:'credito', descricao:c.descricao||'-',
+            todosMovimentos.push({ data, tipo:'credito', descricao:c.descricao||'-',
                 complemento: cliente?cliente.nome:'', banco: banco?banco.nome:'-',
                 valor: parseFloat(c.valor||0) });
         });
         pagas.forEach(c => {
             const data = c.data_pagamento || ''; if (!data) return;
             if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
-            if (anoFiltro  && !data.startsWith(anoFiltro)) return;
-            if (mesFiltro  && !data.includes('-' + mesFiltro + '-')) return;
-            if (busca && !(c.descricao||'').toLowerCase().includes(busca)) return;
             const banco      = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
             const fornecedor = (dadosCache.fornecedores||[]).find(x => x.id === c.fornecedor_id);
-            movimentos.push({ data, tipo:'debito', descricao:c.descricao||'-',
+            todosMovimentos.push({ data, tipo:'debito', descricao:c.descricao||'-',
                 complemento: fornecedor?fornecedor.nome:'', banco: banco?banco.nome:'-',
                 valor: parseFloat(c.valor||0) });
         });
+
+        // Movimentos dentro do período filtrado (aplica ano/mês/busca)
+        const movimentos = todosMovimentos.filter(m => {
+            if (anoFiltro && !m.data.startsWith(anoFiltro)) return false;
+            if (mesFiltro && !m.data.includes('-' + mesFiltro + '-')) return false;
+            if (busca && !(m.descricao||'').toLowerCase().includes(busca)) return false;
+            return true;
+        });
         movimentos.sort((a,b) => a.data.localeCompare(b.data));
-        let saldoInicial = 0;
+
+        // Saldo inicial cadastrado nos bancos (saldo de abertura da conta)
+        let saldoInicialBancos = 0;
         (dadosCache.bancos||[]).filter(b => bancoIdFiltro ? String(b.id)===String(bancoIdFiltro) : b.ativo)
-            .forEach(b => { saldoInicial += parseFloat(b.saldo_inicial||0); });
+            .forEach(b => { saldoInicialBancos += parseFloat(b.saldo_inicial||0); });
+
+        // Data de início do período filtrado (para acumular tudo que aconteceu antes dele)
+        let dataInicioPeriodo = null;
+        if (anoFiltro && mesFiltro) dataInicioPeriodo = anoFiltro + '-' + mesFiltro + '-01';
+        else if (anoFiltro) dataInicioPeriodo = anoFiltro + '-01-01';
+
+        // Saldo anterior = tudo que já aconteceu antes do início do período filtrado
+        // (ex: saldo final de junho quando o filtro selecionado é julho)
+        let saldoAnterior = 0;
+        if (dataInicioPeriodo) {
+            todosMovimentos.forEach(m => {
+                if (m.data < dataInicioPeriodo) saldoAnterior += (m.tipo === 'credito' ? m.valor : -m.valor);
+            });
+        }
+
+        const saldoInicial = saldoInicialBancos + saldoAnterior;
         const porDia = {};
         movimentos.forEach(m => { if (!porDia[m.data]) porDia[m.data]=[]; porDia[m.data].push(m); });
         const fmtData = d => { const p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; };
@@ -5701,34 +5721,28 @@
         tbody.innerHTML = ''; let acumulado=saldoInicial, totalCred=0, totalDeb=0;
         if (saldoInicial !== 0) {
             const cor = saldoInicial>=0?'#28a745':'#dc3545';
-            tbody.innerHTML += '<tr style="background:#f8f9fa;"><td colspan="4" style="font-weight:600;color:#555;">Saldo Inicial</td>' +
+            const labelSaldo = dataInicioPeriodo ? 'Saldo Anterior (acumulado)' : 'Saldo Inicial';
+            tbody.innerHTML += '<tr style="background:#f8f9fa;"><td style="font-weight:600;color:#555;">'+labelSaldo+'</td>' +
                 '<td></td><td></td><td></td><td style="text-align:right;font-weight:700;color:'+cor+';">'+fmtVal(saldoInicial)+'</td></tr>';
         }
         const dias = Object.keys(porDia).sort();
-        if (dias.length===0) tbody.innerHTML += '<tr><td colspan="8" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
+        if (dias.length===0) tbody.innerHTML += '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
         dias.forEach(dia => {
             const movs=porDia[dia]; let credDia=0,debDia=0;
             movs.forEach(m => { if(m.tipo==='credito') credDia+=m.valor; else debDia+=m.valor; });
             const saldoDia=credDia-debDia; acumulado+=saldoDia; totalCred+=credDia; totalDeb+=debDia;
             const corAcum=acumulado>=0?'#28a745':'#dc3545', corDia=saldoDia>=0?'#28a745':'#dc3545';
-            const n=movs.length;
-            movs.forEach((m,idx) => {
-                const desc = m.descricao+(m.complemento?' — '+m.complemento:'');
-                const cred = m.tipo==='credito'?'<td style="text-align:right;color:#28a745;font-weight:600;">'+fmtVal(m.valor)+'</td>':'<td style="text-align:right;color:#bbb;">-</td>';
-                const deb  = m.tipo==='debito' ?'<td style="text-align:right;color:#dc3545;font-weight:600;">'+fmtVal(m.valor)+'</td>':'<td style="text-align:right;color:#bbb;">-</td>';
-                tbody.innerHTML += '<tr style="'+(idx===0?'border-top:2px solid #eee;':'')+'">' +
-                    '<td>'+(idx===0?'<b>'+fmtData(dia)+'</b>':'')+' </td>' +
-                    '<td>'+desc+'</td>' +
-                    '<td style="font-size:11px;color:#666;">'+m.banco+'</td>' +
-                    '<td><span style="padding:2px 7px;border-radius:10px;font-size:11px;font-weight:600;background:'+(m.tipo==='credito'?'#d4edda;color:#155724':'#f8d7da;color:#721c24')+';"> '+(m.tipo==='credito'?'Crédito':'Débito')+'</span></td>' +
-                    cred + deb +
-                    (idx===0?'<td rowspan="'+n+'" style="text-align:right;font-weight:700;color:'+corDia+';vertical-align:middle;">'+fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲')+'</td>' +
-                    '<td rowspan="'+n+'" style="text-align:right;font-weight:700;color:'+corAcum+';vertical-align:middle;">'+fmtVal(acumulado)+'</td>':'') + '</tr>';
-            });
+            tbody.innerHTML += '<tr>' +
+                '<td><b>'+fmtData(dia)+'</b></td>' +
+                '<td style="text-align:right;color:#28a745;font-weight:600;">'+(credDia>0?fmtVal(credDia):'-')+'</td>' +
+                '<td style="text-align:right;color:#dc3545;font-weight:600;">'+(debDia>0?fmtVal(debDia):'-')+'</td>' +
+                '<td style="text-align:right;font-weight:700;color:'+corDia+';">'+fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲')+'</td>' +
+                '<td style="text-align:right;font-weight:700;color:'+corAcum+';">'+fmtVal(acumulado)+'</td>' +
+                '</tr>';
         });
         const fluxo=totalCred-totalDeb;
         tfoot.innerHTML = '<tr style="font-weight:700;background:#333;color:white;">' +
-            '<td colspan="4">TOTAIS DO PERÍODO</td>' +
+            '<td>TOTAIS DO PERÍODO</td>' +
             '<td style="text-align:right;color:#90ee90;">'+fmtVal(totalCred)+'</td>' +
             '<td style="text-align:right;color:#ffb3b3;">'+fmtVal(totalDeb)+'</td>' +
             '<td style="text-align:right;color:'+(fluxo>=0?'#90ee90':'#ffb3b3')+';">'+fmtVal(Math.abs(fluxo))+'</td>' +
@@ -5737,7 +5751,7 @@
             '<div class="stat-card" style="border-left-color:#28a745;"><div class="stat-label">💚 Total Créditos</div><div class="stat-value" style="color:#28a745;font-size:20px;">'+fmtVal(totalCred)+'</div><div class="stat-change">'+movimentos.filter(m=>m.tipo==='credito').length+' entradas</div></div>' +
             '<div class="stat-card" style="border-left-color:#dc3545;"><div class="stat-label">❤️ Total Débitos</div><div class="stat-value" style="color:#dc3545;font-size:20px;">'+fmtVal(totalDeb)+'</div><div class="stat-change">'+movimentos.filter(m=>m.tipo==='debito').length+' saídas</div></div>' +
             '<div class="stat-card" style="border-left-color:'+(fluxo>=0?'#28a745':'#dc3545')+'"><div class="stat-label">📊 Fluxo do Período</div><div class="stat-value" style="color:'+(fluxo>=0?'#28a745':'#dc3545')+';font-size:20px;">'+fmtVal(Math.abs(fluxo))+'</div><div class="stat-change">'+(fluxo>=0?'Positivo':'Negativo')+'</div></div>' +
-            '<div class="stat-card" style="border-left-color:#FF7A42;"><div class="stat-label">🏦 Saldo Acumulado</div><div class="stat-value" style="color:'+(acumulado>=0?'#28a745':'#dc3545')+';font-size:20px;">'+fmtVal(acumulado)+'</div><div class="stat-change">incl. saldo inicial</div></div>';
+            '<div class="stat-card" style="border-left-color:#FF7A42;"><div class="stat-label">🏦 Saldo Acumulado</div><div class="stat-value" style="color:'+(acumulado>=0?'#28a745':'#dc3545')+';font-size:20px;">'+fmtVal(acumulado)+'</div><div class="stat-change">incl. saldo anterior</div></div>';
     }
 
         function atualizarSelectBancosModal(selectId) {
