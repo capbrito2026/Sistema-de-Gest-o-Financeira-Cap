@@ -450,6 +450,29 @@
             border-bottom: 1px solid var(--cor-borda);
         }
 
+        /* Tabela compacta do Extrato Bancário */
+        #tabelaExtrato th {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+        #tabelaExtrato td {
+            padding: 5px 10px;
+            font-size: 12px;
+            line-height: 1.3;
+            border-bottom: 1px solid #eee;
+        }
+        #tabelaExtrato tr.linha-fim-semana td {
+            background-color: #fdf2f2;
+        }
+        #tabelaExtrato .dia-semana {
+            font-size: 10px;
+            font-weight: 400;
+            color: #999;
+        }
+        #tabelaExtrato tr.linha-fim-semana .dia-semana {
+            color: #c98a8a;
+        }
+
         tbody tr:hover {
             background-color: rgba(255, 122, 66, 0.05);
         }
@@ -1025,7 +1048,10 @@
                 </table>
             </div>
             <div class="card">
-                <div class="card-title">📄 Extrato Bancário</div>
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>📄 Extrato Bancário</span>
+                    <button class="btn btn-secondary" onclick="gerarPDFExtrato()" style="background:#e67e22;color:white;">📄 Gerar PDF</button>
+                </div>
                 <div class="filter-container" style="padding:0 0 16px;">
                     <div class="filter-row" style="gap:12px;flex-wrap:wrap;align-items:flex-end;">
                         <div class="form-group">
@@ -5726,17 +5752,39 @@
                 '<td></td><td></td><td></td><td style="text-align:right;font-weight:700;color:'+cor+';">'+fmtVal(saldoInicial)+'</td></tr>';
         }
         const dias = Object.keys(porDia).sort();
-        if (dias.length===0) tbody.innerHTML += '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
-        dias.forEach(dia => {
-            const movs=porDia[dia]; let credDia=0,debDia=0;
+
+        // Quando um mês específico está selecionado, exibe todos os dias do mês (do dia 01 ao último),
+        // mesmo os que não tiveram movimentação. Caso contrário, mantém apenas os dias com lançamentos.
+        const nomesDiaSemana = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+        let diasParaExibir;
+        if (anoFiltro && mesFiltro) {
+            const anoNum = parseInt(anoFiltro, 10), mesNum = parseInt(mesFiltro, 10);
+            const ultimoDia = new Date(anoNum, mesNum, 0).getDate();
+            diasParaExibir = [];
+            for (let d = 1; d <= ultimoDia; d++) {
+                diasParaExibir.push(anoFiltro + '-' + mesFiltro + '-' + String(d).padStart(2,'0'));
+            }
+        } else {
+            diasParaExibir = dias;
+        }
+
+        if (diasParaExibir.length===0) tbody.innerHTML += '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
+
+        diasParaExibir.forEach(dia => {
+            const movs = porDia[dia] || [];
+            let credDia=0, debDia=0;
             movs.forEach(m => { if(m.tipo==='credito') credDia+=m.valor; else debDia+=m.valor; });
             const saldoDia=credDia-debDia; acumulado+=saldoDia; totalCred+=credDia; totalDeb+=debDia;
-            const corAcum=acumulado>=0?'#28a745':'#dc3545', corDia=saldoDia>=0?'#28a745':'#dc3545';
-            tbody.innerHTML += '<tr>' +
-                '<td><b>'+fmtData(dia)+'</b></td>' +
+            const corAcum=acumulado>=0?'#28a745':'#dc3545', corDia=saldoDia>=0?'#28a745':saldoDia<0?'#dc3545':'#999';
+            const partes = dia.split('-');
+            const dtObj = new Date(parseInt(partes[0],10), parseInt(partes[1],10)-1, parseInt(partes[2],10));
+            const diaSemanaIdx = dtObj.getDay();
+            const ehFimDeSemana = diaSemanaIdx===0 || diaSemanaIdx===6;
+            tbody.innerHTML += '<tr class="'+(ehFimDeSemana?'linha-fim-semana':'')+'">' +
+                '<td><b>'+fmtData(dia)+'</b> <span class="dia-semana">'+nomesDiaSemana[diaSemanaIdx]+'</span></td>' +
                 '<td style="text-align:right;color:#28a745;font-weight:600;">'+(credDia>0?fmtVal(credDia):'-')+'</td>' +
                 '<td style="text-align:right;color:#dc3545;font-weight:600;">'+(debDia>0?fmtVal(debDia):'-')+'</td>' +
-                '<td style="text-align:right;font-weight:700;color:'+corDia+';">'+fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲')+'</td>' +
+                '<td style="text-align:right;font-weight:700;color:'+corDia+';">'+(saldoDia!==0?fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲'):'-')+'</td>' +
                 '<td style="text-align:right;font-weight:700;color:'+corAcum+';">'+fmtVal(acumulado)+'</td>' +
                 '</tr>';
         });
@@ -7830,6 +7878,147 @@
         }
 
         doc.save('relatorio_' + tipo + '_' + hoje.replace(/\//g, '-') + '.pdf');
+    }
+
+
+    // ================================================================
+    // PDF — EXTRATO BANCÁRIO (fluxo diário)
+    // ================================================================
+    function gerarPDFExtrato() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+        const corpoEl   = document.getElementById('extratoCorpo');
+        const rodapeEl  = document.getElementById('extratoRodape');
+        if (!corpoEl) return;
+
+        const linhasCorpo  = Array.from(corpoEl.querySelectorAll('tr'));
+        const linhasRodape = rodapeEl ? Array.from(rodapeEl.querySelectorAll('tr')) : [];
+
+        // --- Filtros ativos, para exibir no subtítulo ---
+        const bancoSel = document.getElementById('extratoFiltrobancoId');
+        const bancoTxt = (bancoSel && bancoSel.selectedOptions[0]) ? bancoSel.selectedOptions[0].text : 'Todos';
+        const anoFiltro = (document.getElementById('extratoFiltroAno')||{}).value || '';
+        const mesSel    = document.getElementById('extratoFiltroMes');
+        const mesFiltro = (mesSel||{}).value || '';
+        const mesTxt    = (mesFiltro && mesSel && mesSel.selectedOptions[0]) ? mesSel.selectedOptions[0].text : '';
+        let periodoTxt = 'Todos os periodos';
+        if (anoFiltro && mesFiltro) periodoTxt = mesTxt + ' de ' + anoFiltro;
+        else if (anoFiltro) periodoTxt = 'Ano de ' + anoFiltro;
+
+        // --- Monta linhas de dados (corpo) preservando estilo especial de cada linha ---
+        const body = [];
+        const metaLinhas = [];
+        linhasCorpo.forEach(linha => {
+            const cells = linha.querySelectorAll('td');
+            if (cells.length < 5) return; // ignora linha de "nenhum lançamento" (colspan único)
+            const row = Array.from(cells).map(td =>
+                normalizarTexto(td.innerText.trim().replace(/\s+/g, ' ').replace(/[▲▼]/g, '').trim())
+            );
+            body.push(row);
+            metaLinhas.push({
+                fimDeSemana:   linha.classList.contains('linha-fim-semana'),
+                saldoAnterior: (linha.getAttribute('style')||'').indexOf('f8f9fa') !== -1
+            });
+        });
+        linhasRodape.forEach(linha => {
+            const cells = linha.querySelectorAll('td');
+            if (cells.length < 5) return;
+            const row = Array.from(cells).map(td =>
+                normalizarTexto(td.innerText.trim().replace(/\s+/g, ' ').replace(/[▲▼]/g, '').trim())
+            );
+            body.push(row);
+            metaLinhas.push({ total: true });
+        });
+
+        if (body.length === 0) {
+            alert('Não há dados para exportar.');
+            return;
+        }
+
+        // --- Cabeçalho do documento ---
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestao Financeira', 10, 10);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        doc.text('Gerado em: ' + hoje, pageW - 10, 10, { align: 'right' });
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Extrato Bancario', pageW / 2, 24, { align: 'center' });
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text(normalizarTexto('Banco: ' + bancoTxt + '   |   Periodo: ' + periodoTxt), pageW / 2, 30, { align: 'center' });
+
+        // --- Tabela ---
+        doc.autoTable({
+            head: [['Data', 'Credito', 'Debito', 'Saldo Dia', 'Saldo Acumulado']],
+            body: body,
+            startY: 35,
+            margin: { left: 12, right: 12, bottom: 12 },
+            styles: {
+                fontSize: 8,
+                cellPadding: 1.6,
+                overflow: 'linebreak',
+                valign: 'middle',
+                lineColor: [220, 220, 220],
+                lineWidth: 0.1,
+                textColor: [50, 50, 50]
+            },
+            headStyles: {
+                fillColor: [255, 122, 66],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+                halign: 'left',
+                cellPadding: 2
+            },
+            columnStyles: {
+                0: { cellWidth: 38, halign: 'left'  },
+                1: { cellWidth: 35, halign: 'right' },
+                2: { cellWidth: 35, halign: 'right' },
+                3: { cellWidth: 35, halign: 'right' },
+                4: { cellWidth: 40, halign: 'right' }
+            },
+            didParseCell: function (data) {
+                if (data.section !== 'body') return;
+                const meta = metaLinhas[data.row.index];
+                if (!meta) return;
+                if (meta.total) {
+                    data.cell.styles.fillColor = [51, 51, 51];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                    return;
+                }
+                if (meta.saldoAnterior) {
+                    data.cell.styles.fillColor = [248, 249, 250];
+                    data.cell.styles.fontStyle = 'bold';
+                } else if (meta.fimDeSemana) {
+                    data.cell.styles.fillColor = [253, 242, 242];
+                }
+                const txt = (data.cell.text[0] || '').trim();
+                if (txt && txt !== '-') {
+                    if (data.column.index === 1) data.cell.styles.textColor = [40, 167, 69];
+                    if (data.column.index === 2) data.cell.styles.textColor = [220, 53, 69];
+                }
+            },
+            didDrawPage: function (data) {
+                doc.setFontSize(7);
+                doc.setTextColor(120, 120, 120);
+                doc.setFont(undefined, 'normal');
+                const pageNum = doc.internal.getNumberOfPages();
+                doc.text('Pagina ' + data.pageNumber + ' de ' + pageNum, pageW / 2, pageH - 5, { align: 'center' });
+            }
+        });
+
+        doc.save('extrato_bancario_' + hoje.replace(/\//g, '-') + '.pdf');
     }
 
 
