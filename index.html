@@ -2365,10 +2365,6 @@
                     </table>
                 </div>
             </div>
-            <div class="card" style="margin-top:16px;">
-                <div class="card-title">Evolução Mensal — Receita x Resultado</div>
-                <div class="chart-container"><canvas id="chartDRE"></canvas></div>
-            </div>
         </div>
 <!-- MODAL BANCO -->
 <div class="modal" id="modalBanco">
@@ -7276,7 +7272,6 @@
             if (cardMensal) cardMensal.style.display = 'none';
         }
 
-        criarGraficoDRE(dreLancs, contasRec, contasPag, anoSel);
     }
 
     function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
@@ -7521,8 +7516,11 @@
             { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '' },
             { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '' },
             { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '' },
-            { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: 'var(--cor-primaria)', cor: 'white', bold: true },
+            { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
         ];
+
+        const corSinal = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#999;';
+        const fmtVSinal = v => v !== 0 ? (v < 0 ? '- ' : '+ ') + 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
 
         tbody.innerHTML = '';
         linhas.forEach(linha => {
@@ -7533,8 +7531,8 @@
             const bold  = linha.bold ? 'font-weight:700;' : '';
             tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
                 '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
-                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (linha.cor ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
-                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (linha.cor ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
+                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (linha.sinal ? corSinal(v) : (linha.cor ? '' : cor(v))) + '">' + (linha.sinal ? fmtVSinal(v) : fmtV(v)) + '</td>').join('') +
+                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (linha.sinal ? corSinal(total) : (linha.cor ? '' : cor(total))) + '">' + (linha.sinal ? fmtVSinal(total) : fmtV(total)) + '</td>' +
                 '</tr>';
 
             // Subcategorias expandidas
@@ -7549,73 +7547,6 @@
                         '<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;">' + fmtV(-totalSub) + '</td>' +
                         '</tr>';
                 });
-            }
-        });
-    }
-
-    function criarGraficoDRE(dreLancs, contasRec, contasPag, anoSel) {
-        const ctx = document.getElementById('chartDRE');
-        if (!ctx) return;
-        if (charts.dre) { charts.dre.destroy(); }
-
-        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-        const labels = [];
-        const receitasData = [];
-        const resultadosData = [];
-
-        if (anoSel) {
-            for (let m = 0; m < 12; m++) {
-                const mm = String(m + 1).padStart(2, '0');
-                const pref = anoSel + '-' + mm;
-                labels.push(mNomes[m] + '/' + String(anoSel).slice(2));
-
-                let rb = (dreLancs || []).filter(l => l.grupo === 'RECEITA_BRUTA' && l.competencia && l.competencia.startsWith(pref))
-                                          .reduce((s,l) => s + parseFloat(l.valor||0), 0);
-                rb += contasRec.filter(c => c.data_competencia && c.data_competencia.startsWith(pref))
-                               .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-
-                let costs = (dreLancs || []).filter(l => l.grupo !== 'RECEITA_BRUTA' && l.grupo !== 'RECEITA_FINANCEIRA' && l.grupo !== 'OUTRAS_RECEITAS' && l.competencia && l.competencia.startsWith(pref))
-                                             .reduce((s,l) => s + parseFloat(l.valor||0), 0);
-                costs += contasPag.filter(c => c.data_competencia && c.data_competencia.startsWith(pref))
-                                   .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-
-                receitasData.push(rb);
-                resultadosData.push(rb - costs);
-            }
-        } else {
-            // Últimos 12 meses
-            for (let i = 11; i >= 0; i--) {
-                const d = new Date(); d.setMonth(d.getMonth() - i);
-                const pref = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
-                labels.push(d.toLocaleDateString('pt-BR',{month:'short',year:'2-digit'}));
-                let rb = contasRec.filter(c => (c.data_competencia || c.data_recebimento || '').startsWith(pref))
-                                   .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-                let costs = contasPag.filter(c => (c.data_competencia || c.data_pagamento || '').startsWith(pref))
-                                      .reduce((s,c) => s + parseFloat(c.valor||0), 0);
-                receitasData.push(rb); resultadosData.push(rb - costs);
-            }
-        }
-
-        charts.dre = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [
-                    { label: 'Receita Bruta', data: receitasData, backgroundColor: 'rgba(40,167,69,0.6)', borderColor: '#28a745', borderWidth: 1, borderRadius: 4 },
-                    { label: 'Resultado Líquido', data: resultadosData, type: 'line', borderColor: '#FF7A42', backgroundColor: 'rgba(255,122,66,0.08)',
-                      borderWidth: 2, pointBackgroundColor: '#FF7A42', pointRadius: 4, tension: 0.3, fill: false }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: true, position: 'top' },
-                    tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': R$ ' + Math.abs(ctx.parsed.y).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) }}
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v.toFixed(0) }, grid: { color: 'rgba(0,0,0,0.05)' } },
-                    x: { grid: { display: false } }
-                }
             }
         });
     }
