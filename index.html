@@ -767,6 +767,12 @@
         </div>
 
         <div class="menu-section">
+            <div class="menu-section-title">Cheques</div>
+            <div class="menu-item" onclick="showPage('chequesAberto')">🧾 Cheques em Aberto</div>
+            <div class="menu-item" onclick="showPage('chequesCompensados')">✅ Cheques Compensados</div>
+        </div>
+
+        <div class="menu-section">
             <div class="menu-section-title">Análises</div>
             <div class="menu-item" onclick="showPage('relatorio-receber')">📈 Resumo Recebimentos</div>
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
@@ -1613,6 +1619,141 @@
                                 <th>A Receber</th>
                                 <th>Saldo do Dia</th>
                                 <th>Indicação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHEQUES EM ABERTO -->
+        <div id="chequesAberto" class="page">
+            <div class="page-header">
+                <h1>🧾 Cheques em Aberto</h1>
+                <button class="btn btn-primary btn-small" onclick="openModalCheque()">+ Novo Cheque</button>
+            </div>
+
+            <div class="alert alert-success" id="alertChequesAberto"></div>
+
+            <!-- Cards resumo -->
+            <div class="dashboard-grid" style="margin-bottom:20px;">
+                <div class="stat-card" style="border-left-color:#ffc107;">
+                    <div class="stat-label">🟡 Em Aberto</div>
+                    <div class="stat-value" id="chequeCardAbertoValor" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardAbertoQtd">0 cheque(s)</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">🔴 Vencidos</div>
+                    <div class="stat-value" id="chequeCardVencidoValor" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardVencidoQtd">0 cheque(s)</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#28a745;cursor:pointer;" onclick="showPage('chequesCompensados')" title="Ver cheques compensados">
+                    <div class="stat-label">✅ Compensados</div>
+                    <div class="stat-value" id="chequeCardCompensadoValor" style="color:#28a745;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardCompensadoQtd">0 cheque(s)</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Mês (Bom Para)</label>
+                        <select id="filtroMesCalendarioCheque" onchange="gerarCalendarioCheque()">
+                            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+                            <option value="2">Março</option><option value="3">Abril</option>
+                            <option value="4">Maio</option><option value="5">Junho</option>
+                            <option value="6">Julho</option><option value="7">Agosto</option>
+                            <option value="8">Setembro</option><option value="9">Outubro</option>
+                            <option value="10">Novembro</option><option value="11">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoCalendarioCheque" onchange="gerarCalendarioCheque()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorChequeAberto" onchange="atualizarTabelaChequesAberto(); gerarCalendarioCheque();"><option value="">Todos</option></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendário -->
+            <div class="card">
+                <div class="card-title">📅 Calendário de Cheques (Bom Para)</div>
+                <div id="calendarContainerCheque" style="padding:10px 0;"></div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">📋 Cheques em Aberto</div>
+                <div class="table-container">
+                    <table id="tabelaChequesAberto">
+                        <thead>
+                            <tr>
+                                <th>Bom Para</th>
+                                <th>Fornecedor</th>
+                                <th>Banco</th>
+                                <th>Data Entrada</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHEQUES COMPENSADOS -->
+        <div id="chequesCompensados" class="page">
+            <div class="page-header">
+                <h1>✅ Cheques Compensados</h1>
+            </div>
+
+            <div class="alert alert-success" id="alertChequesCompensados"></div>
+
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano (Compensação)</label>
+                        <select id="filtroAnoChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês (Compensação)</label>
+                        <select id="filtroMesChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 Cheques Compensados</div>
+                <div class="table-container">
+                    <table id="tabelaChequesCompensados">
+                        <thead>
+                            <tr>
+                                <th>Bom Para</th>
+                                <th>Fornecedor</th>
+                                <th>Banco</th>
+                                <th>Data Entrada</th>
+                                <th>Data Compensação</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -2841,6 +2982,50 @@
     </div>
 </div>
 
+<!-- MODAL CHEQUE -->
+<div class="modal" id="modalCheque">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalChequeTitulo">Novo Cheque</span>
+            <button class="modal-close" onclick="closeModal('modalCheque')">&times;</button>
+        </div>
+        <form onsubmit="salvarCheque(event)">
+            <div class="form-group">
+                <label>Fornecedor*</label>
+                <select id="fornecedorCheque" required><option value="">Selecione...</option></select>
+            </div>
+            <div class="form-group">
+                <label>Banco*</label>
+                <select id="bancoCheque" required><option value="">Selecione...</option></select>
+            </div>
+            <div class="form-group">
+                <label>Número do Cheque</label>
+                <input type="text" id="numeroCheque" placeholder="Opcional">
+            </div>
+            <div class="form-group">
+                <label>Bom Para (Data)*</label>
+                <input type="date" id="bomParaCheque" required>
+            </div>
+            <div class="form-group">
+                <label>Data Entrada*</label>
+                <input type="date" id="dataEntradaCheque" required>
+            </div>
+            <div class="form-group">
+                <label>Valor*</label>
+                <input type="number" id="valorCheque" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Observação</label>
+                <textarea id="observacaoCheque" rows="2" placeholder="Opcional"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCheque')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // CONFIG SUPABASE
     const SUPABASE_URL = 'https://tigjibtprqvrbjhqeqld.supabase.co';
@@ -2858,7 +3043,8 @@
         contasReceber: [],
         contasPagar: [],
         contasRecebidas: [],
-        contasPagas: []
+        contasPagas: [],
+        cheques: []
     };
 
     let charts = {};
@@ -2866,7 +3052,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroMesCalendarioCheque", "filtroAnoCalendarioCheque", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -3374,7 +3560,7 @@
     }
 
     function atualizarSelectFornecedores() {
-        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor', 'filtroFornecedorPaga'];
+        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor', 'filtroFornecedorPaga', 'fornecedorCheque', 'filtroFornecedorChequeAberto', 'filtroFornecedorChequeComp'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -4774,8 +4960,13 @@
         if (page) {
             page.classList.add('active');
 
-            // Marca o menu como ativo
-            event.target.classList.add('active');
+            // Marca o menu como ativo (funciona tanto em clique quanto em chamada programática)
+            if (typeof event !== 'undefined' && event && event.target && event.target.classList && event.target.classList.contains('menu-item')) {
+                event.target.classList.add('active');
+            } else {
+                const menuItem = document.querySelector('.menu-item[onclick*="showPage(\'' + pageId + '\')"]');
+                if (menuItem) menuItem.classList.add('active');
+            }
 
             // Carrega dados quando a página for exibida
             if (pageId === 'categorias') carregarCategorias();
@@ -4795,6 +4986,8 @@
             else if (pageId === 'analise-grupo-dre') carregarAnaliseGrupoDRE();
             else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
+            else if (pageId === 'chequesAberto') carregarCheques();
+            else if (pageId === 'chequesCompensados') carregarCheques();
             else if (pageId === 'dashboard') atualizarDashboard();
         }
     }
@@ -6190,6 +6383,341 @@
         if (r !== null) {
             showAlert('Banco deletado!', 'alertBancos', 'success');
             await carregarBancos();
+        }
+    }
+
+    // ================================================================
+    // CHEQUES
+    // ================================================================
+    function _fmtMoedaCheque(v) {
+        return 'R$ ' + parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function _hojeStrCheque() {
+        const h = new Date();
+        return h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0') + '-' + String(h.getDate()).padStart(2, '0');
+    }
+
+    function _dataFmtCheque(d) {
+        return d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+    }
+
+    async function carregarCheques() {
+        const cheques = await fetchSupabase('cheques', 'GET', null, 'order=bom_para.asc');
+        if (!cheques) return;
+        dadosCache.cheques = cheques;
+        atualizarCardsCheques();
+        atualizarTabelaChequesAberto();
+        atualizarTabelaChequesCompensados();
+        _garantirFiltroCalendarioCheque();
+        gerarCalendarioCheque();
+    }
+
+    function atualizarCardsCheques() {
+        const hoje = _hojeStrCheque();
+        const lista = dadosCache.cheques || [];
+        const abertosNaoVencidos = lista.filter(c => c.status === 'aberto' && c.bom_para >= hoje);
+        const vencidos = lista.filter(c => c.status === 'aberto' && c.bom_para < hoje);
+        const compensados = lista.filter(c => c.status === 'compensado');
+        const somaVal = arr => arr.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+
+        const elAV = document.getElementById('chequeCardAbertoValor');
+        const elAQ = document.getElementById('chequeCardAbertoQtd');
+        const elVV = document.getElementById('chequeCardVencidoValor');
+        const elVQ = document.getElementById('chequeCardVencidoQtd');
+        const elCV = document.getElementById('chequeCardCompensadoValor');
+        const elCQ = document.getElementById('chequeCardCompensadoQtd');
+
+        if (elAV) elAV.textContent = _fmtMoedaCheque(somaVal(abertosNaoVencidos));
+        if (elAQ) elAQ.textContent = abertosNaoVencidos.length + ' cheque(s)';
+        if (elVV) elVV.textContent = _fmtMoedaCheque(somaVal(vencidos));
+        if (elVQ) elVQ.textContent = vencidos.length + ' cheque(s)';
+        if (elCV) elCV.textContent = _fmtMoedaCheque(somaVal(compensados));
+        if (elCQ) elCQ.textContent = compensados.length + ' cheque(s)';
+    }
+
+    function atualizarTabelaChequesAberto() {
+        const tbody = document.querySelector('#tabelaChequesAberto tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const hoje = _hojeStrCheque();
+        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque em aberto</td></tr>';
+            return;
+        }
+
+        lista.forEach(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const vencido = cheque.bom_para < hoje;
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
+                '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + (banco ? banco.nome : '-') + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
+                '<td>' + _fmtMoedaCheque(cheque.valor) + '</td>' +
+                '<td><span class="status-badge ' + (vencido ? 'status-atrasado' : 'status-pendente') + '">' + (vencido ? 'Vencido' : 'Em Aberto') + '</span></td>' +
+                '<td>' +
+                    '<button class="btn btn-success btn-small" onclick="compensarCheque(' + cheque.id + ')">✔ Compensar</button> ' +
+                    '<button class="btn btn-secondary btn-small" onclick="editarCheque(' + cheque.id + ')">Editar</button> ' +
+                    '<button class="btn btn-danger btn-small" onclick="deletarCheque(' + cheque.id + ')">Excluir</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function atualizarTabelaChequesCompensados() {
+        const tbody = document.querySelector('#tabelaChequesCompensados tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const filtroForn = (document.getElementById('filtroFornecedorChequeComp') || {}).value || '';
+        const filtroAno = (document.getElementById('filtroAnoChequeComp') || {}).value || '';
+        const filtroMes = (document.getElementById('filtroMesChequeComp') || {}).value || '';
+
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'compensado');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroAno) lista = lista.filter(c => (c.data_compensacao || '').slice(0, 4) === filtroAno);
+        if (filtroMes) lista = lista.filter(c => (c.data_compensacao || '').slice(5, 7) === filtroMes);
+        lista = lista.slice().sort((a, b) => (b.data_compensacao || '').localeCompare(a.data_compensacao || ''));
+
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque compensado</td></tr>';
+            return;
+        }
+
+        lista.forEach(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
+                '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + (banco ? banco.nome : '-') + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_compensacao) + '</td>' +
+                '<td>' + _fmtMoedaCheque(cheque.valor) + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-secondary btn-small" onclick="reabrirCheque(' + cheque.id + ')">↩ Reabrir</button> ' +
+                    '<button class="btn btn-danger btn-small" onclick="deletarCheque(' + cheque.id + ')">Excluir</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function _garantirFiltroCalendarioCheque() {
+        const mesEl = document.getElementById('filtroMesCalendarioCheque');
+        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
+        if (mesEl && !mesEl.dataset.init && !mesEl.value) {
+            mesEl.value = String(new Date().getMonth());
+        }
+        if (mesEl) mesEl.dataset.init = '1';
+        if (anoEl && !anoEl.dataset.init && anoEl.options.length && !anoEl.value) {
+            anoEl.value = String(new Date().getFullYear());
+        }
+        if (anoEl) anoEl.dataset.init = '1';
+    }
+
+    function gerarCalendarioCheque() {
+        const mesEl = document.getElementById('filtroMesCalendarioCheque');
+        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
+        const container = document.getElementById('calendarContainerCheque');
+        if (!container) return;
+        const hoje = new Date();
+        const mes = mesEl && mesEl.value !== '' ? parseInt(mesEl.value) : hoje.getMonth();
+        const ano = anoEl && anoEl.value ? parseInt(anoEl.value) : hoje.getFullYear();
+
+        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+
+        const HOJE = new Date(); HOJE.setHours(0, 0, 0, 0);
+        const hojeStr = _hojeStrCheque();
+
+        const primeiroDia = new Date(ano, mes, 1).getDay();
+        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+        const nomeMes = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+        let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
+            <button onclick="navegarMesCheque(-1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">‹</button>
+            <strong style="font-size:16px;text-transform:capitalize;">${nomeMes}</strong>
+            <button onclick="navegarMesCheque(1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">›</button>
+        </div>`;
+
+        html += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">';
+        html += '<tr>' + diasSemana.map(d => {
+            const isWeekend = d === 'Dom' || d === 'Sáb';
+            return `<th style="padding:8px 4px;text-align:center;font-size:12px;color:${isWeekend ? '#aaa' : '#555'};font-weight:600;border-bottom:2px solid #eee;">${d}</th>`;
+        }).join('') + '</tr>';
+
+        let diaAtual = 1;
+        for (let semana = 0; semana < 6; semana++) {
+            if (diaAtual > ultimoDia) break;
+            html += '<tr>';
+            for (let col = 0; col < 7; col++) {
+                if ((semana === 0 && col < primeiroDia) || diaAtual > ultimoDia) {
+                    html += '<td style="height:80px;border:1px solid #f0f0f0;background:#fafafa;"></td>';
+                } else {
+                    const dataStr = ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(diaAtual).padStart(2, '0');
+                    const doDia = lista.filter(c => c.bom_para === dataStr);
+                    const dObj = new Date(dataStr + 'T12:00:00');
+                    const isHoje = dObj.getTime() === HOJE.getTime();
+                    const isWeekend = col === 0 || col === 6;
+                    const vencido = dataStr < hojeStr;
+
+                    const totalDia = doDia.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+
+                    let bgColor = isWeekend ? '#f9f9f9' : '#fff';
+                    let borderStyle = isHoje ? '2px solid #FF7A42' : '1px solid #f0f0f0';
+
+                    if (doDia.length > 0) bgColor = vencido ? '#fef2f2' : '#fff8e1';
+
+                    let cellContent = `<div style="font-weight:${isHoje ? '700' : '500'};font-size:13px;color:${isHoje ? '#FF7A42' : '#333'};margin-bottom:3px;">${diaAtual}</div>`;
+
+                    if (doDia.length > 0) {
+                        const nomes = doDia.slice(0, 2).map(c => {
+                            const forn = (dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id);
+                            return forn ? forn.nome.split(' ')[0] : 'Forn.';
+                        }).join(', ');
+                        const corTag = vencido ? '#721c24' : '#856404';
+                        const bgTag = vencido ? '#f8d7da' : '#fff3cd';
+                        cellContent += `<div style="background:${bgTag};color:${corTag};border-radius:4px;padding:2px 5px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${nomes}">
+                            🧾 R$ ${totalDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${doDia.length > 1 ? '(' + doDia.length + 'x)' : ''}
+                        </div>`;
+                    }
+
+                    html += `<td style="height:80px;border:${borderStyle};background:${bgColor};padding:5px;vertical-align:top;cursor:default;" title="${dataStr}">${cellContent}</td>`;
+                    diaAtual++;
+                }
+            }
+            html += '</tr>';
+        }
+        html += '</table>';
+        container.innerHTML = html;
+    }
+
+    function navegarMesCheque(delta) {
+        const mesEl = document.getElementById('filtroMesCalendarioCheque');
+        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
+        if (!mesEl || !anoEl) return;
+        let mes = parseInt(mesEl.value) + delta;
+        let ano = parseInt(anoEl.value);
+        if (mes < 0) { mes = 11; ano--; }
+        if (mes > 11) { mes = 0; ano++; }
+        mesEl.value = mes;
+        let optExists = Array.from(anoEl.options).some(o => parseInt(o.value) === ano);
+        if (!optExists) {
+            const opt = document.createElement('option');
+            opt.value = ano; opt.textContent = ano;
+            anoEl.appendChild(opt);
+        }
+        anoEl.value = ano;
+        gerarCalendarioCheque();
+    }
+
+    function openModalCheque() {
+        window._editandoChequeId = null;
+        document.getElementById('modalChequeTitulo').textContent = 'Novo Cheque';
+        document.getElementById('numeroCheque').value = '';
+        atualizarSelectBancosModal('bancoCheque');
+        document.getElementById('fornecedorCheque').value = '';
+        document.getElementById('bancoCheque').value = '';
+        document.getElementById('bomParaCheque').value = '';
+        document.getElementById('dataEntradaCheque').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('valorCheque').value = '';
+        document.getElementById('observacaoCheque').value = '';
+        document.getElementById('modalCheque').classList.add('active');
+    }
+
+    function editarCheque(id) {
+        const cheque = (dadosCache.cheques || []).find(c => c.id === id);
+        if (!cheque) return;
+        window._editandoChequeId = id;
+        atualizarSelectBancosModal('bancoCheque');
+        document.getElementById('modalChequeTitulo').textContent = 'Editar Cheque';
+        document.getElementById('numeroCheque').value = cheque.numero || '';
+        document.getElementById('fornecedorCheque').value = cheque.fornecedor_id || '';
+        document.getElementById('bancoCheque').value = cheque.banco_id || '';
+        document.getElementById('bomParaCheque').value = cheque.bom_para || '';
+        document.getElementById('dataEntradaCheque').value = cheque.data_entrada || '';
+        document.getElementById('valorCheque').value = cheque.valor || '';
+        document.getElementById('observacaoCheque').value = cheque.observacao || '';
+        document.getElementById('modalCheque').classList.add('active');
+    }
+
+    async function salvarCheque(event) {
+        event.preventDefault();
+        const fornecedorId = document.getElementById('fornecedorCheque').value;
+        const bancoId = document.getElementById('bancoCheque').value;
+        const bomPara = document.getElementById('bomParaCheque').value;
+        const dataEntrada = document.getElementById('dataEntradaCheque').value;
+        const valor = document.getElementById('valorCheque').value;
+
+        if (!fornecedorId || !bancoId || !bomPara || !dataEntrada || !valor) {
+            alert('Preencha Fornecedor, Banco, Bom Para, Data Entrada e Valor!');
+            return;
+        }
+
+        const dados = {
+            numero: document.getElementById('numeroCheque').value || null,
+            fornecedor_id: parseInt(fornecedorId),
+            banco_id: parseInt(bancoId),
+            bom_para: bomPara,
+            data_entrada: dataEntrada,
+            valor: parseFloat(valor),
+            observacao: document.getElementById('observacaoCheque').value || null
+        };
+
+        let resultado;
+        if (window._editandoChequeId) {
+            resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + window._editandoChequeId);
+        } else {
+            dados.status = 'aberto';
+            resultado = await fetchSupabase('cheques', 'POST', dados);
+        }
+
+        if (resultado !== null) {
+            showAlert('Cheque salvo com sucesso!', 'alertChequesAberto', 'success');
+            closeModal('modalCheque');
+            await carregarCheques();
+        }
+    }
+
+    async function compensarCheque(id) {
+        if (!confirm('Confirmar a compensação deste cheque? Ele sairá da lista "Em Aberto" e passará para "Compensados".')) return;
+        const dados = { status: 'compensado', data_compensacao: _hojeStrCheque() };
+        const resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + id);
+        if (resultado !== null) {
+            await carregarCheques();
+            showPage('chequesCompensados');
+            showAlert('Cheque compensado com sucesso!', 'alertChequesCompensados', 'success');
+        }
+    }
+
+    async function reabrirCheque(id) {
+        if (!confirm('Reabrir este cheque? Ele voltará para a lista "Em Aberto".')) return;
+        const dados = { status: 'aberto', data_compensacao: null };
+        const resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + id);
+        if (resultado !== null) {
+            await carregarCheques();
+            showPage('chequesAberto');
+            showAlert('Cheque reaberto!', 'alertChequesAberto', 'success');
+        }
+    }
+
+    async function deletarCheque(id) {
+        if (!confirm('Tem certeza que deseja excluir este cheque?')) return;
+        const resultado = await fetchSupabase('cheques', 'DELETE', null, 'id=eq.' + id);
+        if (resultado !== null) {
+            showAlert('Cheque excluído!', 'alertChequesAberto', 'success');
+            await carregarCheques();
         }
     }
 
