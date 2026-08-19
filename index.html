@@ -1659,31 +1659,21 @@
             <div class="filter-container" style="margin-bottom:16px;">
                 <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
-                        <label>Mês (Bom Para)</label>
-                        <select id="filtroMesCalendarioCheque" onchange="gerarCalendarioCheque()">
-                            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
-                            <option value="2">Março</option><option value="3">Abril</option>
-                            <option value="4">Maio</option><option value="5">Junho</option>
-                            <option value="6">Julho</option><option value="7">Agosto</option>
-                            <option value="8">Setembro</option><option value="9">Outubro</option>
-                            <option value="10">Novembro</option><option value="11">Dezembro</option>
-                        </select>
+                        <label>Vencimento - Data Início</label>
+                        <input type="date" id="filtroDataInicioChequeAberto" onchange="atualizarTabelaChequesAberto()">
                     </div>
                     <div class="form-group">
-                        <label>Ano</label>
-                        <select id="filtroAnoCalendarioCheque" onchange="gerarCalendarioCheque()"></select>
+                        <label>Vencimento - Data Fim</label>
+                        <input type="date" id="filtroDataFimChequeAberto" onchange="atualizarTabelaChequesAberto()">
                     </div>
                     <div class="form-group">
                         <label>Fornecedor</label>
-                        <select id="filtroFornecedorChequeAberto" onchange="atualizarTabelaChequesAberto(); gerarCalendarioCheque();"><option value="">Todos</option></select>
+                        <select id="filtroFornecedorChequeAberto" onchange="atualizarTabelaChequesAberto();"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('filtroDataInicioChequeAberto').value='';document.getElementById('filtroDataFimChequeAberto').value='';atualizarTabelaChequesAberto();">Limpar filtro de datas</button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Calendário -->
-            <div class="card">
-                <div class="card-title">📅 Calendário de Cheques (Bom Para)</div>
-                <div id="calendarContainerCheque" style="padding:10px 0;"></div>
             </div>
 
             <!-- Tabela -->
@@ -1717,7 +1707,7 @@
             <div class="alert alert-success" id="alertChequesCompensados"></div>
 
             <div class="filter-container" style="margin-bottom:16px;">
-                <div class="filter-row">
+                <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Fornecedor</label>
                         <select id="filtroFornecedorChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
@@ -1737,6 +1727,19 @@
                             <option value="09">Setembro</option><option value="10">Outubro</option>
                             <option value="11">Novembro</option><option value="12">Dezembro</option>
                         </select>
+                    </div>
+                </div>
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Vencimento - Data Início</label>
+                        <input type="date" id="filtroDataInicioChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                    </div>
+                    <div class="form-group">
+                        <label>Vencimento - Data Fim</label>
+                        <input type="date" id="filtroDataFimChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('filtroDataInicioChequeComp').value='';document.getElementById('filtroDataFimChequeComp').value='';atualizarTabelaChequesCompensados();">Limpar filtro de datas</button>
                     </div>
                 </div>
             </div>
@@ -2582,7 +2585,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Valor Total*</label>
+                    <label id="labelValorReceber">Valor Total*</label>
                     <input type="number" id="valorReceber" step="0.01" required oninput="calcularParcelasReceber()">
                 </div>
                 <div class="form-group">
@@ -2599,19 +2602,23 @@
                     <label>Parcelas</label>
                     <select id="parcelasReceber" onchange="calcularParcelasReceber()">
                         <option value="1">À vista (1x)</option>
-                        <option value="2">2x</option><option value="3">3x</option>
-                        <option value="4">4x</option><option value="5">5x</option>
-                        <option value="6">6x</option><option value="7">7x</option>
-                        <option value="8">8x</option><option value="9">9x</option>
-                        <option value="10">10x</option><option value="11">11x</option>
-                        <option value="12">12x</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-row" style="align-items:center;">
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+                    <input type="checkbox" id="custoFixoReceber" onchange="toggleCustoFixoReceber()" style="width:16px;height:16px;margin:0;">
+                    <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
+                </div>
+                <div class="form-group" id="vigenciaReceberWrap" style="display:none;">
+                    <label>Vigência até*</label>
+                    <input type="date" id="vigenciaFimReceber" oninput="calcularParcelasReceber()">
                 </div>
             </div>
             <!-- Preview parcelas -->
             <div id="previewParcelasReceber" style="display:none; margin-bottom:12px;">
-                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
-                <div id="listaParcelasReceber" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas <small style="font-weight:400;color:#999;">(datas e valores editáveis)</small>:</div>
+                <div id="listaParcelasReceber" style="max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -2641,8 +2648,8 @@
         <form onsubmit="salvarContaPagar(event)">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Fornecedor*</label>
-                    <select id="fornecedorPagar" required>
+                    <label>Fornecedor</label>
+                    <select id="fornecedorPagar">
                         <option value="">Selecione...</option>
                     </select>
                 </div>
@@ -2661,13 +2668,13 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Descrição*</label>
-                    <input type="text" id="descricaoPagar" required>
+                    <label>Descrição</label>
+                    <input type="text" id="descricaoPagar">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Valor Total*</label>
+                    <label id="labelValorPagar">Valor Total*</label>
                     <input type="number" id="valorPagar" step="0.01" required oninput="calcularParcelasPagar()">
                 </div>
                 <div class="form-group">
@@ -2684,19 +2691,23 @@
                     <label>Parcelas</label>
                     <select id="parcelasPagar" onchange="calcularParcelasPagar()">
                         <option value="1">À vista (1x)</option>
-                        <option value="2">2x</option><option value="3">3x</option>
-                        <option value="4">4x</option><option value="5">5x</option>
-                        <option value="6">6x</option><option value="7">7x</option>
-                        <option value="8">8x</option><option value="9">9x</option>
-                        <option value="10">10x</option><option value="11">11x</option>
-                        <option value="12">12x</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-row" style="align-items:center;">
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+                    <input type="checkbox" id="custoFixoPagar" onchange="toggleCustoFixoPagar()" style="width:16px;height:16px;margin:0;">
+                    <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
+                </div>
+                <div class="form-group" id="vigenciaPagarWrap" style="display:none;">
+                    <label>Vigência até*</label>
+                    <input type="date" id="vigenciaFimPagar" oninput="calcularParcelasPagar()">
                 </div>
             </div>
             <!-- Preview parcelas -->
             <div id="previewParcelasPagar" style="display:none; margin-bottom:12px;">
-                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
-                <div id="listaParcelasPagar" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas <small style="font-weight:400;color:#999;">(datas e valores editáveis)</small>:</div>
+                <div id="listaParcelasPagar" style="max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -3052,7 +3063,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroMesCalendarioCheque", "filtroAnoCalendarioCheque", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp", "filtroDataInicioChequeAberto", "filtroDataFimChequeAberto", "filtroDataInicioChequeComp", "filtroDataFimChequeComp"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -3094,6 +3105,8 @@
         inicializarPing();
         preencherAnos();
         preencherDias();
+        popularSelectParcelas('parcelasReceber');
+        popularSelectParcelas('parcelasPagar');
     });
 
     // LOGIN
@@ -3876,30 +3889,54 @@
 
     async function salvarContaReceber(event) {
         event.preventDefault();
-        const numParcelas = parseInt(document.getElementById('parcelasReceber').value) || 1;
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        let numParcelas = parseInt(document.getElementById('parcelasReceber').value) || 1;
         const valorTotal = parseFloat(document.getElementById('valorReceber').value);
-        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
         const dataBase = document.getElementById('vencimentoReceber').value;
         const competencia = document.getElementById('competenciaReceber').value;
         const obs = document.getElementById('observacoesReceber').value;
         const notaFiscalRec = document.getElementById('notaFiscalReceber').value.trim() || null;
         const clienteId = parseInt(document.getElementById('clienteReceber').value);
         const descricao = document.getElementById('descricaoReceber').value;
+        let vigFim = null;
+
+        if (fixo) {
+            vigFim = document.getElementById('vigenciaFimReceber').value;
+            if (!vigFim) { showAlert('Informe a data final da vigência.', 'alertLancarReceber', 'error'); return; }
+            if (vigFim < dataBase) { showAlert('A data final da vigência deve ser igual ou posterior à data de recebimento.', 'alertLancarReceber', 'error'); return; }
+            numParcelas = mesesEntreDatas(dataBase, vigFim);
+        }
 
         let erros = 0;
         for (let i = 0; i < numParcelas; i++) {
-            const dataVenc = addMonths(dataBase, i);
-            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const inputData  = document.getElementById('parcRecData' + i);
+            const inputValor = document.getElementById('parcRecValor' + i);
+            let dataVenc, valorParcela;
+            if (inputData && inputValor && inputData.value) {
+                dataVenc = inputData.value;
+                valorParcela = parseFloat(inputValor.value) || 0;
+            } else {
+                dataVenc = addMonths(dataBase, i);
+                valorParcela = fixo ? valorTotal : Math.round((valorTotal / numParcelas) * 100) / 100;
+            }
+            let descParc = descricao;
+            let obsFinal = obs;
+            if (fixo) {
+                descParc = (descricao || 'Custo Fixo') + ' (' + (i+1) + '/' + numParcelas + ')';
+                obsFinal = (obs ? obs + ' — ' : '') + 'Custo Fixo (vigência ' + new Date(dataBase+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(vigFim+'T12:00:00').toLocaleDateString('pt-BR') + ')';
+            } else if (numParcelas > 1) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+            }
             const dados = {
                 cliente_id: clienteId,
                 descricao: descParc,
                 valor: valorParcela,
-                data_competencia: competencia,
+                data_competencia: fixo ? addMonths(competencia, i) : competencia,
                 data_vencimento: dataVenc,
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs,
+                observacoes: obsFinal,
                 nota_fiscal: notaFiscalRec
             };
             const r = await fetchSupabase('contas_a_receber', 'POST', dados);
@@ -4153,34 +4190,59 @@
 
     async function salvarContaPagar(event) {
         event.preventDefault();
-        const numParcelas = parseInt(document.getElementById('parcelasPagar').value) || 1;
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
+        let numParcelas = parseInt(document.getElementById('parcelasPagar').value) || 1;
         const valorTotal = parseFloat(document.getElementById('valorPagar').value);
-        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
         const dataBase = document.getElementById('vencimentoPagar').value;
         const competencia = document.getElementById('competenciaPagar').value;
         const obs = document.getElementById('observacoesPagar').value;
         const notaFiscal = document.getElementById('notaFiscalPagar').value.trim() || null;
-        const fornecedorId = parseInt(document.getElementById('fornecedorPagar').value);
+        const fornecedorValRaw = document.getElementById('fornecedorPagar').value;
+        const fornecedorId = fornecedorValRaw ? parseInt(fornecedorValRaw) : null;
         const categoriaId = document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null;
         const produtoId = document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null;
-        const descricao = document.getElementById('descricaoPagar').value;
+        const descricao = document.getElementById('descricaoPagar').value.trim() || 'Lançamento';
+        let vigFim = null;
+
+        if (fixo) {
+            vigFim = document.getElementById('vigenciaFimPagar').value;
+            if (!vigFim) { showAlert('Informe a data final da vigência.', 'alertLancarPagar', 'error'); return; }
+            if (vigFim < dataBase) { showAlert('A data final da vigência deve ser igual ou posterior à data de pagamento.', 'alertLancarPagar', 'error'); return; }
+            numParcelas = mesesEntreDatas(dataBase, vigFim);
+        }
 
         let erros = 0;
         for (let i = 0; i < numParcelas; i++) {
-            const dataVenc = addMonths(dataBase, i);
-            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const inputData  = document.getElementById('parcPagData' + i);
+            const inputValor = document.getElementById('parcPagValor' + i);
+            let dataVenc, valorParcela;
+            if (inputData && inputValor && inputData.value) {
+                dataVenc = inputData.value;
+                valorParcela = parseFloat(inputValor.value) || 0;
+            } else {
+                dataVenc = addMonths(dataBase, i);
+                valorParcela = fixo ? valorTotal : Math.round((valorTotal / numParcelas) * 100) / 100;
+            }
+            let descParc = descricao;
+            let obsFinal = obs;
+            if (fixo) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+                obsFinal = (obs ? obs + ' — ' : '') + 'Custo Fixo (vigência ' + new Date(dataBase+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(vigFim+'T12:00:00').toLocaleDateString('pt-BR') + ')';
+            } else if (numParcelas > 1) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+            }
             const dados = {
                 fornecedor_id: fornecedorId,
                 categoria_id: categoriaId,
                 produto_id: produtoId,
                 descricao: descParc,
                 valor: valorParcela,
-                data_competencia: competencia,
+                data_competencia: fixo ? addMonths(competencia, i) : competencia,
                 data_vencimento: dataVenc,
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs,
+                observacoes: obsFinal,
                 nota_fiscal: notaFiscal
             };
             const r = await fetchSupabase('contas_a_pagar', 'POST', dados);
@@ -6409,8 +6471,6 @@
         atualizarCardsCheques();
         atualizarTabelaChequesAberto();
         atualizarTabelaChequesCompensados();
-        _garantirFiltroCalendarioCheque();
-        gerarCalendarioCheque();
     }
 
     function atualizarCardsCheques() {
@@ -6442,9 +6502,13 @@
         tbody.innerHTML = '';
         const hoje = _hojeStrCheque();
         const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeAberto') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeAberto') || {}).value || '';
 
         let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
         if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
         lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
 
         if (lista.length === 0) {
@@ -6480,11 +6544,15 @@
         const filtroForn = (document.getElementById('filtroFornecedorChequeComp') || {}).value || '';
         const filtroAno = (document.getElementById('filtroAnoChequeComp') || {}).value || '';
         const filtroMes = (document.getElementById('filtroMesChequeComp') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeComp') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeComp') || {}).value || '';
 
         let lista = (dadosCache.cheques || []).filter(c => c.status === 'compensado');
         if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
         if (filtroAno) lista = lista.filter(c => (c.data_compensacao || '').slice(0, 4) === filtroAno);
         if (filtroMes) lista = lista.filter(c => (c.data_compensacao || '').slice(5, 7) === filtroMes);
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
         lista = lista.slice().sort((a, b) => (b.data_compensacao || '').localeCompare(a.data_compensacao || ''));
 
         if (lista.length === 0) {
@@ -6509,117 +6577,6 @@
                 '</td>';
             tbody.appendChild(tr);
         });
-    }
-
-    function _garantirFiltroCalendarioCheque() {
-        const mesEl = document.getElementById('filtroMesCalendarioCheque');
-        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
-        if (mesEl && !mesEl.dataset.init && !mesEl.value) {
-            mesEl.value = String(new Date().getMonth());
-        }
-        if (mesEl) mesEl.dataset.init = '1';
-        if (anoEl && !anoEl.dataset.init && anoEl.options.length && !anoEl.value) {
-            anoEl.value = String(new Date().getFullYear());
-        }
-        if (anoEl) anoEl.dataset.init = '1';
-    }
-
-    function gerarCalendarioCheque() {
-        const mesEl = document.getElementById('filtroMesCalendarioCheque');
-        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
-        const container = document.getElementById('calendarContainerCheque');
-        if (!container) return;
-        const hoje = new Date();
-        const mes = mesEl && mesEl.value !== '' ? parseInt(mesEl.value) : hoje.getMonth();
-        const ano = anoEl && anoEl.value ? parseInt(anoEl.value) : hoje.getFullYear();
-
-        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
-        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
-        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
-
-        const HOJE = new Date(); HOJE.setHours(0, 0, 0, 0);
-        const hojeStr = _hojeStrCheque();
-
-        const primeiroDia = new Date(ano, mes, 1).getDay();
-        const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-        const nomeMes = new Date(ano, mes).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-        let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding:0 4px;">
-            <button onclick="navegarMesCheque(-1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">‹</button>
-            <strong style="font-size:16px;text-transform:capitalize;">${nomeMes}</strong>
-            <button onclick="navegarMesCheque(1)" style="background:none;border:1px solid #ddd;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:16px;">›</button>
-        </div>`;
-
-        html += '<table style="width:100%;border-collapse:collapse;table-layout:fixed;">';
-        html += '<tr>' + diasSemana.map(d => {
-            const isWeekend = d === 'Dom' || d === 'Sáb';
-            return `<th style="padding:8px 4px;text-align:center;font-size:12px;color:${isWeekend ? '#aaa' : '#555'};font-weight:600;border-bottom:2px solid #eee;">${d}</th>`;
-        }).join('') + '</tr>';
-
-        let diaAtual = 1;
-        for (let semana = 0; semana < 6; semana++) {
-            if (diaAtual > ultimoDia) break;
-            html += '<tr>';
-            for (let col = 0; col < 7; col++) {
-                if ((semana === 0 && col < primeiroDia) || diaAtual > ultimoDia) {
-                    html += '<td style="height:80px;border:1px solid #f0f0f0;background:#fafafa;"></td>';
-                } else {
-                    const dataStr = ano + '-' + String(mes + 1).padStart(2, '0') + '-' + String(diaAtual).padStart(2, '0');
-                    const doDia = lista.filter(c => c.bom_para === dataStr);
-                    const dObj = new Date(dataStr + 'T12:00:00');
-                    const isHoje = dObj.getTime() === HOJE.getTime();
-                    const isWeekend = col === 0 || col === 6;
-                    const vencido = dataStr < hojeStr;
-
-                    const totalDia = doDia.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
-
-                    let bgColor = isWeekend ? '#f9f9f9' : '#fff';
-                    let borderStyle = isHoje ? '2px solid #FF7A42' : '1px solid #f0f0f0';
-
-                    if (doDia.length > 0) bgColor = vencido ? '#fef2f2' : '#fff8e1';
-
-                    let cellContent = `<div style="font-weight:${isHoje ? '700' : '500'};font-size:13px;color:${isHoje ? '#FF7A42' : '#333'};margin-bottom:3px;">${diaAtual}</div>`;
-
-                    if (doDia.length > 0) {
-                        const nomes = doDia.slice(0, 2).map(c => {
-                            const forn = (dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id);
-                            return forn ? forn.nome.split(' ')[0] : 'Forn.';
-                        }).join(', ');
-                        const corTag = vencido ? '#721c24' : '#856404';
-                        const bgTag = vencido ? '#f8d7da' : '#fff3cd';
-                        cellContent += `<div style="background:${bgTag};color:${corTag};border-radius:4px;padding:2px 5px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${nomes}">
-                            🧾 R$ ${totalDia.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${doDia.length > 1 ? '(' + doDia.length + 'x)' : ''}
-                        </div>`;
-                    }
-
-                    html += `<td style="height:80px;border:${borderStyle};background:${bgColor};padding:5px;vertical-align:top;cursor:default;" title="${dataStr}">${cellContent}</td>`;
-                    diaAtual++;
-                }
-            }
-            html += '</tr>';
-        }
-        html += '</table>';
-        container.innerHTML = html;
-    }
-
-    function navegarMesCheque(delta) {
-        const mesEl = document.getElementById('filtroMesCalendarioCheque');
-        const anoEl = document.getElementById('filtroAnoCalendarioCheque');
-        if (!mesEl || !anoEl) return;
-        let mes = parseInt(mesEl.value) + delta;
-        let ano = parseInt(anoEl.value);
-        if (mes < 0) { mes = 11; ano--; }
-        if (mes > 11) { mes = 0; ano++; }
-        mesEl.value = mes;
-        let optExists = Array.from(anoEl.options).some(o => parseInt(o.value) === ano);
-        if (!optExists) {
-            const opt = document.createElement('option');
-            opt.value = ano; opt.textContent = ano;
-            anoEl.appendChild(opt);
-        }
-        anoEl.value = ano;
-        gerarCalendarioCheque();
     }
 
     function openModalCheque() {
@@ -6730,9 +6687,15 @@
         document.getElementById('valorReceber').value = '';
         document.getElementById('competenciaReceber').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoReceber').value = '';
+        popularSelectParcelas('parcelasReceber');
         document.getElementById('parcelasReceber').value = '1';
+        document.getElementById('parcelasReceber').disabled = false;
         document.getElementById('notaFiscalReceber').value = '';
         document.getElementById('observacoesReceber').value = '';
+        document.getElementById('custoFixoReceber').checked = false;
+        document.getElementById('vigenciaReceberWrap').style.display = 'none';
+        document.getElementById('vigenciaFimReceber').value = '';
+        document.getElementById('labelValorReceber').textContent = 'Valor Total*';
         document.getElementById('previewParcelasReceber').style.display = 'none';
         atualizarSelectCategorias();
         atualizarSelectClientes();
@@ -6747,9 +6710,15 @@
         document.getElementById('valorPagar').value = '';
         document.getElementById('competenciaPagar').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoPagar').value = '';
+        popularSelectParcelas('parcelasPagar');
         document.getElementById('parcelasPagar').value = '1';
+        document.getElementById('parcelasPagar').disabled = false;
         document.getElementById('notaFiscalPagar').value = '';
         document.getElementById('observacoesPagar').value = '';
+        document.getElementById('custoFixoPagar').checked = false;
+        document.getElementById('vigenciaPagarWrap').style.display = 'none';
+        document.getElementById('vigenciaFimPagar').value = '';
+        document.getElementById('labelValorPagar').textContent = 'Valor Total*';
         document.getElementById('previewParcelasPagar').style.display = 'none';
         atualizarSelectCategorias();
         atualizarSelectFornecedores();
@@ -6766,45 +6735,104 @@
         return d.toISOString().split('T')[0];
     }
 
-    function calcularParcelasReceber() {
-        const valor = parseFloat(document.getElementById('valorReceber').value);
-        const n = parseInt(document.getElementById('parcelasReceber').value) || 1;
-        const dataBase = document.getElementById('vencimentoReceber').value;
-        const preview = document.getElementById('previewParcelasReceber');
-        const lista = document.getElementById('listaParcelasReceber');
-        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
-        const parc = Math.round((valor / n) * 100) / 100;
-        let html = '';
+    // Preenche um <select> de parcelas com opções de 1x até `max` (padrão 60x)
+    function popularSelectParcelas(selectId, max) {
+        max = max || 60;
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        const valorAtual = sel.value;
+        let html = '<option value="1">À vista (1x)</option>';
+        for (let i = 2; i <= max; i++) html += '<option value="' + i + '">' + i + 'x</option>';
+        sel.innerHTML = html;
+        if (valorAtual) sel.value = valorAtual;
+    }
+
+    // Calcula o número de meses (inclusive) entre duas datas 'YYYY-MM-DD', limitado a 120 (10 anos)
+    function mesesEntreDatas(inicioStr, fimStr) {
+        const ini = new Date(inicioStr + 'T12:00:00');
+        const fim = new Date(fimStr + 'T12:00:00');
+        const meses = (fim.getFullYear() - ini.getFullYear()) * 12 + (fim.getMonth() - ini.getMonth()) + 1;
+        return Math.min(120, Math.max(1, meses));
+    }
+
+    function toggleCustoFixoReceber() {
+        const fixo = document.getElementById('custoFixoReceber').checked;
+        document.getElementById('vigenciaReceberWrap').style.display = fixo ? '' : 'none';
+        document.getElementById('labelValorReceber').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
+        const parcSel = document.getElementById('parcelasReceber');
+        parcSel.disabled = fixo;
+        if (fixo) parcSel.value = '1';
+        calcularParcelasReceber();
+    }
+
+    function toggleCustoFixoPagar() {
+        const fixo = document.getElementById('custoFixoPagar').checked;
+        document.getElementById('vigenciaPagarWrap').style.display = fixo ? '' : 'none';
+        document.getElementById('labelValorPagar').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
+        const parcSel = document.getElementById('parcelasPagar');
+        parcSel.disabled = fixo;
+        if (fixo) parcSel.value = '1';
+        calcularParcelasPagar();
+    }
+
+    // Renderiza a lista de parcelas com campos de data e valor editáveis
+    function _renderParcelasEditaveis(lista, n, dataBase, valorParcela, idPrefix, corValor) {
+        let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
+            '<span style="width:38px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:90px;">Valor</span></div>';
         for (let i = 0; i < n; i++) {
-            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
-            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
-                '<span>' + (i+1) + '/' + n + '</span>' +
-                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#28a745;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
+            const dt = addMonths(dataBase, i);
+            html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span style="width:38px;">' + (i+1) + '/' + n + '</span>' +
+                '<input type="date" id="' + idPrefix + 'Data' + i + '" value="' + dt + '" style="flex:1;padding:3px 4px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
+                '<input type="number" step="0.01" id="' + idPrefix + 'Valor' + i + '" value="' + valorParcela + '" style="width:90px;padding:3px 4px;font-size:12px;border:1px solid #ddd;border-radius:4px;color:' + corValor + ';font-weight:600;">' +
                 '</div>';
         }
         lista.innerHTML = html;
+    }
+
+    function calcularParcelasReceber() {
+        const valor = parseFloat(document.getElementById('valorReceber').value);
+        const dataBase = document.getElementById('vencimentoReceber').value;
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        const preview = document.getElementById('previewParcelasReceber');
+        const lista = document.getElementById('listaParcelasReceber');
+        let n = parseInt(document.getElementById('parcelasReceber').value) || 1;
+
+        if (fixo) {
+            const vigFim = document.getElementById('vigenciaFimReceber').value;
+            if (!valor || !dataBase || !vigFim) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+            n = mesesEntreDatas(dataBase, vigFim);
+            _renderParcelasEditaveis(lista, n, dataBase, valor, 'parcRec', '#28a745');
+            preview.style.display = 'block';
+            return;
+        }
+
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        _renderParcelasEditaveis(lista, n, dataBase, parc, 'parcRec', '#28a745');
         preview.style.display = 'block';
     }
 
     function calcularParcelasPagar() {
         const valor = parseFloat(document.getElementById('valorPagar').value);
-        const n = parseInt(document.getElementById('parcelasPagar').value) || 1;
         const dataBase = document.getElementById('vencimentoPagar').value;
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
         const preview = document.getElementById('previewParcelasPagar');
         const lista = document.getElementById('listaParcelasPagar');
-        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
-        const parc = Math.round((valor / n) * 100) / 100;
-        let html = '';
-        for (let i = 0; i < n; i++) {
-            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
-            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
-                '<span>' + (i+1) + '/' + n + '</span>' +
-                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#dc3545;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
-                '</div>';
+        let n = parseInt(document.getElementById('parcelasPagar').value) || 1;
+
+        if (fixo) {
+            const vigFim = document.getElementById('vigenciaFimPagar').value;
+            if (!valor || !dataBase || !vigFim) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+            n = mesesEntreDatas(dataBase, vigFim);
+            _renderParcelasEditaveis(lista, n, dataBase, valor, 'parcPag', '#dc3545');
+            preview.style.display = 'block';
+            return;
         }
-        lista.innerHTML = html;
+
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        _renderParcelasEditaveis(lista, n, dataBase, parc, 'parcPag', '#dc3545');
         preview.style.display = 'block';
     }
 
