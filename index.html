@@ -1631,7 +1631,10 @@
         <div id="chequesAberto" class="page">
             <div class="page-header">
                 <h1>🧾 Cheques em Aberto</h1>
-                <button class="btn btn-primary btn-small" onclick="openModalCheque()">+ Novo Cheque</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary btn-small" onclick="abrirModalPDFCheques()">🖨️ Gerar PDF</button>
+                    <button class="btn btn-primary btn-small" onclick="openModalCheque()">+ Novo Cheque</button>
+                </div>
             </div>
 
             <div class="alert alert-success" id="alertChequesAberto"></div>
@@ -2501,7 +2504,19 @@
                 </div>
             </div>
             <div class="card" id="cardDREMensal" style="display:none;margin-top:16px;">
-                <div class="card-title" id="tituloDREMensal">📅 DRE Mensal</div>
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span id="tituloDREMensal">📅 DRE Mensal</span>
+                    <div style="position:relative;">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="toggleMenuMesesDRE()">👁️ Ocultar/Exibir meses</button>
+                        <div id="menuMesesDRE" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:white;border:1px solid var(--cor-borda);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px;z-index:50;min-width:220px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                <a href="javascript:void(0)" onclick="marcarTodosMesesDRE(true)" style="color:var(--cor-primaria);font-weight:600;">Marcar todos</a>
+                                <a href="javascript:void(0)" onclick="marcarTodosMesesDRE(false)" style="color:var(--cor-primaria);font-weight:600;">Desmarcar todos</a>
+                            </div>
+                            <div id="checksMesesDRE" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"></div>
+                        </div>
+                    </div>
+                </div>
                 <div style="overflow-x:auto;">
                     <table id="tabelaDREMensal" style="font-size:12px;min-width:900px;">
                         <thead><tr id="dreHeaderMeses"><th style="min-width:180px;">Descrição</th></tr></thead>
@@ -2596,7 +2611,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Data Prevista de Recebimento*</label>
-                    <input type="date" id="vencimentoReceber" required oninput="calcularParcelasReceber()">
+                    <input type="date" id="vencimentoReceber" required oninput="onDataBaseCustoFixoReceberChange()">
                 </div>
                 <div class="form-group">
                     <label>Parcelas</label>
@@ -2610,9 +2625,15 @@
                     <input type="checkbox" id="custoFixoReceber" onchange="toggleCustoFixoReceber()" style="width:16px;height:16px;margin:0;">
                     <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
                 </div>
-                <div class="form-group" id="vigenciaReceberWrap" style="display:none;">
+            </div>
+            <div class="form-row" id="vigenciaReceberWrap" style="display:none;">
+                <div class="form-group">
+                    <label>Repetir por quantas vezes*</label>
+                    <input type="number" id="qtdCustoFixoReceber" min="1" max="120" step="1" oninput="onQtdCustoFixoReceberChange()" placeholder="Ex: 12">
+                </div>
+                <div class="form-group">
                     <label>Vigência até*</label>
-                    <input type="date" id="vigenciaFimReceber" oninput="calcularParcelasReceber()">
+                    <input type="date" id="vigenciaFimReceber" oninput="onVigenciaCustoFixoReceberChange()">
                 </div>
             </div>
             <!-- Preview parcelas -->
@@ -2685,7 +2706,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Data Prevista de Pagamento*</label>
-                    <input type="date" id="vencimentoPagar" required oninput="calcularParcelasPagar()">
+                    <input type="date" id="vencimentoPagar" required oninput="onDataBaseCustoFixoPagarChange()">
                 </div>
                 <div class="form-group">
                     <label>Parcelas</label>
@@ -2699,9 +2720,15 @@
                     <input type="checkbox" id="custoFixoPagar" onchange="toggleCustoFixoPagar()" style="width:16px;height:16px;margin:0;">
                     <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
                 </div>
-                <div class="form-group" id="vigenciaPagarWrap" style="display:none;">
+            </div>
+            <div class="form-row" id="vigenciaPagarWrap" style="display:none;">
+                <div class="form-group">
+                    <label>Repetir por quantas vezes*</label>
+                    <input type="number" id="qtdCustoFixoPagar" min="1" max="120" step="1" oninput="onQtdCustoFixoPagarChange()" placeholder="Ex: 12">
+                </div>
+                <div class="form-group">
                     <label>Vigência até*</label>
-                    <input type="date" id="vigenciaFimPagar" oninput="calcularParcelasPagar()">
+                    <input type="date" id="vigenciaFimPagar" oninput="onVigenciaCustoFixoPagarChange()">
                 </div>
             </div>
             <!-- Preview parcelas -->
@@ -2994,6 +3021,28 @@
 </div>
 
 <!-- MODAL CHEQUE -->
+<!-- MODAL PDF CHEQUES EM ABERTO (escolha de orientação) -->
+<div class="modal" id="modalPDFCheques">
+    <div class="modal-content" style="max-width:380px;">
+        <div class="modal-header">
+            <span>🖨️ Gerar PDF — Cheques em Aberto</span>
+            <button class="modal-close" onclick="closeModal('modalPDFCheques')">&times;</button>
+        </div>
+        <p style="font-size:13px;color:#666;margin-bottom:16px;">Escolha a orientação da página para impressão:</p>
+        <div style="display:flex;gap:12px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFChequesAberto('portrait')">
+                <div style="font-size:24px;">📄</div>Retrato
+            </button>
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFChequesAberto('landscape')">
+                <div style="font-size:24px;">📃</div>Paisagem
+            </button>
+        </div>
+        <div class="form-actions" style="margin-top:16px;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalPDFCheques')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="modalCheque">
     <div class="modal-content">
         <div class="modal-header">
@@ -4506,6 +4555,112 @@
         }
     }
 
+    // Retorna todos os lançamentos que pertencem ao mesmo grupo de "Custo Fixo" que `conta`
+    // (mesmo fornecedor/cliente, categoria, descrição-base e total de parcelas), ordenados pela parcela.
+    function _grupoCustoFixo(conta, tipo) {
+        if (!conta || !(conta.observacoes || '').includes('Custo Fixo') || !(conta.total_parcelas > 1)) return [conta].filter(Boolean);
+        const origem = tipo === 'receber'
+            ? [...(dadosCache.contasReceber || []), ...(dadosCache.contasRecebidas || [])]
+            : [...(dadosCache.contasPagar || []), ...(dadosCache.contasPagas || [])];
+        const porId = {};
+        origem.forEach(c => { porId[c.id] = c; });
+        const todas = Object.values(porId);
+        const descBase = (conta.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+        return todas.filter(c => {
+            if (!(c.observacoes || '').includes('Custo Fixo')) return false;
+            if (c.total_parcelas !== conta.total_parcelas) return false;
+            const cDescBase = (c.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+            if (cDescBase !== descBase) return false;
+            if ((c.categoria_id || null) !== (conta.categoria_id || null)) return false;
+            if (tipo === 'receber') { if ((c.cliente_id || null) !== (conta.cliente_id || null)) return false; }
+            else { if ((c.fornecedor_id || null) !== (conta.fornecedor_id || null)) return false; }
+            return true;
+        }).sort((a, b) => (a.parcela_atual || 0) - (b.parcela_atual || 0));
+    }
+
+    // Abre a edição de TODOS os lançamentos do grupo Custo Fixo de uma vez.
+    // Retorna true se conseguiu abrir a edição em grupo (grupo com mais de 1 item).
+    function abrirEdicaoGrupoCustoFixo(conta, tipo) {
+        const grupo = _grupoCustoFixo(conta, tipo);
+        if (grupo.length <= 1) return false;
+        window._grupoCFItens = grupo;
+        window._grupoCFTipoAtual = tipo;
+        atualizarSelectFornecedores();
+        atualizarSelectClientes();
+        atualizarSelectCategorias();
+        document.getElementById('editGrupoCFTipo').value = tipo;
+        document.getElementById('editGrupoCFFornecedorWrap').style.display = tipo === 'pagar' ? '' : 'none';
+        document.getElementById('editGrupoCFClienteWrap').style.display = tipo === 'receber' ? '' : 'none';
+        if (tipo === 'pagar') { document.getElementById('editGrupoCFFornecedor').value = conta.fornecedor_id || ''; }
+        else { document.getElementById('editGrupoCFCliente').value = conta.cliente_id || ''; }
+        document.getElementById('editGrupoCFCategoria').value = conta.categoria_id || '';
+        const descBase = (conta.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+        document.getElementById('editGrupoCFDescricao').value = descBase;
+        const obsMatch = (conta.observacoes || '').match(/Custo Fixo \(vig[êe]ncia.*?\)\s*$/i);
+        const obsBase = obsMatch ? (conta.observacoes || '').slice(0, obsMatch.index).replace(/\s*—\s*$/, '').trim() : (conta.observacoes || '');
+        document.getElementById('editGrupoCFObs').value = obsBase;
+        document.getElementById('editGrupoCFObsFinal').textContent = obsMatch ? obsMatch[0] : '';
+
+        let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
+            '<span style="width:44px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:110px;">Valor</span><span style="width:64px;text-align:center;">Status</span></div>';
+        grupo.forEach((c, i) => {
+            const pago = c.status === 'pago' || c.status === 'recebido';
+            html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span style="width:44px;font-weight:600;">' + c.parcela_atual + '/' + c.total_parcelas + '</span>' +
+                '<input type="date" id="editGrupoCFData' + i + '" value="' + (c.data_vencimento || '') + '" style="flex:1;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
+                '<input type="number" step="0.01" id="editGrupoCFValor' + i + '" value="' + (c.valor || 0) + '" style="width:110px;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-weight:600;color:' + (tipo === 'receber' ? '#28a745' : '#dc3545') + ';">' +
+                '<span style="width:64px;text-align:center;font-size:11px;">' + (pago ? '✅ ' + (tipo === 'receber' ? 'Recebido' : 'Pago') : '⏳ Pendente') + '</span>' +
+                '</div>';
+        });
+        document.getElementById('editGrupoCFLista').innerHTML = html;
+        document.getElementById('editGrupoCFTitulo').textContent = '✏️ Editar Custo Fixo — ' + grupo.length + ' lançamento(s) do grupo';
+        document.getElementById('modalEditarGrupoCustoFixo').classList.add('active');
+        return true;
+    }
+
+    async function salvarEdicaoGrupoCustoFixo(event) {
+        event.preventDefault();
+        const tipo = document.getElementById('editGrupoCFTipo').value;
+        const tabela = tipo === 'receber' ? 'contas_a_receber' : 'contas_a_pagar';
+        const descBase = document.getElementById('editGrupoCFDescricao').value.trim() || 'Custo Fixo';
+        const obsBase = document.getElementById('editGrupoCFObs').value.trim();
+        const obsFinalTail = document.getElementById('editGrupoCFObsFinal').textContent.trim();
+        const categoriaVal = document.getElementById('editGrupoCFCategoria').value;
+        const fornecedorVal = tipo === 'pagar' ? document.getElementById('editGrupoCFFornecedor').value : null;
+        const clienteVal = tipo === 'receber' ? document.getElementById('editGrupoCFCliente').value : null;
+        const grupo = window._grupoCFItens || [];
+        let erros = 0;
+        for (let i = 0; i < grupo.length; i++) {
+            const c = grupo[i];
+            const dataEl = document.getElementById('editGrupoCFData' + i);
+            const valorEl = document.getElementById('editGrupoCFValor' + i);
+            const obsCompleto = obsBase && obsFinalTail ? (obsBase + ' — ' + obsFinalTail)
+                               : (obsFinalTail || obsBase || null);
+            const dados = {
+                descricao: descBase + ' (' + c.parcela_atual + '/' + c.total_parcelas + ')',
+                valor: parseFloat(valorEl.value) || 0,
+                data_vencimento: dataEl.value,
+                observacoes: obsCompleto,
+                categoria_id: categoriaVal ? parseInt(categoriaVal) : null
+            };
+            if (tipo === 'pagar') { dados.fornecedor_id = fornecedorVal ? parseInt(fornecedorVal) : null; }
+            else { dados.cliente_id = clienteVal ? parseInt(clienteVal) : null; }
+            const r = await fetchSupabase(tabela, 'PATCH', dados, 'id=eq.' + c.id);
+            if (r === null) erros++;
+        }
+        if (erros === 0) {
+            showAlert(grupo.length + ' lançamento(s) do grupo atualizados!', 'alertEditarGrupoCF', 'success');
+            closeModal('modalEditarGrupoCustoFixo');
+        } else {
+            showAlert('Erro ao atualizar ' + erros + ' lançamento(s) do grupo.', 'alertEditarGrupoCF', 'error');
+        }
+        await carregarContasReceber();
+        await carregarContasPagar();
+        await carregarContasRecebidas();
+        await carregarContasPagas();
+        await atualizarDashboard();
+    }
+
     function editarLancamento(id, tipo) {
         atualizarSelectClientes();
         atualizarSelectFornecedores();
@@ -4514,6 +4669,7 @@
             const conta = dadosCache.contasRecebidas.find(c => c.id === id)
                        || dadosCache.contasReceber.find(c => c.id === id);
             if (!conta) return;
+            if (abrirEdicaoGrupoCustoFixo(conta, 'receber')) return;
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_receber';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Receber';
@@ -4532,6 +4688,7 @@
             const conta = dadosCache.contasPagas.find(c => c.id === id)
                        || dadosCache.contasPagar.find(c => c.id === id);
             if (!conta) return;
+            if (abrirEdicaoGrupoCustoFixo(conta, 'pagar')) return;
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_pagar';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Pagar';
@@ -6537,6 +6694,84 @@
         });
     }
 
+    function abrirModalPDFCheques() {
+        document.getElementById('modalPDFCheques').classList.add('active');
+    }
+
+    // Gera PDF (retrato ou paisagem) com os Cheques em Aberto atualmente filtrados na tela
+    function gerarPDFChequesAberto(orientacao) {
+        closeModal('modalPDFCheques');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: orientacao === 'landscape' ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+
+        // Cabeçalho
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'), pageW - 10, 10, { align: 'right' });
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text(normalizarTexto('Cheques em Aberto'), pageW / 2, 25, { align: 'center' });
+
+        // Reaproveita a mesma lista/filtro exibida na tela (sem a coluna de Ações)
+        const hoje = _hojeStrCheque();
+        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeAberto') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeAberto') || {}).value || '';
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
+        lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+
+        const body = lista.map(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const vencido = cheque.bom_para < hoje;
+            return [
+                _dataFmtCheque(cheque.bom_para),
+                normalizarTexto((forn ? forn.nome : '-') + (cheque.numero ? ' (Nº ' + cheque.numero + ')' : '')),
+                normalizarTexto(banco ? banco.nome : '-'),
+                _dataFmtCheque(cheque.data_entrada),
+                _fmtMoedaCheque(cheque.valor),
+                vencido ? 'Vencido' : 'Em Aberto'
+            ];
+        });
+        const totalGeral = lista.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+
+        doc.autoTable({
+            head: [['Bom Para', 'Fornecedor', 'Banco', 'Data Entrada', 'Valor', 'Status']],
+            body: body,
+            foot: [['', '', '', 'Total', _fmtMoedaCheque(totalGeral), '']],
+            startY: 30,
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: { fillColor: [255, 122, 66], textColor: 255, fontStyle: 'bold' },
+            footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+            columnStyles: { 4: { halign: 'right' } },
+            didParseCell: function (data) {
+                if (data.section === 'body' && data.column.index === 5) {
+                    if (data.cell.raw === 'Vencido') data.cell.styles.textColor = [220, 53, 69];
+                    else data.cell.styles.textColor = [133, 100, 4];
+                }
+            }
+        });
+
+        if (lista.length === 0) {
+            doc.setFontSize(10);
+            doc.text('Nenhum cheque em aberto no filtro atual.', 14, 36);
+        }
+
+        doc.save('Cheques_em_Aberto_' + (orientacao === 'landscape' ? 'paisagem' : 'retrato') + '_' + hoje + '.pdf');
+    }
+
     function atualizarTabelaChequesCompensados() {
         const tbody = document.querySelector('#tabelaChequesCompensados tbody');
         if (!tbody) return;
@@ -6735,6 +6970,13 @@
         return d.toISOString().split('T')[0];
     }
 
+    // Soma dias corridos (calendário) a uma data 'YYYY-MM-DD'
+    function addDays(dateStr, dias) {
+        const d = new Date(dateStr + 'T12:00:00');
+        d.setDate(d.getDate() + dias);
+        return d.toISOString().split('T')[0];
+    }
+
     // Preenche um <select> de parcelas com opções de 1x até `max` (padrão 60x)
     function popularSelectParcelas(selectId, max) {
         max = max || 60;
@@ -6755,13 +6997,66 @@
         return Math.min(120, Math.max(1, meses));
     }
 
+    // Sincroniza campo "Repetir por quantas vezes" <-> "Vigência até" (Custo Fixo)
+    // suf = 'Pagar' ou 'Receber'
+    function _syncQtdFromVig(suf) {
+        const base = document.getElementById('vencimento' + suf).value;
+        const vig  = document.getElementById('vigenciaFim' + suf).value;
+        const qtdEl = document.getElementById('qtdCustoFixo' + suf);
+        if (base && vig && qtdEl) qtdEl.value = mesesEntreDatas(base, vig);
+    }
+    function _syncVigFromQtd(suf) {
+        const base = document.getElementById('vencimento' + suf).value;
+        const qtdEl = document.getElementById('qtdCustoFixo' + suf);
+        const vigEl = document.getElementById('vigenciaFim' + suf);
+        const qtd = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+        if (base && vigEl) vigEl.value = addMonths(base, qtd - 1);
+    }
+    function onQtdCustoFixoPagarChange()      { _syncVigFromQtd('Pagar');   calcularParcelasPagar(); }
+    function onVigenciaCustoFixoPagarChange() { _syncQtdFromVig('Pagar');   calcularParcelasPagar(); }
+    function onQtdCustoFixoReceberChange()      { _syncVigFromQtd('Receber'); calcularParcelasReceber(); }
+    function onVigenciaCustoFixoReceberChange() { _syncQtdFromVig('Receber'); calcularParcelasReceber(); }
+
+    // Quando a data-base (vencimento) muda: se Custo Fixo estiver marcado, recalcula a
+    // vigência mantendo a mesma quantidade de repetições já definida (ou usa o padrão de 30 dias).
+    function onDataBaseCustoFixoPagarChange() {
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
+        if (fixo) {
+            const base = document.getElementById('vencimentoPagar').value;
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (base && qtdEl.value) { _syncVigFromQtd('Pagar'); }
+            else if (base) { document.getElementById('vigenciaFimPagar').value = addDays(base, 30); _syncQtdFromVig('Pagar'); }
+        }
+        calcularParcelasPagar();
+    }
+    function onDataBaseCustoFixoReceberChange() {
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        if (fixo) {
+            const base = document.getElementById('vencimentoReceber').value;
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (base && qtdEl.value) { _syncVigFromQtd('Receber'); }
+            else if (base) { document.getElementById('vigenciaFimReceber').value = addDays(base, 30); _syncQtdFromVig('Receber'); }
+        }
+        calcularParcelasReceber();
+    }
+
     function toggleCustoFixoReceber() {
         const fixo = document.getElementById('custoFixoReceber').checked;
         document.getElementById('vigenciaReceberWrap').style.display = fixo ? '' : 'none';
         document.getElementById('labelValorReceber').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
         const parcSel = document.getElementById('parcelasReceber');
         parcSel.disabled = fixo;
-        if (fixo) parcSel.value = '1';
+        if (fixo) {
+            parcSel.value = '1';
+            // Padrão: 30 dias a partir da data adicionada (data prevista de recebimento)
+            const base = document.getElementById('vencimentoReceber').value;
+            const vigEl = document.getElementById('vigenciaFimReceber');
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (base && !vigEl.value) {
+                vigEl.value = addDays(base, 30);
+                qtdEl.value = mesesEntreDatas(base, vigEl.value);
+            }
+        }
         calcularParcelasReceber();
     }
 
@@ -6771,7 +7066,17 @@
         document.getElementById('labelValorPagar').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
         const parcSel = document.getElementById('parcelasPagar');
         parcSel.disabled = fixo;
-        if (fixo) parcSel.value = '1';
+        if (fixo) {
+            parcSel.value = '1';
+            // Padrão: 30 dias a partir da data adicionada (data prevista de pagamento)
+            const base = document.getElementById('vencimentoPagar').value;
+            const vigEl = document.getElementById('vigenciaFimPagar');
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (base && !vigEl.value) {
+                vigEl.value = addDays(base, 30);
+                qtdEl.value = mesesEntreDatas(base, vigEl.value);
+            }
+        }
         calcularParcelasPagar();
     }
 
@@ -6780,7 +7085,7 @@
         let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
             '<span style="width:38px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:90px;">Valor</span></div>';
         for (let i = 0; i < n; i++) {
-            const dt = addMonths(dataBase, i);
+            const dt = dataBase ? addMonths(dataBase, i) : '';
             html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
                 '<span style="width:38px;">' + (i+1) + '/' + n + '</span>' +
                 '<input type="date" id="' + idPrefix + 'Data' + i + '" value="' + dt + '" style="flex:1;padding:3px 4px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
@@ -6800,9 +7105,15 @@
 
         if (fixo) {
             const vigFim = document.getElementById('vigenciaFimReceber').value;
-            if (!valor || !dataBase || !vigFim) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
-            n = mesesEntreDatas(dataBase, vigFim);
-            _renderParcelasEditaveis(lista, n, dataBase, valor, 'parcRec', '#28a745');
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (qtdEl && qtdEl.value) {
+                n = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+            } else if (dataBase && vigFim) {
+                n = mesesEntreDatas(dataBase, vigFim);
+            } else {
+                preview.style.display = 'none'; lista.innerHTML = ''; return;
+            }
+            _renderParcelasEditaveis(lista, n, dataBase, valor || 0, 'parcRec', '#28a745');
             preview.style.display = 'block';
             return;
         }
@@ -6823,9 +7134,15 @@
 
         if (fixo) {
             const vigFim = document.getElementById('vigenciaFimPagar').value;
-            if (!valor || !dataBase || !vigFim) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
-            n = mesesEntreDatas(dataBase, vigFim);
-            _renderParcelasEditaveis(lista, n, dataBase, valor, 'parcPag', '#dc3545');
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (qtdEl && qtdEl.value) {
+                n = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+            } else if (dataBase && vigFim) {
+                n = mesesEntreDatas(dataBase, vigFim);
+            } else {
+                preview.style.display = 'none'; lista.innerHTML = ''; return;
+            }
+            _renderParcelasEditaveis(lista, n, dataBase, valor || 0, 'parcPag', '#dc3545');
             preview.style.display = 'block';
             return;
         }
@@ -7752,7 +8069,7 @@
             porGrupo[grupo].total += parseFloat(c.valor || 0);
             const comp = c.data_competencia || c.data_recebimento || '';
             porGrupo[grupo].itens.push({
-                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
                 catNome: cat ? cat.nome : 'Receita', fonte: 'receber'
             });
@@ -7766,7 +8083,7 @@
             porGrupo[grupo].total += parseFloat(c.valor || 0);
             const comp = c.data_competencia || c.data_pagamento || '';
             porGrupo[grupo].itens.push({
-                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
                 catNome: cat ? cat.nome : 'Custo', fonte: 'pagar'
             });
@@ -7930,50 +8247,85 @@
 
     let _dreDetalheCache = {};
 
-    function verDetalheDRE(grupoId) {
-        const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
-        if (!grupo) return;
-        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+    // Renderiza as linhas da tabela de detalhe do DRE (usado tanto pela visão anual quanto mensal).
+    // Cada item pode ser de 3 fontes: 'dre' (lançamento direto), 'receber' ou 'pagar' — todos editáveis.
+    function _renderLinhasDetalheDRE(itens) {
         const tbody = document.querySelector('#tabelaDetalheDRE tbody');
-        const itens = (_dreDetalheCache[grupoId] || []);
         if (!tbody) return;
         tbody.innerHTML = '';
-        itens.forEach(item => {
+        itens.forEach((item, idx) => {
             const val = parseFloat(item.valor || 0);
-            tbody.innerHTML += `<tr>
-                <td>${item.competencia || '-'}</td>
+            let acoes = '<span style="color:#aaa;font-size:11px;">—</span>';
+            if (item.id != null) {
+                if (item.fonte === 'dre') {
+                    acoes = '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>';
+                } else if (item.fonte === 'receber') {
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'receber\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_receber\')" class="btn btn-danger btn-small">🗑️</button>';
+                } else if (item.fonte === 'pagar') {
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'pagar\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_pagar\')" class="btn btn-danger btn-small">🗑️</button>';
+                }
+            }
+            tbody.innerHTML += `<tr style="${idx % 2 === 1 ? 'background:#fafafa;' : ''}">
+                <td style="white-space:nowrap;font-weight:500;">${item.competencia || '-'}</td>
                 <td>${item.descricao || '-'}</td>
                 <td>${item.catNome || '-'}</td>
                 <td>${item.parte || '-'}</td>
                 <td>${item.centro || '-'}</td>
-                <td style="text-align:right;font-weight:600;">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                <td>${item.fonte === 'dre' && item.id ? '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️</button> <button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>' : '<span style="color:#aaa;font-size:11px;">automático</span>'}</td>
+                <td style="text-align:right;font-weight:700;font-size:14px;color:${val < 0 ? '#dc3545' : '#28a745'};white-space:nowrap;">R$ ${Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                <td style="white-space:nowrap;">${acoes}</td>
             </tr>`;
         });
-        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px;">Nenhum lançamento</td></tr>';
+        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento neste período</td></tr>';
+    }
+
+    function verDetalheDRE(grupoId) {
+        const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
+        if (!grupo) return;
+        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+        const subEl = document.getElementById('subtituloDetalheDRE');
+        if (subEl) subEl.textContent = 'Todos os meses';
+        const itens = (_dreDetalheCache[grupoId] || []);
+        _renderLinhasDetalheDRE(itens);
         document.getElementById('modalDetalheDRE').classList.add('active');
     }
+
+    // Estado de visibilidade dos meses na tabela DRE Mensal (índice 0=Jan ... 11=Dez)
+    let _mesesVisiveisDRE = Array(12).fill(true);
+    // Cache dos itens que compõem cada célula da tabela DRE Mensal, para o clique abrir o detalhe
+    let _dreMensalAno = null;
+    let _dreMensalItensGrupo = {};   // { grupoId: [ itens[], itens[], ... 12x ] }
+    let _dreMensalCPV = [];          // [ [nome, {valores:[12], itens:[12x[]]}], ... ]
+    let _dreMensalDA  = [];          // idem, para Despesas Administrativas
 
     function gerarTabelaMensalDRE(dreLancs, contasRec, contasPag, ano) {
         const headerRow = document.getElementById('dreHeaderMeses');
         const tbody = document.querySelector('#tabelaDREMensal tbody');
         if (!headerRow || !tbody) return;
         const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        _dreMensalAno = ano;
 
         // Cabeçalho com meses
         headerRow.innerHTML = '<th style="min-width:180px;text-align:left;">Descrição</th>' +
-            mNomes.map(m => '<th style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
+            mNomes.map((m, idx) => '<th data-mes="' + idx + '" style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
             '<th style="text-align:right;min-width:100px;">Total</th>';
 
-        // Para cada mês, calcular valores por grupo
+        // Para cada mês, calcular valores E itens (para detalhe) por grupo
         const dados = {};
-        DRE_GRUPOS.forEach(g => { dados[g.id] = Array(12).fill(0); });
+        DRE_GRUPOS.forEach(g => { dados[g.id] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) }; });
 
         // DRE diretos
         (dreLancs || []).filter(l => l.competencia && l.competencia.startsWith(ano)).forEach(l => {
             const m = parseInt(l.competencia.substring(5,7)) - 1;
             if (m < 0 || m > 11 || !dados[l.grupo]) return;
-            dados[l.grupo][m] += parseFloat(l.valor || 0);
+            dados[l.grupo].valores[m] += parseFloat(l.valor || 0);
+            const cat = dadosCache.categorias.find(x => x.id === l.categoria_id);
+            dados[l.grupo].itens[m].push({
+                id: l.id, descricao: l.descricao, valor: l.valor, competencia: l.competencia,
+                catNome: cat ? cat.nome : (l.categoria || '-'), parte: l.parte || '-', centro: l.centro || '-', fonte: 'dre'
+            });
         });
 
         // Contas recebidas — por competência (inclui pendentes no regime de competência)
@@ -7982,7 +8334,13 @@
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
             if (m < 0 || m > 11 || !dados[g]) return;
-            dados[g][m] += parseFloat(c.valor || 0);
+            dados[g].valores[m] += parseFloat(c.valor || 0);
+            dados[g].itens[m].push({
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia,
+                catNome: cat ? cat.nome : 'Receita',
+                parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
+                fonte: 'receber'
+            });
         });
 
         // Contas pagas — por competência (inclui pendentes no regime de competência)
@@ -7991,25 +8349,34 @@
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
             if (m < 0 || m > 11 || !dados[g]) return;
-            dados[g][m] += parseFloat(c.valor || 0);
+            dados[g].valores[m] += parseFloat(c.valor || 0);
+            dados[g].itens[m].push({
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia,
+                catNome: cat ? cat.nome : 'Custo',
+                parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
+                fonte: 'pagar'
+            });
         });
+
+        _dreMensalItensGrupo = {};
+        Object.keys(dados).forEach(g => { _dreMensalItensGrupo[g] = dados[g].itens; });
 
         // Calcular subtotais por mês
         const calcMes = (m) => {
-            const rb = dados['RECEITA_BRUTA'][m];
-            const ded = dados['DEDUCOES'][m];
+            const rb = dados['RECEITA_BRUTA'].valores[m];
+            const ded = dados['DEDUCOES'].valores[m];
             const rl = rb - ded;
-            const cpv = dados['CPV'][m];
+            const cpv = dados['CPV'].valores[m];
             const lb = rl - cpv;
-            const dc = dados['DESP_COMERCIAL'][m];
-            const da = dados['DESP_ADMIN'][m];
-            const rf = dados['RECEITA_FINANCEIRA'][m];
-            const df = dados['DESP_FINANCEIRA'][m];
+            const dc = dados['DESP_COMERCIAL'].valores[m];
+            const da = dados['DESP_ADMIN'].valores[m];
+            const rf = dados['RECEITA_FINANCEIRA'].valores[m];
+            const df = dados['DESP_FINANCEIRA'].valores[m];
             const ebt = lb - dc - da + rf - df;
-            const emp = dados['EMPRESTIMO'][m];
-            const inv = dados['INVESTIMENTO'][m];
-            const or = dados['OUTRAS_RECEITAS'][m];
-            const od = dados['OUTRAS_DESPESAS'][m];
+            const emp = dados['EMPRESTIMO'].valores[m];
+            const inv = dados['INVESTIMENTO'].valores[m];
+            const or = dados['OUTRAS_RECEITAS'].valores[m];
+            const od = dados['OUTRAS_DESPESAS'].valores[m];
             const res = ebt - emp - inv + or - od;
             return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, emp, inv, or, od, res };
         };
@@ -8017,8 +8384,7 @@
         const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
 
-        // ---- Subcategorias do CPV por mes ----
-        // Agrupa contas_a_pagar do grupo CPV por nome de categoria
+        // ---- Subcategorias do CPV por mes (com itens) ----
         const cpvSubcats = {};
         contasPag.filter(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
@@ -8026,22 +8392,35 @@
         }).forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const nome = cat ? cat.nome : 'Sem Categoria';
-            if (!cpvSubcats[nome]) cpvSubcats[nome] = Array(12).fill(0);
+            if (!cpvSubcats[nome]) cpvSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) cpvSubcats[nome][m] += parseFloat(c.valor || 0);
+            if (m >= 0 && m < 12) {
+                cpvSubcats[nome].valores[m] += parseFloat(c.valor || 0);
+                cpvSubcats[nome].itens[m].push({
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                });
+            }
         });
         // Tambem DRE lancamentos do grupo CPV
         (dreLancs || []).filter(l => l.grupo === 'CPV' && l.competencia && l.competencia.startsWith(ano)).forEach(l => {
             const nome = l.categoria || 'CPV/CSP';
-            if (!cpvSubcats[nome]) cpvSubcats[nome] = Array(12).fill(0);
+            if (!cpvSubcats[nome]) cpvSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(l.competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) cpvSubcats[nome][m] += parseFloat(l.valor || 0);
+            if (m >= 0 && m < 12) {
+                cpvSubcats[nome].valores[m] += parseFloat(l.valor || 0);
+                cpvSubcats[nome].itens[m].push({
+                    id: l.id, descricao: l.descricao, valor: l.valor, competencia: l.competencia, catNome: nome,
+                    parte: l.parte || '-', centro: l.centro || '-', fonte: 'dre'
+                });
+            }
         });
         const cpvSubOrdenado = Object.entries(cpvSubcats).sort((a,b) =>
-            b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)
+            b[1].valores.reduce((s,v)=>s+v,0) - a[1].valores.reduce((s,v)=>s+v,0)
         );
+        _dreMensalCPV = cpvSubOrdenado;
 
-        // ---- Subcategorias DESP_ADMIN por mes ----
+        // ---- Subcategorias DESP_ADMIN por mes (com itens) ----
         const daSubcats = {};
         contasPag.filter(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
@@ -8049,29 +8428,36 @@
         }).forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const nome = cat ? cat.nome : 'Sem Categoria';
-            if (!daSubcats[nome]) daSubcats[nome] = Array(12).fill(0);
+            if (!daSubcats[nome]) daSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) daSubcats[nome][m] += parseFloat(c.valor || 0);
+            if (m >= 0 && m < 12) {
+                daSubcats[nome].valores[m] += parseFloat(c.valor || 0);
+                daSubcats[nome].itens[m].push({
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                });
+            }
         });
         const daSubOrdenado = Object.entries(daSubcats).sort((a,b) =>
-            b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)
+            b[1].valores.reduce((s,v)=>s+v,0) - a[1].valores.reduce((s,v)=>s+v,0)
         );
+        _dreMensalDA = daSubOrdenado;
 
         const linhas = [
-            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '' },
-            { label: '(-) Dedu\u00e7\u00f5es',   fn: m => -calcMes(m).ded, bg: '' },
+            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '', grupoId: 'RECEITA_BRUTA' },
+            { label: '(-) Dedu\u00e7\u00f5es',   fn: m => -calcMes(m).ded, bg: '', grupoId: 'DEDUCOES' },
             { label: '= Receita L\u00edquida',    fn: m => calcMes(m).rl,   bg: '#f5f5f5', bold: true },
-            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '', bold: false, expandir: cpvSubOrdenado },
+            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '', bold: false, grupoId: 'CPV', expandir: cpvSubOrdenado, expandirTipo: 'cpv' },
             { label: '= Lucro Bruto',             fn: m => calcMes(m).lb,   bg: '#f5f5f5', bold: true },
-            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '' },
-            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '', expandir: daSubOrdenado },
-            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '' },
-            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '' },
+            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '', grupoId: 'DESP_COMERCIAL' },
+            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '', grupoId: 'DESP_ADMIN', expandir: daSubOrdenado, expandirTipo: 'da' },
+            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '', grupoId: 'RECEITA_FINANCEIRA' },
+            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '', grupoId: 'DESP_FINANCEIRA' },
             { label: '= EBITDA',                  fn: m => calcMes(m).ebt,  bg: '#e8f4fd', bold: true },
-            { label: '(-) Empr\u00e9stimos',      fn: m => -calcMes(m).emp, bg: '' },
-            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '' },
-            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '' },
-            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '' },
+            { label: '(-) Empr\u00e9stimos',      fn: m => -calcMes(m).emp, bg: '', grupoId: 'EMPRESTIMO' },
+            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '', grupoId: 'INVESTIMENTO' },
+            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '', grupoId: 'OUTRAS_RECEITAS' },
+            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '', grupoId: 'OUTRAS_DESPESAS' },
             { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
         ];
 
@@ -8085,26 +8471,109 @@
             const rowBg = linha.bg ? 'background:' + linha.bg + ';' : '';
             const rowFc = linha.cor ? 'color:' + linha.cor + ';' : '';
             const bold  = linha.bold ? 'font-weight:700;' : '';
+            const clicavelGrupo = !!linha.grupoId;
+
+            const celMes = (v, m) => {
+                const estilo = (linha.sinal ? corSinal(v) : (linha.cor ? '' : cor(v))) + 'padding:5px 8px;text-align:right;' +
+                    (clicavelGrupo ? 'cursor:pointer;' : '');
+                const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',${m})" title="Clique para ver os lançamentos"` : '';
+                return `<td data-mes="${m}" style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(v) : fmtV(v)}</td>`;
+            };
+            const celTotal = (() => {
+                const estilo = 'text-align:right;padding:5px 8px;font-weight:700;' + (linha.sinal ? corSinal(total) : (linha.cor ? '' : cor(total))) +
+                    (clicavelGrupo ? 'cursor:pointer;' : '');
+                const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',-1)" title="Clique para ver os lançamentos do ano"` : '';
+                return `<td style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(total) : fmtV(total)}</td>`;
+            })();
+
             tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
                 '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
-                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (linha.sinal ? corSinal(v) : (linha.cor ? '' : cor(v))) + '">' + (linha.sinal ? fmtVSinal(v) : fmtV(v)) + '</td>').join('') +
-                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (linha.sinal ? corSinal(total) : (linha.cor ? '' : cor(total))) + '">' + (linha.sinal ? fmtVSinal(total) : fmtV(total)) + '</td>' +
+                vals.map((v, m) => celMes(v, m)).join('') +
+                celTotal +
                 '</tr>';
 
-            // Subcategorias expandidas
+            // Subcategorias expandidas (clicáveis também)
             if (linha.expandir && linha.expandir.length > 0) {
-                linha.expandir.forEach(([nomeSub, mesesSub]) => {
+                linha.expandir.forEach(([nomeSub, subDados], subIdx) => {
+                    const mesesSub = subDados.valores;
                     const totalSub = mesesSub.reduce((s,v)=>s+v,0);
                     if (totalSub === 0) return;
+                    const celMesSub = (v, m) => `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos">${v > 0 ? fmtV(-v) : '-'}</td>`;
                     tbody.innerHTML += '<tr style="background:#fafafa;">' +
                         '<td style="padding:4px 8px 4px 22px;font-size:11px;color:#888;">' +
                         '<span style="color:#bbb;margin-right:4px;">\u21b3</span>' + nomeSub + '</td>' +
-                        mesesSub.map(v => '<td style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;">' + (v > 0 ? fmtV(-v) : '-') + '</td>').join('') +
-                        '<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;">' + fmtV(-totalSub) + '</td>' +
+                        mesesSub.map((v, m) => celMesSub(v, m)).join('') +
+                        `<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(-totalSub) + '</td>' +
                         '</tr>';
                 });
             }
         });
+
+        _popularChecksMesesDRE();
+        _aplicarVisibilidadeMesesDRE();
+    }
+
+    // ---- Ocultar/Exibir meses na tabela DRE Mensal ----
+    function toggleMenuMesesDRE() {
+        const menu = document.getElementById('menuMesesDRE');
+        if (!menu) return;
+        menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'block' : 'none';
+    }
+    document.addEventListener('click', function (ev) {
+        const menu = document.getElementById('menuMesesDRE');
+        if (!menu || menu.style.display !== 'block') return;
+        const wrap = menu.parentElement;
+        if (wrap && !wrap.contains(ev.target)) menu.style.display = 'none';
+    });
+    function _popularChecksMesesDRE() {
+        const cont = document.getElementById('checksMesesDRE');
+        if (!cont) return;
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        cont.innerHTML = mNomes.map((m, idx) =>
+            '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;">' +
+            '<input type="checkbox" ' + (_mesesVisiveisDRE[idx] ? 'checked' : '') + ' onchange="toggleMesVisivelDRE(' + idx + ')" style="width:14px;height:14px;margin:0;">' + m + '</label>'
+        ).join('');
+    }
+    function toggleMesVisivelDRE(m) {
+        _mesesVisiveisDRE[m] = !_mesesVisiveisDRE[m];
+        _aplicarVisibilidadeMesesDRE();
+    }
+    function marcarTodosMesesDRE(valor) {
+        _mesesVisiveisDRE = Array(12).fill(valor);
+        _popularChecksMesesDRE();
+        _aplicarVisibilidadeMesesDRE();
+    }
+    function _aplicarVisibilidadeMesesDRE() {
+        document.querySelectorAll('#tabelaDREMensal [data-mes]').forEach(el => {
+            const m = parseInt(el.getAttribute('data-mes'));
+            el.style.display = _mesesVisiveisDRE[m] ? '' : 'none';
+        });
+    }
+
+    // Abre o modal de detalhe de uma célula da DRE Mensal (grupo ou subcategoria, de um mês específico ou do ano todo)
+    // tipo: 'grupo' | 'cpv' | 'da'    chave: grupoId (string) para 'grupo', ou índice (number) para 'cpv'/'da'    mes: 0-11, ou -1 para o ano todo
+    function abrirDetalheMensalDRE(tipo, chave, mes) {
+        const mNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        let itens = [];
+        let titulo = '';
+        if (tipo === 'grupo') {
+            const grupo = DRE_GRUPOS.find(g => g.id === chave);
+            titulo = grupo ? grupo.label.trim() : chave;
+            const porMes = _dreMensalItensGrupo[chave] || [];
+            itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
+        } else {
+            const origem = tipo === 'cpv' ? _dreMensalCPV : _dreMensalDA;
+            const entry = origem[chave];
+            if (!entry) return;
+            titulo = entry[0];
+            const porMes = entry[1].itens;
+            itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
+        }
+        document.getElementById('tituloDetalheDRE').textContent = titulo;
+        const subEl = document.getElementById('subtituloDetalheDRE');
+        if (subEl) subEl.textContent = (mes === -1 ? 'Ano todo' : mNomes[mes]) + ' / ' + _dreMensalAno;
+        _renderLinhasDetalheDRE(itens.slice().sort((a,b) => (a.competencia||'').localeCompare(b.competencia||'')));
+        document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
     // Lançamentos DRE diretos
@@ -9248,20 +9717,80 @@
 </div>
 
 <div class="modal" id="modalDetalheDRE">
-    <div class="modal-content" style="max-width:700px;">
+    <div class="modal-content" style="max-width:920px;">
         <div class="modal-header">
-            <span id="tituloDetalheDRE">Detalhes</span>
+            <div>
+                <div id="tituloDetalheDRE" style="font-size:16px;">Detalhes</div>
+                <div id="subtituloDetalheDRE" style="font-size:12px;font-weight:400;color:#888;margin-top:2px;"></div>
+            </div>
             <button class="modal-close" onclick="closeModal('modalDetalheDRE')">&times;</button>
         </div>
-        <div class="table-container">
-            <table id="tabelaDetalheDRE">
-                <thead><tr><th>Competência</th><th>Descrição</th><th>Categoria</th><th>Parte</th><th>Centro</th><th style="text-align:right;">Valor</th><th>Ações</th></tr></thead>
+        <div class="table-container" style="max-height:60vh;overflow-y:auto;">
+            <table id="tabelaDetalheDRE" style="font-size:14px;">
+                <thead style="position:sticky;top:0;z-index:2;">
+                    <tr>
+                        <th style="min-width:90px;">Competência</th>
+                        <th style="min-width:200px;">Descrição</th>
+                        <th style="min-width:140px;">Categoria</th>
+                        <th style="min-width:140px;">Fornecedor/Cliente</th>
+                        <th style="min-width:100px;">Centro</th>
+                        <th style="min-width:130px;text-align:right;">Valor</th>
+                        <th style="min-width:150px;">Ações</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
         <div class="form-actions" style="margin-top:12px;">
             <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR GRUPO CUSTO FIXO (edita todos os lançamentos do grupo de uma vez) -->
+<div class="modal" id="modalEditarGrupoCustoFixo">
+    <div class="modal-content" style="max-width:640px;">
+        <div class="modal-header">
+            <span id="editGrupoCFTitulo">💠 Editar Custo Fixo</span>
+            <button class="modal-close" onclick="closeModal('modalEditarGrupoCustoFixo')">&times;</button>
+        </div>
+        <div class="alert alert-success" id="alertEditarGrupoCF"></div>
+        <form onsubmit="salvarEdicaoGrupoCustoFixo(event)">
+            <input type="hidden" id="editGrupoCFTipo">
+            <div class="form-row">
+                <div class="form-group" id="editGrupoCFFornecedorWrap">
+                    <label>Fornecedor</label>
+                    <select id="editGrupoCFFornecedor"><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group" id="editGrupoCFClienteWrap" style="display:none;">
+                    <label>Cliente</label>
+                    <select id="editGrupoCFCliente"><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="editGrupoCFCategoria"><option value="">Selecione...</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descrição base</label>
+                    <input type="text" id="editGrupoCFDescricao">
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <input type="text" id="editGrupoCFObs">
+                    <small id="editGrupoCFObsFinal" style="display:block;color:#999;margin-top:4px;"></small>
+                </div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--cor-primaria);margin:10px 0 6px;">
+                📋 Lançamentos do grupo <small style="font-weight:400;color:#999;">(vencimento e valor editáveis por parcela)</small>:
+            </div>
+            <div id="editGrupoCFLista" style="max-height:280px;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:8px;font-size:12px;"></div>
+            <div class="form-actions" style="margin-top:14px;">
+                <button type="submit" class="btn btn-success">💾 Salvar Todos</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarGrupoCustoFixo')">Cancelar</button>
+            </div>
+        </form>
     </div>
 </div>
 
