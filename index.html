@@ -4620,8 +4620,18 @@
         document.getElementById('editGrupoCFObs').value = obsBase;
         document.getElementById('editGrupoCFObsFinal').textContent = obsMatch ? obsMatch[0] : '';
 
+        _renderListaGrupoCF();
+        document.getElementById('modalEditarGrupoCustoFixo').classList.add('active');
+        return true;
+    }
+
+    // Renderiza a lista de parcelas do grupo dentro do modal.
+    // Chamada ao abrir o modal e novamente após excluir uma parcela (para não precisar reabrir).
+    function _renderListaGrupoCF() {
+        const grupo = window._grupoCFItens || [];
+        const tipo = window._grupoCFTipoAtual;
         let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
-            '<span style="width:44px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:110px;">Valor</span><span style="width:64px;text-align:center;">Status</span></div>';
+            '<span style="width:44px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:110px;">Valor</span><span style="width:64px;text-align:center;">Status</span><span style="width:26px;"></span></div>';
         grupo.forEach((c, i) => {
             const pago = c.status === 'pago' || c.status === 'recebido';
             html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f0f0f0;">' +
@@ -4629,12 +4639,52 @@
                 '<input type="date" id="editGrupoCFData' + i + '" value="' + (c.data_vencimento || '') + '" style="flex:1;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
                 '<input type="number" step="0.01" id="editGrupoCFValor' + i + '" value="' + (c.valor || 0) + '" style="width:110px;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-weight:600;color:' + (tipo === 'receber' ? '#28a745' : '#dc3545') + ';">' +
                 '<span style="width:64px;text-align:center;font-size:11px;">' + (pago ? '✅ ' + (tipo === 'receber' ? 'Recebido' : 'Pago') : '⏳ Pendente') + '</span>' +
+                '<button type="button" onclick="excluirParcelaGrupoCF(' + i + ')" title="Excluir esta parcela" style="width:24px;height:24px;border:none;background:#fdecea;color:#dc3545;border-radius:4px;cursor:pointer;font-size:12px;line-height:1;">🗑️</button>' +
                 '</div>';
         });
         document.getElementById('editGrupoCFLista').innerHTML = html;
         document.getElementById('editGrupoCFTitulo').textContent = '✏️ Editar Custo Fixo — ' + grupo.length + ' lançamento(s) do grupo';
-        document.getElementById('modalEditarGrupoCustoFixo').classList.add('active');
-        return true;
+    }
+
+    // Exclui uma única parcela do grupo Custo Fixo diretamente pelo modal de edição em grupo.
+    // Apaga do banco na hora (mesma lógica do botão "Deletar" das telas de listagem) e
+    // atualiza a lista do modal e o cache local, sem precisar fechar/reabrir o modal.
+    async function excluirParcelaGrupoCF(index) {
+        const grupo = window._grupoCFItens || [];
+        const item = grupo[index];
+        if (!item) return;
+        const label = item.parcela_atual + '/' + item.total_parcelas;
+        const vencLabel = item.data_vencimento ? new Date(item.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+        if (!confirm('Excluir a parcela ' + label + (vencLabel ? ' (vencimento ' + vencLabel + ')' : '') + '?\nEsta ação não pode ser desfeita.')) return;
+
+        const tipo = window._grupoCFTipoAtual;
+        const tabela = tipo === 'receber' ? 'contas_a_receber' : 'contas_a_pagar';
+        const resultado = await fetchSupabase(tabela, 'DELETE', null, 'id=eq.' + item.id);
+        if (resultado === null) {
+            showAlert('Erro ao excluir a parcela.', 'alertEditarGrupoCF', 'error');
+            return;
+        }
+
+        grupo.splice(index, 1);
+        window._grupoCFItens = grupo;
+
+        // Mantém o cache local sincronizado sem precisar recarregar tudo do servidor
+        ['contasPagar', 'contasPagas', 'contasReceber', 'contasRecebidas'].forEach(chave => {
+            if (Array.isArray(dadosCache[chave])) dadosCache[chave] = dadosCache[chave].filter(c => c.id !== item.id);
+        });
+
+        if (grupo.length === 0) {
+            showAlert('Todas as parcelas do grupo foram excluídas.', 'alertEditarGrupoCF', 'success');
+            closeModal('modalEditarGrupoCustoFixo');
+        } else {
+            showAlert('Parcela ' + label + ' excluída.', 'alertEditarGrupoCF', 'success');
+            _renderListaGrupoCF();
+        }
+
+        // Reflete a exclusão nas telas que já estejam abertas
+        atualizarTabelaPendentesPagar();
+        atualizarTabelaPendentesReceber();
+        atualizarDashboard();
     }
 
     async function salvarEdicaoGrupoCustoFixo(event) {
