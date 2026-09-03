@@ -464,6 +464,17 @@
         #tabelaExtrato tr.linha-fim-semana td {
             background-color: #fdf2f2;
         }
+
+        /* Tabela compacta do DRE */
+        #tabelaDRE th {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        #tabelaDRE td {
+            padding: 3px 10px;
+            font-size: 12px;
+            line-height: 1.25;
+        }
         #tabelaExtrato .dia-semana {
             font-size: 10px;
             font-weight: 400;
@@ -471,12 +482,6 @@
         }
         #tabelaExtrato tr.linha-fim-semana .dia-semana {
             color: #c98a8a;
-        }
-
-        /* Tabelas do DRE — mais compactas para caber lado a lado */
-        #tabelaDRE td, #tabelaDRE th,
-        #tabelaDREMensal td, #tabelaDREMensal th {
-            padding: 5px 8px;
         }
 
         tbody tr:hover {
@@ -749,16 +754,6 @@
         <div class="menu-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
 
         <div class="menu-section">
-            <div class="menu-section-title">Cadastros</div>
-            <div class="menu-item" onclick="showPage('categorias')">📁 Categorias</div>
-            <div class="menu-item" onclick="showPage('produtos')">📦 Produtos</div>
-            <div class="menu-item" onclick="showPage('fornecedores')">🏭 Fornecedores</div>
-            <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
-            <div class="menu-item" onclick="showPage('bancos')">🏦 Bancos</div>
-            <div class="menu-item" onclick="showPage('custos-fixos')">📌 Custos Fixos</div>
-        </div>
-
-        <div class="menu-section">
             <div class="menu-section-title">Lançamentos</div>
             <div class="menu-item" onclick="showPage('lancar-receber')">📥 Lançar Contas a Receber</div>
             <div class="menu-item" onclick="showPage('lancar-pagar')">📤 Lançar Contas a Pagar</div>
@@ -772,6 +767,12 @@
         </div>
 
         <div class="menu-section">
+            <div class="menu-section-title">Cheques</div>
+            <div class="menu-item" onclick="showPage('chequesAberto')">🧾 Cheques em Aberto</div>
+            <div class="menu-item" onclick="showPage('chequesCompensados')">✅ Cheques Compensados</div>
+        </div>
+
+        <div class="menu-section">
             <div class="menu-section-title">Análises</div>
             <div class="menu-item" onclick="showPage('relatorio-receber')">📈 Resumo Recebimentos</div>
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
@@ -780,6 +781,15 @@
             <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
             <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
             <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-section-title">Cadastros</div>
+            <div class="menu-item" onclick="showPage('categorias')">📁 Categorias</div>
+            <div class="menu-item" onclick="showPage('produtos')">📦 Produtos</div>
+            <div class="menu-item" onclick="showPage('fornecedores')">🏭 Fornecedores</div>
+            <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
+            <div class="menu-item" onclick="showPage('bancos')">🏦 Bancos</div>
         </div>
 
               </div><!-- fim sidebar-menu -->
@@ -1002,52 +1012,6 @@
             </div>
         </div>
 
-        <!-- CUSTOS FIXOS -->
-        <div id="custos-fixos" class="page">
-            <div class="page-header">
-                <h1>📌 Custos Fixos</h1>
-                <button class="btn btn-primary btn-small" onclick="openModalCustoFixo()">+ Novo Custo Fixo</button>
-            </div>
-
-            <div class="alert alert-success" id="alertCustosFixos"></div>
-
-            <div class="filter-container">
-                <div class="filter-row">
-                    <div class="form-group">
-                        <label>Pesquisar</label>
-                        <input type="text" id="filtroCustoFixo" placeholder="Descrição" onchange="carregarCustosFixos()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard-grid" style="margin-bottom:16px;">
-                <div class="stat-card" style="border-left-color:#dc3545;">
-                    <div class="stat-label">💸 Total Mensal (ativos)</div>
-                    <div class="stat-value" id="totalCustosFixos" style="color:#dc3545;">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">🧾 Quantidade Ativa</div>
-                    <div class="stat-value" id="qtdCustosFixos">0</div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table id="tabelaCustosFixos">
-                    <thead>
-                        <tr>
-                            <th>Descrição</th>
-                            <th>Categoria</th>
-                            <th>Valor Mensal (R$)</th>
-                            <th>Dia Vencimento</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-
         <!-- CLIENTES -->
         <div id="clientes" class="page">
             <div class="page-header">
@@ -1170,6 +1134,13 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Filtrar por</label>
+                        <select id="filtroBaseDataReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="vencimento">Vencimento</option>
+                            <option value="competencia">Competência</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Ano</label>
                         <select id="filtroAnoReceber" onchange="atualizarTabelaPendentesReceber()">
                             <option value="">Todos</option>
@@ -1187,6 +1158,21 @@
                             <option value="11">Novembro</option><option value="12">Dezembro</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Dia</label>
+                        <select id="filtroDiaReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="filtroStatusReceber" onchange="atualizarTabelaPendentesReceber()">
+                            <option value="">Todos</option>
+                            <option value="atrasado">Atrasado</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="recebido">Recebido</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -1200,20 +1186,26 @@
                     <div style="font-size:11px;color:#856404;font-weight:600;">⏳ ATRASADOS</div>
                     <div id="totalReceberAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
                 </div>
+                <div style="background:#d1ecf1;border:1px solid #17a2b8;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#0c5460;font-weight:600;">✅ RECEBIDO</div>
+                    <div id="totalReceberRecebido" style="font-size:20px;font-weight:700;color:#0c5460;">R$ 0,00</div>
+                </div>
                 <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
                     <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
                     <div id="countReceberFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
                 </div>
             </div>
+            <div id="dicaBaseReceber" style="font-size:12px;color:#666;margin:-8px 0 12px 2px;"></div>
 
             <div class="table-container">
                 <table id="tabelaPendentesReceber">
                     <colgroup>
                         <col style="min-width:130px;">
                         <col style="min-width:160px;">
-                        <col style="min-width:90px;">
+                        <col style="min-width:70px;">
                         <col style="min-width:100px;">
                         <col style="min-width:110px;">
+                        <col style="min-width:90px;">
                         <col style="min-width:70px;">
                         <col style="min-width:90px;">
                         <col style="min-width:170px;">
@@ -1222,9 +1214,10 @@
                         <tr>
                             <th>Cliente</th>
                             <th>Descrição</th>
-                            <th>Competência</th>
-                            <th>Vencimento</th>
-                            <th>Valor</th>
+                            <th>NF</th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasReceberPor('data_competencia')" title="Clique para ordenar">Competência <span id="sortIconReceberComp"></span></th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasReceberPor('data_vencimento')" title="Clique para ordenar">Vencimento <span id="sortIconReceberVenc"></span></th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasReceberPor('valor')" title="Clique para ordenar">Valor <span id="sortIconReceberValor"></span></th>
                             <th>Parcela</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -1241,6 +1234,7 @@
                 <h1>📤 Contas a Pagar</h1>
                 <div style="display:flex;gap:8px;">
                     <button class="btn btn-secondary" onclick="gerarPDF('pagar')" style="background:#e67e22;color:white;">📄 PDF</button>
+                    <button class="btn btn-secondary" onclick="exportarExcelContasPagar()" style="background:#217346;color:white;">📊 Excel</button>
                     <button class="btn btn-primary" onclick="openModalLancarPagar()">+ Novo Lançamento</button>
                 </div>
             </div>
@@ -1255,9 +1249,33 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label>Grupo</label>
+                        <select id="filtroGrupoPagar" onchange="aplicarFiltroGrupoCategoriaPagar(); atualizarTabelaPendentesPagar();">
+                            <option value="">Todos os grupos</option>
+                            <option value="RECEITA_BRUTA">Receita Bruta</option>
+                            <option value="DEDUCOES">Deduções / Impostos s/ Receita</option>
+                            <option value="CPV">CPV / Custo dos Serviços</option>
+                            <option value="DESP_COMERCIAL">Despesas Comerciais</option>
+                            <option value="DESP_ADMIN">Despesas Administrativas</option>
+                            <option value="RECEITA_FINANCEIRA">Receitas Financeiras</option>
+                            <option value="DESP_FINANCEIRA">Despesas Financeiras</option>
+                            <option value="EMPRESTIMO">Empréstimos e Financiamentos</option>
+                            <option value="INVESTIMENTO">Investimentos</option>
+                            <option value="OUTRAS_RECEITAS">Outras Receitas</option>
+                            <option value="OUTRAS_DESPESAS">Outras Despesas</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label>Categoria</label>
                         <select id="filtroCategoriaPagar" onchange="atualizarTabelaPendentesPagar()">
                             <option value="">Todos</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Filtrar por</label>
+                        <select id="filtroBaseDataPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="vencimento">Vencimento</option>
+                            <option value="competencia">Competência</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1278,6 +1296,15 @@
                             <option value="11">Novembro</option><option value="12">Dezembro</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="filtroStatusPagar" onchange="atualizarTabelaPendentesPagar()">
+                            <option value="">Todos</option>
+                            <option value="atrasado">Atrasado</option>
+                            <option value="pendente">Pendente</option>
+                            <option value="pago">Pago</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -1291,11 +1318,16 @@
                     <div style="font-size:11px;color:#856404;font-weight:600;">⚠️ ATRASADOS</div>
                     <div id="totalPagarAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
                 </div>
+                <div style="background:#d4edda;border:1px solid #28a745;border-radius:8px;padding:10px 18px;min-width:160px;">
+                    <div style="font-size:11px;color:#155724;font-weight:600;">✅ PAGO</div>
+                    <div id="totalPagarPago" style="font-size:20px;font-weight:700;color:#155724;">R$ 0,00</div>
+                </div>
                 <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
                     <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
                     <div id="countPagarFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
                 </div>
             </div>
+            <div id="dicaBasePagar" style="font-size:12px;color:#666;margin:-8px 0 12px 2px;"></div>
 
             <div class="table-container">
                 <table id="tabelaPendentesPagar">
@@ -1317,9 +1349,9 @@
                             <th>Categoria</th>
                             <th>Descrição</th>
                             <th>NF</th>
-                            <th>Competência</th>
-                            <th>Vencimento</th>
-                            <th>Valor</th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasPagarPor('data_competencia')" title="Clique para ordenar">Competência <span id="sortIconPagarComp"></span></th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasPagarPor('data_vencimento')" title="Clique para ordenar">Vencimento <span id="sortIconPagarVenc"></span></th>
+                            <th style="cursor:pointer;user-select:none;" onclick="ordenarContasPagarPor('valor')" title="Clique para ordenar">Valor <span id="sortIconPagarValor"></span></th>
                             <th>Parcela</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -1587,6 +1619,147 @@
                                 <th>A Receber</th>
                                 <th>Saldo do Dia</th>
                                 <th>Indicação</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHEQUES EM ABERTO -->
+        <div id="chequesAberto" class="page">
+            <div class="page-header">
+                <h1>🧾 Cheques em Aberto</h1>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary btn-small" onclick="abrirModalPDFCheques()">🖨️ Gerar PDF</button>
+                    <button class="btn btn-primary btn-small" onclick="openModalCheque()">+ Novo Cheque</button>
+                </div>
+            </div>
+
+            <div class="alert alert-success" id="alertChequesAberto"></div>
+
+            <!-- Cards resumo -->
+            <div class="dashboard-grid" style="margin-bottom:20px;">
+                <div class="stat-card" style="border-left-color:#ffc107;">
+                    <div class="stat-label">🟡 Em Aberto</div>
+                    <div class="stat-value" id="chequeCardAbertoValor" style="font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardAbertoQtd">0 cheque(s)</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-label">🔴 Vencidos</div>
+                    <div class="stat-value" id="chequeCardVencidoValor" style="color:#dc3545;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardVencidoQtd">0 cheque(s)</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#28a745;cursor:pointer;" onclick="showPage('chequesCompensados')" title="Ver cheques compensados">
+                    <div class="stat-label">✅ Compensados</div>
+                    <div class="stat-value" id="chequeCardCompensadoValor" style="color:#28a745;font-size:20px;">R$ 0,00</div>
+                    <div class="stat-change" id="chequeCardCompensadoQtd">0 cheque(s)</div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Vencimento - Data Início</label>
+                        <input type="date" id="filtroDataInicioChequeAberto" onchange="atualizarTabelaChequesAberto()">
+                    </div>
+                    <div class="form-group">
+                        <label>Vencimento - Data Fim</label>
+                        <input type="date" id="filtroDataFimChequeAberto" onchange="atualizarTabelaChequesAberto()">
+                    </div>
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorChequeAberto" onchange="atualizarTabelaChequesAberto();"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('filtroDataInicioChequeAberto').value='';document.getElementById('filtroDataFimChequeAberto').value='';atualizarTabelaChequesAberto();">Limpar filtro de datas</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela -->
+            <div class="card" style="margin-top:16px;">
+                <div class="card-title">📋 Cheques em Aberto</div>
+                <div class="table-container">
+                    <table id="tabelaChequesAberto">
+                        <thead>
+                            <tr>
+                                <th>Bom Para</th>
+                                <th>Fornecedor</th>
+                                <th>Banco</th>
+                                <th>Data Entrada</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHEQUES COMPENSADOS -->
+        <div id="chequesCompensados" class="page">
+            <div class="page-header">
+                <h1>✅ Cheques Compensados</h1>
+            </div>
+
+            <div class="alert alert-success" id="alertChequesCompensados"></div>
+
+            <div class="filter-container" style="margin-bottom:16px;">
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="filtroFornecedorChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano (Compensação)</label>
+                        <select id="filtroAnoChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês (Compensação)</label>
+                        <select id="filtroMesChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                            <option value="">Todos</option>
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Vencimento - Data Início</label>
+                        <input type="date" id="filtroDataInicioChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                    </div>
+                    <div class="form-group">
+                        <label>Vencimento - Data Fim</label>
+                        <input type="date" id="filtroDataFimChequeComp" onchange="atualizarTabelaChequesCompensados()">
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('filtroDataInicioChequeComp').value='';document.getElementById('filtroDataFimChequeComp').value='';atualizarTabelaChequesCompensados();">Limpar filtro de datas</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📋 Cheques Compensados</div>
+                <div class="table-container">
+                    <table id="tabelaChequesCompensados">
+                        <thead>
+                            <tr>
+                                <th>Bom Para</th>
+                                <th>Fornecedor</th>
+                                <th>Banco</th>
+                                <th>Data Entrada</th>
+                                <th>Data Compensação</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -2281,6 +2454,7 @@
                     <div class="form-group" style="display:flex;gap:8px;align-items:flex-end;padding-bottom:2px;">
                         <button class="btn btn-primary btn-small" onclick="abrirModalLancDRE()">+ Lançar</button>
                         <button class="btn btn-secondary btn-small" onclick="exportarDRE()">📥 Exportar</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportarExcelDRE()" style="background:#217346;color:white;">📊 Excel</button>
                         <button class="btn btn-secondary btn-small" onclick="gerarPDFDRE()" style="background:#e67e22;color:white;">📄 PDF</button>
                     </div>
                 </div>
@@ -2313,31 +2487,41 @@
                     <div class="stat-change" id="dreCardMargemLiq">Margem: 0%</div>
                 </div>
             </div>
-            <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
-                <div class="card" style="padding:14px;flex:0 0 auto;max-width:420px;min-width:340px;margin-bottom:0;">
-                    <div class="card-title" id="dreTituloPeriodo" style="font-size:15px;margin-bottom:8px;">DRE por Competência</div>
-                    <div class="table-container">
-                        <table id="tabelaDRE" style="font-size:12px;width:100%;">
-                            <thead>
-                                <tr>
-                                    <th style="width:auto;min-width:180px;">Descrição</th>
-                                    <th style="width:140px;text-align:right;">Valor (R$)</th>
-                                    <th style="width:80px;text-align:right;">AV %</th>
-                                    <th style="width:50px;text-align:center;">Ver</th>
-                                </tr>
-                            </thead>
-                            <tbody id="dreCorpo"></tbody>
-                        </table>
+            <div class="card">
+                <div class="card-title" id="dreTituloPeriodo">DRE por Competência</div>
+                <div class="table-container">
+                    <table id="tabelaDRE" style="font-size:13px;width:auto;min-width:600px;max-width:900px;">
+                        <thead>
+                            <tr>
+                                <th style="width:auto;min-width:220px;">Descrição</th>
+                                <th style="width:160px;text-align:right;">Valor (R$)</th>
+                                <th style="width:100px;text-align:right;">AV %</th>
+                                <th style="width:60px;text-align:center;">Ver</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dreCorpo"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card" id="cardDREMensal" style="display:none;margin-top:16px;">
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span id="tituloDREMensal">📅 DRE Mensal</span>
+                    <div style="position:relative;">
+                        <button type="button" class="btn btn-secondary btn-small" onclick="toggleMenuMesesDRE()">👁️ Ocultar/Exibir meses</button>
+                        <div id="menuMesesDRE" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:white;border:1px solid var(--cor-borda);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px;z-index:50;min-width:220px;font-size:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                <a href="javascript:void(0)" onclick="marcarTodosMesesDRE(true)" style="color:var(--cor-primaria);font-weight:600;">Marcar todos</a>
+                                <a href="javascript:void(0)" onclick="marcarTodosMesesDRE(false)" style="color:var(--cor-primaria);font-weight:600;">Desmarcar todos</a>
+                            </div>
+                            <div id="checksMesesDRE" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="card" id="cardDREMensal" style="display:none;padding:14px;flex:1 1 480px;min-width:480px;margin-bottom:0;">
-                    <div class="card-title" id="tituloDREMensal" style="font-size:15px;margin-bottom:8px;">📅 DRE Mensal</div>
-                    <div style="overflow-x:auto;">
-                        <table id="tabelaDREMensal" style="font-size:11px;min-width:900px;">
-                            <thead><tr id="dreHeaderMeses"><th style="min-width:160px;">Descrição</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                <div style="overflow-x:auto;">
+                    <table id="tabelaDREMensal" style="font-size:12px;min-width:900px;">
+                        <thead><tr id="dreHeaderMeses"><th style="min-width:180px;">Descrição</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -2378,18 +2562,12 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Saldo Inicial (R$)*</label>
-                    <input type="number" id="saldoInicialBanco" step="0.01" inputmode="decimal" value="0" required placeholder="Ex: -500,00 para saldo devedor">
+                    <input type="number" id="saldoInicialBanco" step="0.01" value="0" required>
                 </div>
                 <div class="form-group">
-                    <label>Saldo Inicial desde*</label>
-                    <input type="date" id="dataSaldoInicialBanco" required>
-                    <div style="font-size:11px;color:#999;margin-top:4px;">Lançamentos anteriores a esta data não entram no cálculo do saldo</div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="checkbox-group" style="margin-bottom:0;">
-                    <input type="checkbox" id="ativoBanco" checked>
-                    <label for="ativoBanco">Ativo</label>
+                    <label>
+                        <input type="checkbox" id="ativoBanco" checked> Ativo
+                    </label>
                 </div>
             </div>
             <div class="form-actions">
@@ -2422,7 +2600,7 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Valor Total*</label>
+                    <label id="labelValorReceber">Valor Total*</label>
                     <input type="number" id="valorReceber" step="0.01" required oninput="calcularParcelasReceber()">
                 </div>
                 <div class="form-group">
@@ -2433,25 +2611,35 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Data Prevista de Recebimento*</label>
-                    <input type="date" id="vencimentoReceber" required oninput="calcularParcelasReceber()">
+                    <input type="date" id="vencimentoReceber" required oninput="onDataBaseCustoFixoReceberChange()">
                 </div>
                 <div class="form-group">
                     <label>Parcelas</label>
                     <select id="parcelasReceber" onchange="calcularParcelasReceber()">
                         <option value="1">À vista (1x)</option>
-                        <option value="2">2x</option><option value="3">3x</option>
-                        <option value="4">4x</option><option value="5">5x</option>
-                        <option value="6">6x</option><option value="7">7x</option>
-                        <option value="8">8x</option><option value="9">9x</option>
-                        <option value="10">10x</option><option value="11">11x</option>
-                        <option value="12">12x</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-row" style="align-items:center;">
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+                    <input type="checkbox" id="custoFixoReceber" onchange="toggleCustoFixoReceber()" style="width:16px;height:16px;margin:0;">
+                    <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
+                </div>
+            </div>
+            <div class="form-row" id="vigenciaReceberWrap" style="display:none;">
+                <div class="form-group">
+                    <label>Repetir por quantas vezes*</label>
+                    <input type="number" id="qtdCustoFixoReceber" min="1" max="120" step="1" oninput="onQtdCustoFixoReceberChange()" placeholder="Ex: 12">
+                </div>
+                <div class="form-group">
+                    <label>Vigência até*</label>
+                    <input type="date" id="vigenciaFimReceber" oninput="onVigenciaCustoFixoReceberChange()">
                 </div>
             </div>
             <!-- Preview parcelas -->
             <div id="previewParcelasReceber" style="display:none; margin-bottom:12px;">
-                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
-                <div id="listaParcelasReceber" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas <small style="font-weight:400;color:#999;">(datas e valores editáveis)</small>:</div>
+                <div id="listaParcelasReceber" style="max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -2481,8 +2669,8 @@
         <form onsubmit="salvarContaPagar(event)">
             <div class="form-row">
                 <div class="form-group">
-                    <label>Fornecedor*</label>
-                    <select id="fornecedorPagar" required>
+                    <label>Fornecedor</label>
+                    <select id="fornecedorPagar">
                         <option value="">Selecione...</option>
                     </select>
                 </div>
@@ -2501,13 +2689,13 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Descrição*</label>
-                    <input type="text" id="descricaoPagar" required>
+                    <label>Descrição</label>
+                    <input type="text" id="descricaoPagar">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Valor Total*</label>
+                    <label id="labelValorPagar">Valor Total*</label>
                     <input type="number" id="valorPagar" step="0.01" required oninput="calcularParcelasPagar()">
                 </div>
                 <div class="form-group">
@@ -2518,25 +2706,35 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Data Prevista de Pagamento*</label>
-                    <input type="date" id="vencimentoPagar" required oninput="calcularParcelasPagar()">
+                    <input type="date" id="vencimentoPagar" required oninput="onDataBaseCustoFixoPagarChange()">
                 </div>
                 <div class="form-group">
                     <label>Parcelas</label>
                     <select id="parcelasPagar" onchange="calcularParcelasPagar()">
                         <option value="1">À vista (1x)</option>
-                        <option value="2">2x</option><option value="3">3x</option>
-                        <option value="4">4x</option><option value="5">5x</option>
-                        <option value="6">6x</option><option value="7">7x</option>
-                        <option value="8">8x</option><option value="9">9x</option>
-                        <option value="10">10x</option><option value="11">11x</option>
-                        <option value="12">12x</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-row" style="align-items:center;">
+                <div class="form-group" style="display:flex;align-items:center;gap:8px;margin-bottom:0;">
+                    <input type="checkbox" id="custoFixoPagar" onchange="toggleCustoFixoPagar()" style="width:16px;height:16px;margin:0;">
+                    <label style="margin:0;">💠 Custo Fixo (repete mensalmente)</label>
+                </div>
+            </div>
+            <div class="form-row" id="vigenciaPagarWrap" style="display:none;">
+                <div class="form-group">
+                    <label>Repetir por quantas vezes*</label>
+                    <input type="number" id="qtdCustoFixoPagar" min="1" max="120" step="1" oninput="onQtdCustoFixoPagarChange()" placeholder="Ex: 12">
+                </div>
+                <div class="form-group">
+                    <label>Vigência até*</label>
+                    <input type="date" id="vigenciaFimPagar" oninput="onVigenciaCustoFixoPagarChange()">
                 </div>
             </div>
             <!-- Preview parcelas -->
             <div id="previewParcelasPagar" style="display:none; margin-bottom:12px;">
-                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas:</div>
-                <div id="listaParcelasPagar" style="max-height:140px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
+                <div style="font-size:12px; font-weight:600; color:var(--cor-primaria); margin-bottom:6px;">Parcelas geradas <small style="font-weight:400;color:#999;">(datas e valores editáveis)</small>:</div>
+                <div id="listaParcelasPagar" style="max-height:180px; overflow-y:auto; border:1px solid #eee; border-radius:6px; padding:8px; font-size:12px;"></div>
             </div>
             <div class="form-row">
                 <div class="form-group">
@@ -2781,51 +2979,6 @@
     </div>
 </div>
 
-<div class="modal" id="modalCustoFixo">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span id="modalCustoFixoTitulo">Novo Custo Fixo</span>
-            <button class="modal-close" onclick="closeModal('modalCustoFixo')">&times;</button>
-        </div>
-        <form onsubmit="salvarCustoFixo(event)">
-            <div class="form-group">
-                <label>Descrição*</label>
-                <input type="text" id="descricaoCustoFixo" placeholder="Ex: Aluguel, Salários, Internet" required>
-            </div>
-            <div class="form-group">
-                <label>Categoria</label>
-                <select id="categoriaCustoFixo">
-                    <option value="">Selecione...</option>
-                </select>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Valor Mensal (R$)*</label>
-                    <input type="number" id="valorCustoFixo" step="0.01" value="0" required>
-                </div>
-                <div class="form-group">
-                    <label>Dia de Vencimento</label>
-                    <input type="number" id="diaVencimentoCustoFixo" min="1" max="31" placeholder="1 a 31">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Observações</label>
-                <textarea id="observacoesCustoFixo" rows="2"></textarea>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ativoCustoFixo" checked>
-                    Ativo
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCustoFixo')">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <div class="modal" id="modalCliente">
     <div class="modal-content">
         <div class="modal-header">
@@ -2867,6 +3020,72 @@
     </div>
 </div>
 
+<!-- MODAL CHEQUE -->
+<!-- MODAL PDF CHEQUES EM ABERTO (escolha de orientação) -->
+<div class="modal" id="modalPDFCheques">
+    <div class="modal-content" style="max-width:380px;">
+        <div class="modal-header">
+            <span>🖨️ Gerar PDF — Cheques em Aberto</span>
+            <button class="modal-close" onclick="closeModal('modalPDFCheques')">&times;</button>
+        </div>
+        <p style="font-size:13px;color:#666;margin-bottom:16px;">Escolha a orientação da página para impressão:</p>
+        <div style="display:flex;gap:12px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFChequesAberto('portrait')">
+                <div style="font-size:24px;">📄</div>Retrato
+            </button>
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFChequesAberto('landscape')">
+                <div style="font-size:24px;">📃</div>Paisagem
+            </button>
+        </div>
+        <div class="form-actions" style="margin-top:16px;">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalPDFCheques')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modalCheque">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span id="modalChequeTitulo">Novo Cheque</span>
+            <button class="modal-close" onclick="closeModal('modalCheque')">&times;</button>
+        </div>
+        <form onsubmit="salvarCheque(event)">
+            <div class="form-group">
+                <label>Fornecedor*</label>
+                <select id="fornecedorCheque" required><option value="">Selecione...</option></select>
+            </div>
+            <div class="form-group">
+                <label>Banco*</label>
+                <select id="bancoCheque" required><option value="">Selecione...</option></select>
+            </div>
+            <div class="form-group">
+                <label>Número do Cheque</label>
+                <input type="text" id="numeroCheque" placeholder="Opcional">
+            </div>
+            <div class="form-group">
+                <label>Bom Para (Data)*</label>
+                <input type="date" id="bomParaCheque" required>
+            </div>
+            <div class="form-group">
+                <label>Data Entrada*</label>
+                <input type="date" id="dataEntradaCheque" required>
+            </div>
+            <div class="form-group">
+                <label>Valor*</label>
+                <input type="number" id="valorCheque" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Observação</label>
+                <textarea id="observacaoCheque" rows="2" placeholder="Opcional"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success">Salvar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCheque')">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
     // CONFIG SUPABASE
     const SUPABASE_URL = 'https://tigjibtprqvrbjhqeqld.supabase.co';
@@ -2885,7 +3104,7 @@
         contasPagar: [],
         contasRecebidas: [],
         contasPagas: [],
-        custosFixos: []
+        cheques: []
     };
 
     let charts = {};
@@ -2893,7 +3112,7 @@
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroAnoReceber", "filtroMesReceber", "filtroFornecedorPagar", "filtroCategoriaPagar", "filtroAnoPagar", "filtroMesPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp", "filtroDataInicioChequeAberto", "filtroDataFimChequeAberto", "filtroDataInicioChequeComp", "filtroDataFimChequeComp"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -2935,6 +3154,8 @@
         inicializarPing();
         preencherAnos();
         preencherDias();
+        popularSelectParcelas('parcelasReceber');
+        popularSelectParcelas('parcelasPagar');
     });
 
     // LOGIN
@@ -3138,7 +3359,7 @@
 
     function atualizarSelectCategorias() {
         // IDs de todos os selects que recebem lista de categorias
-        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat', 'filtroCategoriaPaga', 'categoriaCustoFixo'];
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat', 'filtroCategoriaPaga'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -3152,6 +3373,40 @@
             });
             if (valorAtual) select.value = valorAtual;
         });
+        // Reaplica o filtro de Grupo → Categoria na tela de Contas a Pagar (a lista acima
+        // acabou de ser sobrescrita com TODAS as categorias, sem considerar o Grupo selecionado)
+        aplicarFiltroGrupoCategoriaPagar();
+    }
+
+    // Filtra as opções do select de Categoria (Contas a Pagar) de acordo com o Grupo DRE escolhido.
+    // Se nenhum grupo estiver selecionado, mostra todas as categorias ativas.
+    function aplicarFiltroGrupoCategoriaPagar() {
+        const selectGrupo = document.getElementById('filtroGrupoPagar');
+        const selectCategoria = document.getElementById('filtroCategoriaPagar');
+        if (!selectGrupo || !selectCategoria) return;
+        const grupoSel = selectGrupo.value;
+
+        // Mantém a categoria já selecionada; se estiver vazia (ex.: carregamento inicial da página,
+        // antes das categorias chegarem), tenta recuperar o último valor salvo do usuário.
+        let valorAtual = selectCategoria.value;
+        if (!valorAtual) {
+            try { valorAtual = localStorage.getItem(_filtroKey('filtroCategoriaPagar')) || ''; } catch (e) { /* ignora */ }
+        }
+
+        selectCategoria.innerHTML = '<option value="">Selecione...</option>';
+        dadosCache.categorias
+            .filter(c => c.ativo !== false)
+            .filter(c => !grupoSel || c.grupo_dre === grupoSel)
+            .forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.id;
+                opt.textContent = cat.nome;
+                selectCategoria.appendChild(opt);
+            });
+
+        // Só mantém a categoria selecionada se ela ainda pertencer ao grupo filtrado
+        const aindaExiste = Array.from(selectCategoria.options).some(o => o.value === String(valorAtual));
+        selectCategoria.value = aindaExiste ? valorAtual : '';
     }
 
     function openModalCategoria() {
@@ -3367,7 +3622,7 @@
     }
 
     function atualizarSelectFornecedores() {
-        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor', 'filtroFornecedorPaga'];
+        const ids = ['fornecedorPagar', 'filtroFornecedorPagar', 'editLancFornecedor', 'filtroFornecedorPaga', 'fornecedorCheque', 'filtroFornecedorChequeAberto', 'filtroFornecedorChequeComp'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -3444,118 +3699,6 @@
             if (resultado !== null) {
                 showAlert('Fornecedor deletado com sucesso!', 'alertFornecedores', 'success');
                 carregarFornecedores();
-            }
-        }
-    }
-
-    // CUSTOS FIXOS
-    async function carregarCustosFixos() {
-        const filtro = document.getElementById('filtroCustoFixo');
-        let filtros = '';
-        if (filtro && filtro.value) {
-            filtros = `descricao=ilike.%${filtro.value}%`;
-        }
-
-        const dados = await fetchSupabase('custos_fixos', 'GET', null, filtros);
-        if (dados) {
-            dadosCache.custosFixos = dados;
-            atualizarTabelaCustosFixos();
-        }
-    }
-
-    function atualizarTabelaCustosFixos() {
-        const tbody = document.querySelector('#tabelaCustosFixos tbody');
-        if (!tbody) return;
-        tbody.innerHTML = '';
-
-        let totalAtivos = 0, qtdAtivos = 0;
-
-        dadosCache.custosFixos.forEach(cf => {
-            const cat = (dadosCache.categorias || []).find(c => c.id === cf.categoria_id);
-            const valor = parseFloat(cf.valor || 0);
-            if (cf.ativo) { totalAtivos += valor; qtdAtivos++; }
-            tbody.innerHTML += `
-                <tr>
-                    <td>${cf.descricao}</td>
-                    <td>${cat ? cat.nome : '-'}</td>
-                    <td>R$ ${valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                    <td>${cf.dia_vencimento || '-'}</td>
-                    <td><span class="status-badge ${cf.ativo ? 'status-recebido' : 'status-atrasado'}">${cf.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                    <td>
-                        <button class="btn btn-secondary btn-small" onclick="editarCustoFixo(${cf.id})">Editar</button>
-                        <button class="btn btn-danger btn-small" onclick="deletarCustoFixo(${cf.id})">Deletar</button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        const elTotal = document.getElementById('totalCustosFixos');
-        const elQtd = document.getElementById('qtdCustosFixos');
-        if (elTotal) elTotal.textContent = 'R$ ' + totalAtivos.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-        if (elQtd) elQtd.textContent = qtdAtivos;
-    }
-
-    function openModalCustoFixo() {
-        editandoId = null;
-        editandoTipo = null;
-        document.getElementById('descricaoCustoFixo').value = '';
-        document.getElementById('categoriaCustoFixo').value = '';
-        document.getElementById('valorCustoFixo').value = '0';
-        document.getElementById('diaVencimentoCustoFixo').value = '';
-        document.getElementById('observacoesCustoFixo').value = '';
-        document.getElementById('ativoCustoFixo').checked = true;
-        document.getElementById('modalCustoFixoTitulo').textContent = 'Novo Custo Fixo';
-        document.getElementById('modalCustoFixo').classList.add('active');
-    }
-
-    function editarCustoFixo(id) {
-        const cf = dadosCache.custosFixos.find(c => c.id === id);
-        if (cf) {
-            editandoId = id;
-            editandoTipo = 'custoFixo';
-            document.getElementById('descricaoCustoFixo').value = cf.descricao;
-            document.getElementById('categoriaCustoFixo').value = cf.categoria_id || '';
-            document.getElementById('valorCustoFixo').value = cf.valor || 0;
-            document.getElementById('diaVencimentoCustoFixo').value = cf.dia_vencimento || '';
-            document.getElementById('observacoesCustoFixo').value = cf.observacoes || '';
-            document.getElementById('ativoCustoFixo').checked = cf.ativo;
-            document.getElementById('modalCustoFixoTitulo').textContent = 'Editar Custo Fixo';
-            document.getElementById('modalCustoFixo').classList.add('active');
-        }
-    }
-
-    async function salvarCustoFixo(event) {
-        event.preventDefault();
-
-        const dados = {
-            descricao: document.getElementById('descricaoCustoFixo').value,
-            categoria_id: document.getElementById('categoriaCustoFixo').value || null,
-            valor: parseFloat(document.getElementById('valorCustoFixo').value) || 0,
-            dia_vencimento: document.getElementById('diaVencimentoCustoFixo').value ? parseInt(document.getElementById('diaVencimentoCustoFixo').value) : null,
-            observacoes: document.getElementById('observacoesCustoFixo').value || null,
-            ativo: document.getElementById('ativoCustoFixo').checked
-        };
-
-        let resultado;
-        if (editandoId && editandoTipo === 'custoFixo') {
-            resultado = await fetchSupabase('custos_fixos', 'PATCH', dados, `id=eq.${editandoId}`);
-        } else {
-            resultado = await fetchSupabase('custos_fixos', 'POST', dados);
-        }
-
-        if (resultado !== null) {
-            showAlert('Custo fixo salvo com sucesso!', 'alertCustosFixos', 'success');
-            closeModal('modalCustoFixo');
-            await carregarCustosFixos();
-        }
-    }
-
-    async function deletarCustoFixo(id) {
-        if (confirm('Tem certeza que deseja deletar este custo fixo?')) {
-            const resultado = await fetchSupabase('custos_fixos', 'DELETE', null, `id=eq.${id}`);
-            if (resultado !== null) {
-                showAlert('Custo fixo deletado com sucesso!', 'alertCustosFixos', 'success');
-                carregarCustosFixos();
             }
         }
     }
@@ -3681,9 +3824,26 @@
     }
 
     // CONTAS A RECEBER
+    // Determina o status real de um lançamento de Contas a Receber (recebido prevalece sobre atrasado/pendente)
+    function statusContaReceber(c) {
+        if (c.status === 'recebido') return 'recebido';
+        const hoje = new Date(); hoje.setHours(0,0,0,0);
+        const venc = new Date(c.data_vencimento + 'T12:00:00');
+        return venc < hoje ? 'atrasado' : 'pendente';
+    }
+
+    let _sortReceber = { campo: null, dir: 1 };
+    function ordenarContasReceberPor(campo) {
+        if (_sortReceber.campo === campo) { _sortReceber.dir *= -1; } else { _sortReceber.campo = campo; _sortReceber.dir = 1; }
+        atualizarTabelaPendentesReceber();
+    }
+
+    // Guarda o último resultado filtrado da tela de Contas a Receber
+    let _ultimoFiltroContasReceber = [];
+
     async function carregarContasReceber() {
-        const filtro = `status=eq.pendente`;
-        const dados = await fetchSupabase('contas_a_receber', 'GET', null, filtro);
+        // Traz TODOS os lançamentos (pendente + recebido), o filtro de Status na tela decide o que exibir/somar
+        const dados = await fetchSupabase('contas_a_receber', 'GET');
         if (dados) {
             dadosCache.contasReceber = dados;
             atualizarTabelaPendentesReceber();
@@ -3696,50 +3856,80 @@
         tbody.innerHTML = '';
         let filtrado = dadosCache.contasReceber;
         const filtroCliente = document.getElementById('filtroClienteReceber');
+        const filtroBaseData = document.getElementById('filtroBaseDataReceber');
         const filtroAno = document.getElementById('filtroAnoReceber');
         const filtroMes = document.getElementById('filtroMesReceber');
+        const filtroDia = document.getElementById('filtroDiaReceber');
+        const filtroStatus = document.getElementById('filtroStatusReceber');
+        const baseData = (filtroBaseData && filtroBaseData.value === 'competencia') ? 'data_competencia' : 'data_vencimento';
         if (filtroCliente && filtroCliente.value) filtrado = filtrado.filter(c => c.cliente_id == filtroCliente.value);
-        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
-        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c[baseData] && c[baseData].startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c[baseData] && c[baseData].includes('-' + filtroMes.value + '-'));
+        if (filtroDia && filtroDia.value) filtrado = filtrado.filter(c => c[baseData] && c[baseData].endsWith('-' + filtroDia.value));
 
-        // Calcular totais
-        const hoje = new Date(); hoje.setHours(0,0,0,0);
-        let totalFiltro = 0, totalAtrasado = 0;
+        const statusDe = statusContaReceber;
+
+        if (filtroStatus && filtroStatus.value) filtrado = filtrado.filter(c => statusDe(c) === filtroStatus.value);
+
+        filtrado = _aplicarOrdenacao(filtrado, _sortReceber);
+        _atualizarIconesSort(_sortReceber, { data_competencia: 'sortIconReceberComp', data_vencimento: 'sortIconReceberVenc', valor: 'sortIconReceberValor' });
+
+        _ultimoFiltroContasReceber = filtrado;
+
+        // Calcular totais (refletem exatamente o que está sendo exibido na tabela)
+        let totalFiltro = 0, totalAtrasado = 0, totalRecebido = 0;
         filtrado.forEach(c => {
             const v = parseFloat(c.valor || 0);
             totalFiltro += v;
-            const venc = new Date(c.data_vencimento + 'T12:00:00');
-            if (venc < hoje) totalAtrasado += v;
+            const st = statusDe(c);
+            if (st === 'atrasado') totalAtrasado += v;
+            if (st === 'recebido') totalRecebido += v;
         });
         const elTF = document.getElementById('totalReceberFiltro');
         const elTA = document.getElementById('totalReceberAtrasado');
+        const elTR = document.getElementById('totalReceberRecebido');
         const elCF = document.getElementById('countReceberFiltro');
         if (elTF) elTF.textContent = 'R$ ' + totalFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         if (elTA) elTA.textContent = 'R$ ' + totalAtrasado.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elTR) elTR.textContent = 'R$ ' + totalRecebido.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         if (elCF) elCF.textContent = filtrado.length;
+
+        const elDica = document.getElementById('dicaBaseReceber');
+        if (elDica) {
+            elDica.textContent = baseData === 'data_competencia'
+                ? '📌 Ano/Mês/Dia filtrando por Competência.'
+                : '📌 Ano/Mês/Dia filtrando por Vencimento. Para bater com relatórios por regime de competência (DRE/CPV), mude "Filtrar por" para Competência.';
+        }
 
         filtrado.forEach(conta => {
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
-            const status = venc < hoje ? 'atrasado' : 'pendente';
+            const status = statusDe(conta);
+            const statusLabel = status === 'recebido' ? 'Recebido' : (status === 'atrasado' ? 'Atrasado' : 'Pendente');
             const parcLabel = conta.total_parcelas > 1
                 ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">${conta.parcela_atual}/${conta.total_parcelas}</span>`
                 : `<span style="color:#aaa;font-size:11px;">-</span>`;
             const compLabel = conta.data_competencia
                 ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
                 : '-';
+            const acoes = status === 'recebido'
+                ? `<button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
+                   <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                   <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>`
+                : `<button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
+                   <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
+                   <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>`;
             tbody.innerHTML += `<tr>
                 <td>${cliente ? cliente.nome : '-'}</td>
                 <td>${conta.descricao}</td>
+                <td style="font-size:11px;color:#555;">${conta.nota_fiscal || '-'}</td>
                 <td>${compLabel}</td>
                 <td>${venc.toLocaleDateString('pt-BR')}</td>
                 <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${parcLabel}</td>
-                <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                <td><span class="status-badge status-${status}">${statusLabel}</span></td>
                 <td>
-                    <button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
-                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
-                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>
+                    ${acoes}
                 </td>
             </tr>`;
         });
@@ -3748,30 +3938,54 @@
 
     async function salvarContaReceber(event) {
         event.preventDefault();
-        const numParcelas = parseInt(document.getElementById('parcelasReceber').value) || 1;
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        let numParcelas = parseInt(document.getElementById('parcelasReceber').value) || 1;
         const valorTotal = parseFloat(document.getElementById('valorReceber').value);
-        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
         const dataBase = document.getElementById('vencimentoReceber').value;
         const competencia = document.getElementById('competenciaReceber').value;
         const obs = document.getElementById('observacoesReceber').value;
         const notaFiscalRec = document.getElementById('notaFiscalReceber').value.trim() || null;
         const clienteId = parseInt(document.getElementById('clienteReceber').value);
         const descricao = document.getElementById('descricaoReceber').value;
+        let vigFim = null;
+
+        if (fixo) {
+            vigFim = document.getElementById('vigenciaFimReceber').value;
+            if (!vigFim) { showAlert('Informe a data final da vigência.', 'alertLancarReceber', 'error'); return; }
+            if (vigFim < dataBase) { showAlert('A data final da vigência deve ser igual ou posterior à data de recebimento.', 'alertLancarReceber', 'error'); return; }
+            numParcelas = mesesEntreDatas(dataBase, vigFim);
+        }
 
         let erros = 0;
         for (let i = 0; i < numParcelas; i++) {
-            const dataVenc = addMonths(dataBase, i);
-            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const inputData  = document.getElementById('parcRecData' + i);
+            const inputValor = document.getElementById('parcRecValor' + i);
+            let dataVenc, valorParcela;
+            if (inputData && inputValor && inputData.value) {
+                dataVenc = inputData.value;
+                valorParcela = parseFloat(inputValor.value) || 0;
+            } else {
+                dataVenc = addMonths(dataBase, i);
+                valorParcela = fixo ? valorTotal : Math.round((valorTotal / numParcelas) * 100) / 100;
+            }
+            let descParc = descricao;
+            let obsFinal = obs;
+            if (fixo) {
+                descParc = (descricao || 'Custo Fixo') + ' (' + (i+1) + '/' + numParcelas + ')';
+                obsFinal = (obs ? obs + ' — ' : '') + 'Custo Fixo (vigência ' + new Date(dataBase+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(vigFim+'T12:00:00').toLocaleDateString('pt-BR') + ')';
+            } else if (numParcelas > 1) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+            }
             const dados = {
                 cliente_id: clienteId,
                 descricao: descParc,
                 valor: valorParcela,
-                data_competencia: competencia,
+                data_competencia: fixo ? addMonths(competencia, i) : competencia,
                 data_vencimento: dataVenc,
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs,
+                observacoes: obsFinal,
                 nota_fiscal: notaFiscalRec
             };
             const r = await fetchSupabase('contas_a_receber', 'POST', dados);
@@ -3790,11 +4004,48 @@
 
     // CONTAS A PAGAR
     async function carregarContasPagar() {
-        const filtro = `status=eq.pendente`;
-        const dados = await fetchSupabase('contas_a_pagar', 'GET', null, filtro);
+        // Traz TODOS os lançamentos (pendente + pago), o filtro de Status na tela decide o que exibir/somar
+        const dados = await fetchSupabase('contas_a_pagar', 'GET');
         if (dados) {
             dadosCache.contasPagar = dados;
             atualizarTabelaPendentesPagar();
+        }
+    }
+
+    // Determina o status real de um lançamento de Contas a Pagar (pago prevalece sobre atrasado/pendente)
+    function statusContaPagar(c) {
+        if (c.status === 'pago') return 'pago';
+        const hoje = new Date(); hoje.setHours(0,0,0,0);
+        const venc = new Date(c.data_vencimento + 'T12:00:00');
+        return venc < hoje ? 'atrasado' : 'pendente';
+    }
+
+    // Guarda o último resultado filtrado da tela de Contas a Pagar, para reaproveitar na exportação Excel
+    let _ultimoFiltroContasPagar = [];
+
+    // Ordenação de tabelas (Contas a Pagar / Contas a Receber) — clique no cabeçalho da coluna
+    let _sortPagar = { campo: null, dir: 1 };
+    function ordenarContasPagarPor(campo) {
+        if (_sortPagar.campo === campo) { _sortPagar.dir *= -1; } else { _sortPagar.campo = campo; _sortPagar.dir = 1; }
+        atualizarTabelaPendentesPagar();
+    }
+    function _aplicarOrdenacao(lista, estado) {
+        if (!estado.campo) return lista;
+        const campo = estado.campo;
+        return [...lista].sort((a, b) => {
+            let va = a[campo], vb = b[campo];
+            if (campo === 'valor') { va = parseFloat(va || 0); vb = parseFloat(vb || 0); }
+            else { va = va || ''; vb = vb || ''; }
+            if (va < vb) return -1 * estado.dir;
+            if (va > vb) return 1 * estado.dir;
+            return 0;
+        });
+    }
+    function _atualizarIconesSort(estado, mapa) {
+        Object.values(mapa).forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ''; });
+        if (estado.campo && mapa[estado.campo]) {
+            const el = document.getElementById(mapa[estado.campo]);
+            if (el) el.textContent = estado.dir === 1 ? '▲' : '▼';
         }
     }
 
@@ -3805,40 +4056,69 @@
         let filtrado = dadosCache.contasPagar;
         const filtroFornecedor = document.getElementById('filtroFornecedorPagar');
         const filtroCategoria = document.getElementById('filtroCategoriaPagar');
+        const filtroBaseData = document.getElementById('filtroBaseDataPagar');
         const filtroAno = document.getElementById('filtroAnoPagar');
         const filtroMes = document.getElementById('filtroMesPagar');
+        const filtroStatus = document.getElementById('filtroStatusPagar');
+        const baseData = (filtroBaseData && filtroBaseData.value === 'competencia') ? 'data_competencia' : 'data_vencimento';
         if (filtroFornecedor && filtroFornecedor.value) filtrado = filtrado.filter(c => c.fornecedor_id == filtroFornecedor.value);
         if (filtroCategoria && filtroCategoria.value) filtrado = filtrado.filter(c => c.categoria_id == filtroCategoria.value);
-        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.startsWith(filtroAno.value));
-        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c.data_vencimento && c.data_vencimento.includes('-' + filtroMes.value + '-'));
+        if (filtroAno && filtroAno.value) filtrado = filtrado.filter(c => c[baseData] && c[baseData].startsWith(filtroAno.value));
+        if (filtroMes && filtroMes.value) filtrado = filtrado.filter(c => c[baseData] && c[baseData].includes('-' + filtroMes.value + '-'));
 
-        // Calcular totais
-        const hoje = new Date(); hoje.setHours(0,0,0,0);
-        let totalFiltro = 0, totalAtrasado = 0;
+        const statusDe = statusContaPagar;
+
+        if (filtroStatus && filtroStatus.value) filtrado = filtrado.filter(c => statusDe(c) === filtroStatus.value);
+
+        filtrado = _aplicarOrdenacao(filtrado, _sortPagar);
+        _atualizarIconesSort(_sortPagar, { data_competencia: 'sortIconPagarComp', data_vencimento: 'sortIconPagarVenc', valor: 'sortIconPagarValor' });
+
+        _ultimoFiltroContasPagar = filtrado;
+
+        // Calcular totais (refletem exatamente o que está sendo exibido na tabela)
+        let totalFiltro = 0, totalAtrasado = 0, totalPago = 0;
         filtrado.forEach(c => {
             const v = parseFloat(c.valor || 0);
             totalFiltro += v;
-            const venc = new Date(c.data_vencimento + 'T12:00:00');
-            if (venc < hoje) totalAtrasado += v;
+            const st = statusDe(c);
+            if (st === 'atrasado') totalAtrasado += v;
+            if (st === 'pago') totalPago += v;
         });
         const elTF = document.getElementById('totalPagarFiltro');
         const elTA = document.getElementById('totalPagarAtrasado');
+        const elTP = document.getElementById('totalPagarPago');
         const elCF = document.getElementById('countPagarFiltro');
         if (elTF) elTF.textContent = 'R$ ' + totalFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         if (elTA) elTA.textContent = 'R$ ' + totalAtrasado.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+        if (elTP) elTP.textContent = 'R$ ' + totalPago.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
         if (elCF) elCF.textContent = filtrado.length;
+
+        const elDica = document.getElementById('dicaBasePagar');
+        if (elDica) {
+            elDica.textContent = baseData === 'data_competencia'
+                ? '📌 Ano/Mês filtrando por Competência — este total bate com o relatório de CPV/DRE (que também soma por competência) quando o Status estiver em "Todos".'
+                : '📌 Ano/Mês filtrando por Vencimento — para o total bater com o relatório de CPV/DRE (que soma por competência), mude "Filtrar por" para Competência.';
+        }
 
         filtrado.forEach(conta => {
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
             const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
-            const status = venc < hoje ? 'atrasado' : 'pendente';
+            const status = statusDe(conta);
+            const statusLabel = status === 'pago' ? 'Pago' : (status === 'atrasado' ? 'Atrasado' : 'Pendente');
             const parcLabel = conta.total_parcelas > 1
                 ? `<span style="background:#e3f2fd;color:#1565c0;padding:2px 7px;border-radius:10px;font-size:11px;">${conta.parcela_atual}/${conta.total_parcelas}</span>`
                 : `<span style="color:#aaa;font-size:11px;">-</span>`;
             const compLabel = conta.data_competencia
                 ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit',year:'numeric'})
                 : '-';
+            const acoes = status === 'pago'
+                ? `<button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
+                   <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                   <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>`
+                : `<button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
+                   <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
+                   <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>`;
             tbody.innerHTML += `<tr>
                 <td>${fornecedor ? fornecedor.nome : '-'}</td>
                 <td>${categoria ? categoria.nome : '-'}</td>
@@ -3848,47 +4128,170 @@
                 <td>${venc.toLocaleDateString('pt-BR')}</td>
                 <td>R$ ${parseFloat(conta.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                 <td>${parcLabel}</td>
-                <td><span class="status-badge status-${status}">${status === 'atrasado' ? 'Atrasado' : 'Pendente'}</span></td>
+                <td><span class="status-badge status-${status}">${statusLabel}</span></td>
                 <td>
-                    <button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
-                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
-                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>
+                    ${acoes}
                 </td>
             </tr>`;
         });
     }
 
+    // Exporta para Excel exatamente os lançamentos que estão filtrados/exibidos na tela de Contas a Pagar
+    // Garante que a biblioteca XLSX (SheetJS) esteja carregada antes de gerar um Excel.
+    // Se ainda não carregou (ex.: falha/lentidão no CDN original), tenta carregá-la sob demanda
+    // a partir de CDNs alternativos, e só então executa o callback.
+    let _xlsxCarregando = false;
+    function _garantirXLSX(callback) {
+        if (typeof XLSX !== 'undefined') { callback(); return; }
+        if (_xlsxCarregando) {
+            alert('A biblioteca de Excel ainda está carregando. Aguarde alguns segundos e tente novamente.');
+            return;
+        }
+        _xlsxCarregando = true;
+        const urls = [
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js',
+            'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+            'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+        ];
+        let i = 0;
+        function tentarProximo() {
+            if (i >= urls.length) {
+                _xlsxCarregando = false;
+                alert('Não foi possível carregar a biblioteca de Excel. Verifique sua conexão com a internet e tente novamente.');
+                return;
+            }
+            const s = document.createElement('script');
+            s.src = urls[i++];
+            s.onload = function () {
+                _xlsxCarregando = false;
+                if (typeof XLSX !== 'undefined') { callback(); }
+                else { tentarProximo(); }
+            };
+            s.onerror = function () { tentarProximo(); };
+            document.head.appendChild(s);
+        }
+        tentarProximo();
+    }
+
+    function exportarExcelContasPagar() {
+        _garantirXLSX(_exportarExcelContasPagarInterno);
+    }
+
+    function _exportarExcelContasPagarInterno() {
+        const linhas = _ultimoFiltroContasPagar || [];
+        if (linhas.length === 0) {
+            alert('Não há dados para exportar.');
+            return;
+        }
+
+        try {
+            const header = ['Fornecedor', 'Categoria', 'Grupo DRE', 'Descrição', 'NF', 'Competência', 'Vencimento', 'Valor', 'Parcela', 'Status', 'Data Pagamento'];
+            const rows = [header];
+
+            let total = 0;
+            linhas.forEach(conta => {
+                const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
+                const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
+                const grupoLabel = categoria && categoria.grupo_dre ? (_GRUPOS_DRE_LABELS[categoria.grupo_dre] || categoria.grupo_dre) : '-';
+                const status = statusContaPagar(conta);
+                const statusLabel = status === 'pago' ? 'Pago' : (status === 'atrasado' ? 'Atrasado' : 'Pendente');
+                const parcLabel = conta.total_parcelas > 1 ? (conta.parcela_atual + '/' + conta.total_parcelas) : '-';
+                const compLabel = conta.data_competencia
+                    ? new Date(conta.data_competencia + 'T12:00:00').toLocaleDateString('pt-BR', {month:'2-digit', year:'numeric'})
+                    : '-';
+                const vencLabel = conta.data_vencimento
+                    ? new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR')
+                    : '-';
+                const pagLabel = conta.data_pagamento
+                    ? new Date(conta.data_pagamento + 'T12:00:00').toLocaleDateString('pt-BR')
+                    : '-';
+                const valor = parseFloat(conta.valor || 0);
+                total += valor;
+                rows.push([
+                    fornecedor ? fornecedor.nome : '-',
+                    categoria ? categoria.nome : '-',
+                    grupoLabel,
+                    conta.descricao || '',
+                    conta.nota_fiscal || '-',
+                    compLabel,
+                    vencLabel,
+                    valor,
+                    parcLabel,
+                    statusLabel,
+                    pagLabel
+                ]);
+            });
+
+            rows.push(['', '', '', '', '', '', 'TOTAL', total, '', '', '']);
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols'] = [{wch:26},{wch:22},{wch:18},{wch:32},{wch:10},{wch:12},{wch:12},{wch:14},{wch:10},{wch:12},{wch:14}];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Contas a Pagar');
+            const hoje = new Date().toISOString().slice(0,10);
+            XLSX.writeFile(wb, 'Contas_a_Pagar_' + hoje + '.xlsx');
+        } catch (e) {
+            console.error('Erro ao gerar Excel de Contas a Pagar:', e);
+            alert('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e));
+        }
+    }
+
 
     async function salvarContaPagar(event) {
         event.preventDefault();
-        const numParcelas = parseInt(document.getElementById('parcelasPagar').value) || 1;
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
+        let numParcelas = parseInt(document.getElementById('parcelasPagar').value) || 1;
         const valorTotal = parseFloat(document.getElementById('valorPagar').value);
-        const valorParcela = Math.round((valorTotal / numParcelas) * 100) / 100;
         const dataBase = document.getElementById('vencimentoPagar').value;
         const competencia = document.getElementById('competenciaPagar').value;
         const obs = document.getElementById('observacoesPagar').value;
         const notaFiscal = document.getElementById('notaFiscalPagar').value.trim() || null;
-        const fornecedorId = parseInt(document.getElementById('fornecedorPagar').value);
+        const fornecedorValRaw = document.getElementById('fornecedorPagar').value;
+        const fornecedorId = fornecedorValRaw ? parseInt(fornecedorValRaw) : null;
         const categoriaId = document.getElementById('categoriaPagar').value ? parseInt(document.getElementById('categoriaPagar').value) : null;
         const produtoId = document.getElementById('produtoPagar').value ? parseInt(document.getElementById('produtoPagar').value) : null;
-        const descricao = document.getElementById('descricaoPagar').value;
+        const descricao = document.getElementById('descricaoPagar').value.trim() || 'Lançamento';
+        let vigFim = null;
+
+        if (fixo) {
+            vigFim = document.getElementById('vigenciaFimPagar').value;
+            if (!vigFim) { showAlert('Informe a data final da vigência.', 'alertLancarPagar', 'error'); return; }
+            if (vigFim < dataBase) { showAlert('A data final da vigência deve ser igual ou posterior à data de pagamento.', 'alertLancarPagar', 'error'); return; }
+            numParcelas = mesesEntreDatas(dataBase, vigFim);
+        }
 
         let erros = 0;
         for (let i = 0; i < numParcelas; i++) {
-            const dataVenc = addMonths(dataBase, i);
-            const descParc = numParcelas > 1 ? descricao + ' (' + (i+1) + '/' + numParcelas + ')' : descricao;
+            const inputData  = document.getElementById('parcPagData' + i);
+            const inputValor = document.getElementById('parcPagValor' + i);
+            let dataVenc, valorParcela;
+            if (inputData && inputValor && inputData.value) {
+                dataVenc = inputData.value;
+                valorParcela = parseFloat(inputValor.value) || 0;
+            } else {
+                dataVenc = addMonths(dataBase, i);
+                valorParcela = fixo ? valorTotal : Math.round((valorTotal / numParcelas) * 100) / 100;
+            }
+            let descParc = descricao;
+            let obsFinal = obs;
+            if (fixo) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+                obsFinal = (obs ? obs + ' — ' : '') + 'Custo Fixo (vigência ' + new Date(dataBase+'T12:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(vigFim+'T12:00:00').toLocaleDateString('pt-BR') + ')';
+            } else if (numParcelas > 1) {
+                descParc = descricao + ' (' + (i+1) + '/' + numParcelas + ')';
+            }
             const dados = {
                 fornecedor_id: fornecedorId,
                 categoria_id: categoriaId,
                 produto_id: produtoId,
                 descricao: descParc,
                 valor: valorParcela,
-                data_competencia: competencia,
+                data_competencia: fixo ? addMonths(competencia, i) : competencia,
                 data_vencimento: dataVenc,
                 parcela_atual: i + 1,
                 total_parcelas: numParcelas,
                 status: 'pendente',
-                observacoes: obs,
+                observacoes: obsFinal,
                 nota_fiscal: notaFiscal
             };
             const r = await fetchSupabase('contas_a_pagar', 'POST', dados);
@@ -4152,6 +4555,112 @@
         }
     }
 
+    // Retorna todos os lançamentos que pertencem ao mesmo grupo de "Custo Fixo" que `conta`
+    // (mesmo fornecedor/cliente, categoria, descrição-base e total de parcelas), ordenados pela parcela.
+    function _grupoCustoFixo(conta, tipo) {
+        if (!conta || !(conta.observacoes || '').includes('Custo Fixo') || !(conta.total_parcelas > 1)) return [conta].filter(Boolean);
+        const origem = tipo === 'receber'
+            ? [...(dadosCache.contasReceber || []), ...(dadosCache.contasRecebidas || [])]
+            : [...(dadosCache.contasPagar || []), ...(dadosCache.contasPagas || [])];
+        const porId = {};
+        origem.forEach(c => { porId[c.id] = c; });
+        const todas = Object.values(porId);
+        const descBase = (conta.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+        return todas.filter(c => {
+            if (!(c.observacoes || '').includes('Custo Fixo')) return false;
+            if (c.total_parcelas !== conta.total_parcelas) return false;
+            const cDescBase = (c.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+            if (cDescBase !== descBase) return false;
+            if ((c.categoria_id || null) !== (conta.categoria_id || null)) return false;
+            if (tipo === 'receber') { if ((c.cliente_id || null) !== (conta.cliente_id || null)) return false; }
+            else { if ((c.fornecedor_id || null) !== (conta.fornecedor_id || null)) return false; }
+            return true;
+        }).sort((a, b) => (a.parcela_atual || 0) - (b.parcela_atual || 0));
+    }
+
+    // Abre a edição de TODOS os lançamentos do grupo Custo Fixo de uma vez.
+    // Retorna true se conseguiu abrir a edição em grupo (grupo com mais de 1 item).
+    function abrirEdicaoGrupoCustoFixo(conta, tipo) {
+        const grupo = _grupoCustoFixo(conta, tipo);
+        if (grupo.length <= 1) return false;
+        window._grupoCFItens = grupo;
+        window._grupoCFTipoAtual = tipo;
+        atualizarSelectFornecedores();
+        atualizarSelectClientes();
+        atualizarSelectCategorias();
+        document.getElementById('editGrupoCFTipo').value = tipo;
+        document.getElementById('editGrupoCFFornecedorWrap').style.display = tipo === 'pagar' ? '' : 'none';
+        document.getElementById('editGrupoCFClienteWrap').style.display = tipo === 'receber' ? '' : 'none';
+        if (tipo === 'pagar') { document.getElementById('editGrupoCFFornecedor').value = conta.fornecedor_id || ''; }
+        else { document.getElementById('editGrupoCFCliente').value = conta.cliente_id || ''; }
+        document.getElementById('editGrupoCFCategoria').value = conta.categoria_id || '';
+        const descBase = (conta.descricao || '').replace(/\s*\(\d+\/\d+\)\s*$/, '').trim();
+        document.getElementById('editGrupoCFDescricao').value = descBase;
+        const obsMatch = (conta.observacoes || '').match(/Custo Fixo \(vig[êe]ncia.*?\)\s*$/i);
+        const obsBase = obsMatch ? (conta.observacoes || '').slice(0, obsMatch.index).replace(/\s*—\s*$/, '').trim() : (conta.observacoes || '');
+        document.getElementById('editGrupoCFObs').value = obsBase;
+        document.getElementById('editGrupoCFObsFinal').textContent = obsMatch ? obsMatch[0] : '';
+
+        let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
+            '<span style="width:44px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:110px;">Valor</span><span style="width:64px;text-align:center;">Status</span></div>';
+        grupo.forEach((c, i) => {
+            const pago = c.status === 'pago' || c.status === 'recebido';
+            html += '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span style="width:44px;font-weight:600;">' + c.parcela_atual + '/' + c.total_parcelas + '</span>' +
+                '<input type="date" id="editGrupoCFData' + i + '" value="' + (c.data_vencimento || '') + '" style="flex:1;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
+                '<input type="number" step="0.01" id="editGrupoCFValor' + i + '" value="' + (c.valor || 0) + '" style="width:110px;padding:4px 6px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-weight:600;color:' + (tipo === 'receber' ? '#28a745' : '#dc3545') + ';">' +
+                '<span style="width:64px;text-align:center;font-size:11px;">' + (pago ? '✅ ' + (tipo === 'receber' ? 'Recebido' : 'Pago') : '⏳ Pendente') + '</span>' +
+                '</div>';
+        });
+        document.getElementById('editGrupoCFLista').innerHTML = html;
+        document.getElementById('editGrupoCFTitulo').textContent = '✏️ Editar Custo Fixo — ' + grupo.length + ' lançamento(s) do grupo';
+        document.getElementById('modalEditarGrupoCustoFixo').classList.add('active');
+        return true;
+    }
+
+    async function salvarEdicaoGrupoCustoFixo(event) {
+        event.preventDefault();
+        const tipo = document.getElementById('editGrupoCFTipo').value;
+        const tabela = tipo === 'receber' ? 'contas_a_receber' : 'contas_a_pagar';
+        const descBase = document.getElementById('editGrupoCFDescricao').value.trim() || 'Custo Fixo';
+        const obsBase = document.getElementById('editGrupoCFObs').value.trim();
+        const obsFinalTail = document.getElementById('editGrupoCFObsFinal').textContent.trim();
+        const categoriaVal = document.getElementById('editGrupoCFCategoria').value;
+        const fornecedorVal = tipo === 'pagar' ? document.getElementById('editGrupoCFFornecedor').value : null;
+        const clienteVal = tipo === 'receber' ? document.getElementById('editGrupoCFCliente').value : null;
+        const grupo = window._grupoCFItens || [];
+        let erros = 0;
+        for (let i = 0; i < grupo.length; i++) {
+            const c = grupo[i];
+            const dataEl = document.getElementById('editGrupoCFData' + i);
+            const valorEl = document.getElementById('editGrupoCFValor' + i);
+            const obsCompleto = obsBase && obsFinalTail ? (obsBase + ' — ' + obsFinalTail)
+                               : (obsFinalTail || obsBase || null);
+            const dados = {
+                descricao: descBase + ' (' + c.parcela_atual + '/' + c.total_parcelas + ')',
+                valor: parseFloat(valorEl.value) || 0,
+                data_vencimento: dataEl.value,
+                observacoes: obsCompleto,
+                categoria_id: categoriaVal ? parseInt(categoriaVal) : null
+            };
+            if (tipo === 'pagar') { dados.fornecedor_id = fornecedorVal ? parseInt(fornecedorVal) : null; }
+            else { dados.cliente_id = clienteVal ? parseInt(clienteVal) : null; }
+            const r = await fetchSupabase(tabela, 'PATCH', dados, 'id=eq.' + c.id);
+            if (r === null) erros++;
+        }
+        if (erros === 0) {
+            showAlert(grupo.length + ' lançamento(s) do grupo atualizados!', 'alertEditarGrupoCF', 'success');
+            closeModal('modalEditarGrupoCustoFixo');
+        } else {
+            showAlert('Erro ao atualizar ' + erros + ' lançamento(s) do grupo.', 'alertEditarGrupoCF', 'error');
+        }
+        await carregarContasReceber();
+        await carregarContasPagar();
+        await carregarContasRecebidas();
+        await carregarContasPagas();
+        await atualizarDashboard();
+    }
+
     function editarLancamento(id, tipo) {
         atualizarSelectClientes();
         atualizarSelectFornecedores();
@@ -4160,6 +4669,7 @@
             const conta = dadosCache.contasRecebidas.find(c => c.id === id)
                        || dadosCache.contasReceber.find(c => c.id === id);
             if (!conta) return;
+            if (abrirEdicaoGrupoCustoFixo(conta, 'receber')) return;
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_receber';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Receber';
@@ -4178,6 +4688,7 @@
             const conta = dadosCache.contasPagas.find(c => c.id === id)
                        || dadosCache.contasPagar.find(c => c.id === id);
             if (!conta) return;
+            if (abrirEdicaoGrupoCustoFixo(conta, 'pagar')) return;
             document.getElementById('editLancId').value = id;
             document.getElementById('editLancTipo').value = 'contas_a_pagar';
             document.getElementById('editLancTituloModal').textContent = 'Editar Lançamento a Pagar';
@@ -4668,8 +5179,13 @@
         if (page) {
             page.classList.add('active');
 
-            // Marca o menu como ativo
-            event.target.classList.add('active');
+            // Marca o menu como ativo (funciona tanto em clique quanto em chamada programática)
+            if (typeof event !== 'undefined' && event && event.target && event.target.classList && event.target.classList.contains('menu-item')) {
+                event.target.classList.add('active');
+            } else {
+                const menuItem = document.querySelector('.menu-item[onclick*="showPage(\'' + pageId + '\')"]');
+                if (menuItem) menuItem.classList.add('active');
+            }
 
             // Carrega dados quando a página for exibida
             if (pageId === 'categorias') carregarCategorias();
@@ -4689,7 +5205,8 @@
             else if (pageId === 'analise-grupo-dre') carregarAnaliseGrupoDRE();
             else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
-            else if (pageId === 'custos-fixos') carregarCustosFixos();
+            else if (pageId === 'chequesAberto') carregarCheques();
+            else if (pageId === 'chequesCompensados') carregarCheques();
             else if (pageId === 'dashboard') atualizarDashboard();
         }
     }
@@ -5797,22 +6314,12 @@
     // ================================================================
     function _calcularSaldosBancos(bancos, recebidas, pagas) {
         const saldos = {};
-        const dataCortePorBanco = {};
-        bancos.forEach(b => {
-            saldos[b.id] = parseFloat(b.saldo_inicial || 0);
-            dataCortePorBanco[b.id] = b.data_saldo_inicial || null;
-        });
+        bancos.forEach(b => { saldos[b.id] = parseFloat(b.saldo_inicial || 0); });
         (recebidas || []).filter(c => c.status === 'recebido' && c.banco_id).forEach(c => {
-            if (saldos[c.banco_id] === undefined) return;
-            const corte = dataCortePorBanco[c.banco_id];
-            if (corte && c.data_recebimento && c.data_recebimento < corte) return; // já embutido no saldo inicial
-            saldos[c.banco_id] += parseFloat(c.valor || 0);
+            if (saldos[c.banco_id] !== undefined) saldos[c.banco_id] += parseFloat(c.valor || 0);
         });
         (pagas || []).filter(c => c.status === 'pago' && c.banco_id).forEach(c => {
-            if (saldos[c.banco_id] === undefined) return;
-            const corte = dataCortePorBanco[c.banco_id];
-            if (corte && c.data_pagamento && c.data_pagamento < corte) return; // já embutido no saldo inicial
-            saldos[c.banco_id] -= parseFloat(c.valor || 0);
+            if (saldos[c.banco_id] !== undefined) saldos[c.banco_id] -= parseFloat(c.valor || 0);
         });
         return saldos;
     }
@@ -5867,7 +6374,7 @@
                 '<div class="stat-label">🏦 ' + banco.nome + '</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">' + (banco.tipo || '') + '</div>' +
                 '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
-                '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + (banco.data_saldo_inicial ? ' (desde ' + banco.data_saldo_inicial.split('-').reverse().join('/') + ')' : '') + '</div>' +
+                '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
                 '</div>';
         });
         if ((dadosCache.bancos || []).filter(b => b.ativo).length > 1) {
@@ -5917,14 +6424,11 @@
 
         // Lista com TODOS os movimentos do(s) banco(s) selecionado(s), sem filtro de ano/mês/busca.
         // É usada para calcular o saldo acumulado até o início do período filtrado (saldo anterior).
-        // Lançamentos anteriores à "Data do Saldo Inicial" de cada banco são ignorados, pois já
-        // estão embutidos no valor de saldo inicial informado no cadastro do banco.
         const todosMovimentos = [];
         recebidas.forEach(c => {
             const data = c.data_recebimento || ''; if (!data) return;
             if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
             const banco   = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
-            if (banco && banco.data_saldo_inicial && data < banco.data_saldo_inicial) return;
             const cliente = (dadosCache.clientes||[]).find(x => x.id === c.cliente_id);
             todosMovimentos.push({ data, tipo:'credito', descricao:c.descricao||'-',
                 complemento: cliente?cliente.nome:'', banco: banco?banco.nome:'-',
@@ -5934,7 +6438,6 @@
             const data = c.data_pagamento || ''; if (!data) return;
             if (bancoIdFiltro && String(c.banco_id) !== String(bancoIdFiltro)) return;
             const banco      = (dadosCache.bancos||[]).find(b => b.id === c.banco_id);
-            if (banco && banco.data_saldo_inicial && data < banco.data_saldo_inicial) return;
             const fornecedor = (dadosCache.fornecedores||[]).find(x => x.id === c.fornecedor_id);
             todosMovimentos.push({ data, tipo:'debito', descricao:c.descricao||'-',
                 complemento: fornecedor?fornecedor.nome:'', banco: banco?banco.nome:'-',
@@ -6050,7 +6553,6 @@
         document.getElementById('agenciaBanco').value = '';
         document.getElementById('contaBanco').value = '';
         document.getElementById('saldoInicialBanco').value = '0';
-        document.getElementById('dataSaldoInicialBanco').value = new Date().toISOString().slice(0,10);
         document.getElementById('ativoBanco').checked = true;
         document.getElementById('modalBancoTitulo').textContent = 'Novo Banco';
         window._editandoBancoId = null;
@@ -6065,7 +6567,6 @@
         document.getElementById('agenciaBanco').value = banco.agencia || '';
         document.getElementById('contaBanco').value = banco.conta || '';
         document.getElementById('saldoInicialBanco').value = banco.saldo_inicial || 0;
-        document.getElementById('dataSaldoInicialBanco').value = banco.data_saldo_inicial || new Date().toISOString().slice(0,10);
         document.getElementById('ativoBanco').checked = banco.ativo;
         document.getElementById('modalBancoTitulo').textContent = 'Editar Banco';
         window._editandoBancoId = id;
@@ -6080,7 +6581,6 @@
             agencia: document.getElementById('agenciaBanco').value || null,
             conta: document.getElementById('contaBanco').value || null,
             saldo_inicial: parseFloat(document.getElementById('saldoInicialBanco').value) || 0,
-            data_saldo_inicial: document.getElementById('dataSaldoInicialBanco').value || null,
             ativo: document.getElementById('ativoBanco').checked
         };
         let r;
@@ -6106,6 +6606,314 @@
     }
 
     // ================================================================
+    // CHEQUES
+    // ================================================================
+    function _fmtMoedaCheque(v) {
+        return 'R$ ' + parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function _hojeStrCheque() {
+        const h = new Date();
+        return h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0') + '-' + String(h.getDate()).padStart(2, '0');
+    }
+
+    function _dataFmtCheque(d) {
+        return d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
+    }
+
+    async function carregarCheques() {
+        const cheques = await fetchSupabase('cheques', 'GET', null, 'order=bom_para.asc');
+        if (!cheques) return;
+        dadosCache.cheques = cheques;
+        atualizarCardsCheques();
+        atualizarTabelaChequesAberto();
+        atualizarTabelaChequesCompensados();
+    }
+
+    function atualizarCardsCheques() {
+        const hoje = _hojeStrCheque();
+        const lista = dadosCache.cheques || [];
+        const abertosNaoVencidos = lista.filter(c => c.status === 'aberto' && c.bom_para >= hoje);
+        const vencidos = lista.filter(c => c.status === 'aberto' && c.bom_para < hoje);
+        const compensados = lista.filter(c => c.status === 'compensado');
+        const somaVal = arr => arr.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+
+        const elAV = document.getElementById('chequeCardAbertoValor');
+        const elAQ = document.getElementById('chequeCardAbertoQtd');
+        const elVV = document.getElementById('chequeCardVencidoValor');
+        const elVQ = document.getElementById('chequeCardVencidoQtd');
+        const elCV = document.getElementById('chequeCardCompensadoValor');
+        const elCQ = document.getElementById('chequeCardCompensadoQtd');
+
+        if (elAV) elAV.textContent = _fmtMoedaCheque(somaVal(abertosNaoVencidos));
+        if (elAQ) elAQ.textContent = abertosNaoVencidos.length + ' cheque(s)';
+        if (elVV) elVV.textContent = _fmtMoedaCheque(somaVal(vencidos));
+        if (elVQ) elVQ.textContent = vencidos.length + ' cheque(s)';
+        if (elCV) elCV.textContent = _fmtMoedaCheque(somaVal(compensados));
+        if (elCQ) elCQ.textContent = compensados.length + ' cheque(s)';
+    }
+
+    function atualizarTabelaChequesAberto() {
+        const tbody = document.querySelector('#tabelaChequesAberto tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const hoje = _hojeStrCheque();
+        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeAberto') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeAberto') || {}).value || '';
+
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
+        lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque em aberto</td></tr>';
+            return;
+        }
+
+        lista.forEach(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const vencido = cheque.bom_para < hoje;
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
+                '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + (banco ? banco.nome : '-') + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
+                '<td>' + _fmtMoedaCheque(cheque.valor) + '</td>' +
+                '<td><span class="status-badge ' + (vencido ? 'status-atrasado' : 'status-pendente') + '">' + (vencido ? 'Vencido' : 'Em Aberto') + '</span></td>' +
+                '<td>' +
+                    '<button class="btn btn-success btn-small" onclick="compensarCheque(' + cheque.id + ')">✔ Compensar</button> ' +
+                    '<button class="btn btn-secondary btn-small" onclick="editarCheque(' + cheque.id + ')">Editar</button> ' +
+                    '<button class="btn btn-danger btn-small" onclick="deletarCheque(' + cheque.id + ')">Excluir</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function abrirModalPDFCheques() {
+        document.getElementById('modalPDFCheques').classList.add('active');
+    }
+
+    // Gera PDF (retrato ou paisagem) com os Cheques em Aberto atualmente filtrados na tela
+    function gerarPDFChequesAberto(orientacao) {
+        closeModal('modalPDFCheques');
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: orientacao === 'landscape' ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+
+        // Cabeçalho
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 16, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 10);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'), pageW - 10, 10, { align: 'right' });
+
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text(normalizarTexto('Cheques em Aberto'), pageW / 2, 25, { align: 'center' });
+
+        // Reaproveita a mesma lista/filtro exibida na tela (sem a coluna de Ações)
+        const hoje = _hojeStrCheque();
+        const filtroForn = (document.getElementById('filtroFornecedorChequeAberto') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeAberto') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeAberto') || {}).value || '';
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
+        lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+
+        const body = lista.map(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const vencido = cheque.bom_para < hoje;
+            return [
+                _dataFmtCheque(cheque.bom_para),
+                normalizarTexto((forn ? forn.nome : '-') + (cheque.numero ? ' (Nº ' + cheque.numero + ')' : '')),
+                normalizarTexto(banco ? banco.nome : '-'),
+                _dataFmtCheque(cheque.data_entrada),
+                _fmtMoedaCheque(cheque.valor),
+                vencido ? 'Vencido' : 'Em Aberto'
+            ];
+        });
+        const totalGeral = lista.reduce((s, c) => s + parseFloat(c.valor || 0), 0);
+
+        doc.autoTable({
+            head: [['Bom Para', 'Fornecedor', 'Banco', 'Data Entrada', 'Valor', 'Status']],
+            body: body,
+            foot: [['', '', '', 'Total', _fmtMoedaCheque(totalGeral), '']],
+            startY: 30,
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: { fillColor: [255, 122, 66], textColor: 255, fontStyle: 'bold' },
+            footStyles: { fillColor: [240, 240, 240], textColor: 0, fontStyle: 'bold' },
+            columnStyles: { 4: { halign: 'right' } },
+            didParseCell: function (data) {
+                if (data.section === 'body' && data.column.index === 5) {
+                    if (data.cell.raw === 'Vencido') data.cell.styles.textColor = [220, 53, 69];
+                    else data.cell.styles.textColor = [133, 100, 4];
+                }
+            }
+        });
+
+        if (lista.length === 0) {
+            doc.setFontSize(10);
+            doc.text('Nenhum cheque em aberto no filtro atual.', 14, 36);
+        }
+
+        doc.save('Cheques_em_Aberto_' + (orientacao === 'landscape' ? 'paisagem' : 'retrato') + '_' + hoje + '.pdf');
+    }
+
+    function atualizarTabelaChequesCompensados() {
+        const tbody = document.querySelector('#tabelaChequesCompensados tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        const filtroForn = (document.getElementById('filtroFornecedorChequeComp') || {}).value || '';
+        const filtroAno = (document.getElementById('filtroAnoChequeComp') || {}).value || '';
+        const filtroMes = (document.getElementById('filtroMesChequeComp') || {}).value || '';
+        const filtroDataInicio = (document.getElementById('filtroDataInicioChequeComp') || {}).value || '';
+        const filtroDataFim = (document.getElementById('filtroDataFimChequeComp') || {}).value || '';
+
+        let lista = (dadosCache.cheques || []).filter(c => c.status === 'compensado');
+        if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        if (filtroAno) lista = lista.filter(c => (c.data_compensacao || '').slice(0, 4) === filtroAno);
+        if (filtroMes) lista = lista.filter(c => (c.data_compensacao || '').slice(5, 7) === filtroMes);
+        if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
+        if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
+        lista = lista.slice().sort((a, b) => (b.data_compensacao || '').localeCompare(a.data_compensacao || ''));
+
+        if (lista.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque compensado</td></tr>';
+            return;
+        }
+
+        lista.forEach(cheque => {
+            const forn = (dadosCache.fornecedores || []).find(f => f.id === cheque.fornecedor_id);
+            const banco = (dadosCache.bancos || []).find(b => b.id === cheque.banco_id);
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
+                '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + (banco ? banco.nome : '-') + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
+                '<td>' + _dataFmtCheque(cheque.data_compensacao) + '</td>' +
+                '<td>' + _fmtMoedaCheque(cheque.valor) + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-secondary btn-small" onclick="reabrirCheque(' + cheque.id + ')">↩ Reabrir</button> ' +
+                    '<button class="btn btn-danger btn-small" onclick="deletarCheque(' + cheque.id + ')">Excluir</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function openModalCheque() {
+        window._editandoChequeId = null;
+        document.getElementById('modalChequeTitulo').textContent = 'Novo Cheque';
+        document.getElementById('numeroCheque').value = '';
+        atualizarSelectBancosModal('bancoCheque');
+        document.getElementById('fornecedorCheque').value = '';
+        document.getElementById('bancoCheque').value = '';
+        document.getElementById('bomParaCheque').value = '';
+        document.getElementById('dataEntradaCheque').value = new Date().toISOString().slice(0, 10);
+        document.getElementById('valorCheque').value = '';
+        document.getElementById('observacaoCheque').value = '';
+        document.getElementById('modalCheque').classList.add('active');
+    }
+
+    function editarCheque(id) {
+        const cheque = (dadosCache.cheques || []).find(c => c.id === id);
+        if (!cheque) return;
+        window._editandoChequeId = id;
+        atualizarSelectBancosModal('bancoCheque');
+        document.getElementById('modalChequeTitulo').textContent = 'Editar Cheque';
+        document.getElementById('numeroCheque').value = cheque.numero || '';
+        document.getElementById('fornecedorCheque').value = cheque.fornecedor_id || '';
+        document.getElementById('bancoCheque').value = cheque.banco_id || '';
+        document.getElementById('bomParaCheque').value = cheque.bom_para || '';
+        document.getElementById('dataEntradaCheque').value = cheque.data_entrada || '';
+        document.getElementById('valorCheque').value = cheque.valor || '';
+        document.getElementById('observacaoCheque').value = cheque.observacao || '';
+        document.getElementById('modalCheque').classList.add('active');
+    }
+
+    async function salvarCheque(event) {
+        event.preventDefault();
+        const fornecedorId = document.getElementById('fornecedorCheque').value;
+        const bancoId = document.getElementById('bancoCheque').value;
+        const bomPara = document.getElementById('bomParaCheque').value;
+        const dataEntrada = document.getElementById('dataEntradaCheque').value;
+        const valor = document.getElementById('valorCheque').value;
+
+        if (!fornecedorId || !bancoId || !bomPara || !dataEntrada || !valor) {
+            alert('Preencha Fornecedor, Banco, Bom Para, Data Entrada e Valor!');
+            return;
+        }
+
+        const dados = {
+            numero: document.getElementById('numeroCheque').value || null,
+            fornecedor_id: parseInt(fornecedorId),
+            banco_id: parseInt(bancoId),
+            bom_para: bomPara,
+            data_entrada: dataEntrada,
+            valor: parseFloat(valor),
+            observacao: document.getElementById('observacaoCheque').value || null
+        };
+
+        let resultado;
+        if (window._editandoChequeId) {
+            resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + window._editandoChequeId);
+        } else {
+            dados.status = 'aberto';
+            resultado = await fetchSupabase('cheques', 'POST', dados);
+        }
+
+        if (resultado !== null) {
+            showAlert('Cheque salvo com sucesso!', 'alertChequesAberto', 'success');
+            closeModal('modalCheque');
+            await carregarCheques();
+        }
+    }
+
+    async function compensarCheque(id) {
+        if (!confirm('Confirmar a compensação deste cheque? Ele sairá da lista "Em Aberto" e passará para "Compensados".')) return;
+        const dados = { status: 'compensado', data_compensacao: _hojeStrCheque() };
+        const resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + id);
+        if (resultado !== null) {
+            await carregarCheques();
+            showPage('chequesCompensados');
+            showAlert('Cheque compensado com sucesso!', 'alertChequesCompensados', 'success');
+        }
+    }
+
+    async function reabrirCheque(id) {
+        if (!confirm('Reabrir este cheque? Ele voltará para a lista "Em Aberto".')) return;
+        const dados = { status: 'aberto', data_compensacao: null };
+        const resultado = await fetchSupabase('cheques', 'PATCH', dados, 'id=eq.' + id);
+        if (resultado !== null) {
+            await carregarCheques();
+            showPage('chequesAberto');
+            showAlert('Cheque reaberto!', 'alertChequesAberto', 'success');
+        }
+    }
+
+    async function deletarCheque(id) {
+        if (!confirm('Tem certeza que deseja excluir este cheque?')) return;
+        const resultado = await fetchSupabase('cheques', 'DELETE', null, 'id=eq.' + id);
+        if (resultado !== null) {
+            showAlert('Cheque excluído!', 'alertChequesAberto', 'success');
+            await carregarCheques();
+        }
+    }
+
+    // ================================================================
     // ABRIR MODAIS DE LANÇAMENTO
     // ================================================================
     function openModalLancarReceber() {
@@ -6114,9 +6922,15 @@
         document.getElementById('valorReceber').value = '';
         document.getElementById('competenciaReceber').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoReceber').value = '';
+        popularSelectParcelas('parcelasReceber');
         document.getElementById('parcelasReceber').value = '1';
+        document.getElementById('parcelasReceber').disabled = false;
         document.getElementById('notaFiscalReceber').value = '';
         document.getElementById('observacoesReceber').value = '';
+        document.getElementById('custoFixoReceber').checked = false;
+        document.getElementById('vigenciaReceberWrap').style.display = 'none';
+        document.getElementById('vigenciaFimReceber').value = '';
+        document.getElementById('labelValorReceber').textContent = 'Valor Total*';
         document.getElementById('previewParcelasReceber').style.display = 'none';
         atualizarSelectCategorias();
         atualizarSelectClientes();
@@ -6131,9 +6945,15 @@
         document.getElementById('valorPagar').value = '';
         document.getElementById('competenciaPagar').value = new Date().toISOString().slice(0,7) + '-01';
         document.getElementById('vencimentoPagar').value = '';
+        popularSelectParcelas('parcelasPagar');
         document.getElementById('parcelasPagar').value = '1';
+        document.getElementById('parcelasPagar').disabled = false;
         document.getElementById('notaFiscalPagar').value = '';
         document.getElementById('observacoesPagar').value = '';
+        document.getElementById('custoFixoPagar').checked = false;
+        document.getElementById('vigenciaPagarWrap').style.display = 'none';
+        document.getElementById('vigenciaFimPagar').value = '';
+        document.getElementById('labelValorPagar').textContent = 'Valor Total*';
         document.getElementById('previewParcelasPagar').style.display = 'none';
         atualizarSelectCategorias();
         atualizarSelectFornecedores();
@@ -6150,45 +6970,186 @@
         return d.toISOString().split('T')[0];
     }
 
-    function calcularParcelasReceber() {
-        const valor = parseFloat(document.getElementById('valorReceber').value);
-        const n = parseInt(document.getElementById('parcelasReceber').value) || 1;
-        const dataBase = document.getElementById('vencimentoReceber').value;
-        const preview = document.getElementById('previewParcelasReceber');
-        const lista = document.getElementById('listaParcelasReceber');
-        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
-        const parc = Math.round((valor / n) * 100) / 100;
-        let html = '';
+    // Soma dias corridos (calendário) a uma data 'YYYY-MM-DD'
+    function addDays(dateStr, dias) {
+        const d = new Date(dateStr + 'T12:00:00');
+        d.setDate(d.getDate() + dias);
+        return d.toISOString().split('T')[0];
+    }
+
+    // Preenche um <select> de parcelas com opções de 1x até `max` (padrão 60x)
+    function popularSelectParcelas(selectId, max) {
+        max = max || 60;
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        const valorAtual = sel.value;
+        let html = '<option value="1">À vista (1x)</option>';
+        for (let i = 2; i <= max; i++) html += '<option value="' + i + '">' + i + 'x</option>';
+        sel.innerHTML = html;
+        if (valorAtual) sel.value = valorAtual;
+    }
+
+    // Calcula o número de meses (inclusive) entre duas datas 'YYYY-MM-DD', limitado a 120 (10 anos)
+    function mesesEntreDatas(inicioStr, fimStr) {
+        const ini = new Date(inicioStr + 'T12:00:00');
+        const fim = new Date(fimStr + 'T12:00:00');
+        const meses = (fim.getFullYear() - ini.getFullYear()) * 12 + (fim.getMonth() - ini.getMonth()) + 1;
+        return Math.min(120, Math.max(1, meses));
+    }
+
+    // Sincroniza campo "Repetir por quantas vezes" <-> "Vigência até" (Custo Fixo)
+    // suf = 'Pagar' ou 'Receber'
+    function _syncQtdFromVig(suf) {
+        const base = document.getElementById('vencimento' + suf).value;
+        const vig  = document.getElementById('vigenciaFim' + suf).value;
+        const qtdEl = document.getElementById('qtdCustoFixo' + suf);
+        if (base && vig && qtdEl) qtdEl.value = mesesEntreDatas(base, vig);
+    }
+    function _syncVigFromQtd(suf) {
+        const base = document.getElementById('vencimento' + suf).value;
+        const qtdEl = document.getElementById('qtdCustoFixo' + suf);
+        const vigEl = document.getElementById('vigenciaFim' + suf);
+        const qtd = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+        if (base && vigEl) vigEl.value = addMonths(base, qtd - 1);
+    }
+    function onQtdCustoFixoPagarChange()      { _syncVigFromQtd('Pagar');   calcularParcelasPagar(); }
+    function onVigenciaCustoFixoPagarChange() { _syncQtdFromVig('Pagar');   calcularParcelasPagar(); }
+    function onQtdCustoFixoReceberChange()      { _syncVigFromQtd('Receber'); calcularParcelasReceber(); }
+    function onVigenciaCustoFixoReceberChange() { _syncQtdFromVig('Receber'); calcularParcelasReceber(); }
+
+    // Quando a data-base (vencimento) muda: se Custo Fixo estiver marcado, recalcula a
+    // vigência mantendo a mesma quantidade de repetições já definida (ou usa o padrão de 30 dias).
+    function onDataBaseCustoFixoPagarChange() {
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
+        if (fixo) {
+            const base = document.getElementById('vencimentoPagar').value;
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (base && qtdEl.value) { _syncVigFromQtd('Pagar'); }
+            else if (base) { document.getElementById('vigenciaFimPagar').value = addDays(base, 30); _syncQtdFromVig('Pagar'); }
+        }
+        calcularParcelasPagar();
+    }
+    function onDataBaseCustoFixoReceberChange() {
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        if (fixo) {
+            const base = document.getElementById('vencimentoReceber').value;
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (base && qtdEl.value) { _syncVigFromQtd('Receber'); }
+            else if (base) { document.getElementById('vigenciaFimReceber').value = addDays(base, 30); _syncQtdFromVig('Receber'); }
+        }
+        calcularParcelasReceber();
+    }
+
+    function toggleCustoFixoReceber() {
+        const fixo = document.getElementById('custoFixoReceber').checked;
+        document.getElementById('vigenciaReceberWrap').style.display = fixo ? '' : 'none';
+        document.getElementById('labelValorReceber').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
+        const parcSel = document.getElementById('parcelasReceber');
+        parcSel.disabled = fixo;
+        if (fixo) {
+            parcSel.value = '1';
+            // Padrão: 30 dias a partir da data adicionada (data prevista de recebimento)
+            const base = document.getElementById('vencimentoReceber').value;
+            const vigEl = document.getElementById('vigenciaFimReceber');
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (base && !vigEl.value) {
+                vigEl.value = addDays(base, 30);
+                qtdEl.value = mesesEntreDatas(base, vigEl.value);
+            }
+        }
+        calcularParcelasReceber();
+    }
+
+    function toggleCustoFixoPagar() {
+        const fixo = document.getElementById('custoFixoPagar').checked;
+        document.getElementById('vigenciaPagarWrap').style.display = fixo ? '' : 'none';
+        document.getElementById('labelValorPagar').textContent = fixo ? 'Valor Mensal*' : 'Valor Total*';
+        const parcSel = document.getElementById('parcelasPagar');
+        parcSel.disabled = fixo;
+        if (fixo) {
+            parcSel.value = '1';
+            // Padrão: 30 dias a partir da data adicionada (data prevista de pagamento)
+            const base = document.getElementById('vencimentoPagar').value;
+            const vigEl = document.getElementById('vigenciaFimPagar');
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (base && !vigEl.value) {
+                vigEl.value = addDays(base, 30);
+                qtdEl.value = mesesEntreDatas(base, vigEl.value);
+            }
+        }
+        calcularParcelasPagar();
+    }
+
+    // Renderiza a lista de parcelas com campos de data e valor editáveis
+    function _renderParcelasEditaveis(lista, n, dataBase, valorParcela, idPrefix, corValor) {
+        let html = '<div style="display:flex;gap:6px;padding:2px 0 6px;font-size:11px;color:#888;">' +
+            '<span style="width:38px;">Parc.</span><span style="flex:1;">Vencimento</span><span style="width:90px;">Valor</span></div>';
         for (let i = 0; i < n; i++) {
-            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
-            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
-                '<span>' + (i+1) + '/' + n + '</span>' +
-                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#28a745;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
+            const dt = dataBase ? addMonths(dataBase, i) : '';
+            html += '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
+                '<span style="width:38px;">' + (i+1) + '/' + n + '</span>' +
+                '<input type="date" id="' + idPrefix + 'Data' + i + '" value="' + dt + '" style="flex:1;padding:3px 4px;font-size:12px;border:1px solid #ddd;border-radius:4px;">' +
+                '<input type="number" step="0.01" id="' + idPrefix + 'Valor' + i + '" value="' + valorParcela + '" style="width:90px;padding:3px 4px;font-size:12px;border:1px solid #ddd;border-radius:4px;color:' + corValor + ';font-weight:600;">' +
                 '</div>';
         }
         lista.innerHTML = html;
+    }
+
+    function calcularParcelasReceber() {
+        const valor = parseFloat(document.getElementById('valorReceber').value);
+        const dataBase = document.getElementById('vencimentoReceber').value;
+        const fixo = document.getElementById('custoFixoReceber') && document.getElementById('custoFixoReceber').checked;
+        const preview = document.getElementById('previewParcelasReceber');
+        const lista = document.getElementById('listaParcelasReceber');
+        let n = parseInt(document.getElementById('parcelasReceber').value) || 1;
+
+        if (fixo) {
+            const vigFim = document.getElementById('vigenciaFimReceber').value;
+            const qtdEl = document.getElementById('qtdCustoFixoReceber');
+            if (qtdEl && qtdEl.value) {
+                n = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+            } else if (dataBase && vigFim) {
+                n = mesesEntreDatas(dataBase, vigFim);
+            } else {
+                preview.style.display = 'none'; lista.innerHTML = ''; return;
+            }
+            _renderParcelasEditaveis(lista, n, dataBase, valor || 0, 'parcRec', '#28a745');
+            preview.style.display = 'block';
+            return;
+        }
+
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        _renderParcelasEditaveis(lista, n, dataBase, parc, 'parcRec', '#28a745');
         preview.style.display = 'block';
     }
 
     function calcularParcelasPagar() {
         const valor = parseFloat(document.getElementById('valorPagar').value);
-        const n = parseInt(document.getElementById('parcelasPagar').value) || 1;
         const dataBase = document.getElementById('vencimentoPagar').value;
+        const fixo = document.getElementById('custoFixoPagar') && document.getElementById('custoFixoPagar').checked;
         const preview = document.getElementById('previewParcelasPagar');
         const lista = document.getElementById('listaParcelasPagar');
-        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; return; }
-        const parc = Math.round((valor / n) * 100) / 100;
-        let html = '';
-        for (let i = 0; i < n; i++) {
-            const dt = new Date(addMonths(dataBase, i) + 'T12:00:00');
-            html += '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;">' +
-                '<span>' + (i+1) + '/' + n + '</span>' +
-                '<span>' + dt.toLocaleDateString('pt-BR') + '</span>' +
-                '<span style="color:#dc3545;font-weight:600;">R$ ' + parc.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</span>' +
-                '</div>';
+        let n = parseInt(document.getElementById('parcelasPagar').value) || 1;
+
+        if (fixo) {
+            const vigFim = document.getElementById('vigenciaFimPagar').value;
+            const qtdEl = document.getElementById('qtdCustoFixoPagar');
+            if (qtdEl && qtdEl.value) {
+                n = Math.min(120, Math.max(1, parseInt(qtdEl.value) || 1));
+            } else if (dataBase && vigFim) {
+                n = mesesEntreDatas(dataBase, vigFim);
+            } else {
+                preview.style.display = 'none'; lista.innerHTML = ''; return;
+            }
+            _renderParcelasEditaveis(lista, n, dataBase, valor || 0, 'parcPag', '#dc3545');
+            preview.style.display = 'block';
+            return;
         }
-        lista.innerHTML = html;
+
+        if (!valor || !dataBase || n <= 1) { preview.style.display = 'none'; lista.innerHTML = ''; return; }
+        const parc = Math.round((valor / n) * 100) / 100;
+        _renderParcelasEditaveis(lista, n, dataBase, parc, 'parcPag', '#dc3545');
         preview.style.display = 'block';
     }
 
@@ -7108,7 +8069,7 @@
             porGrupo[grupo].total += parseFloat(c.valor || 0);
             const comp = c.data_competencia || c.data_recebimento || '';
             porGrupo[grupo].itens.push({
-                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
                 catNome: cat ? cat.nome : 'Receita', fonte: 'receber'
             });
@@ -7122,7 +8083,7 @@
             porGrupo[grupo].total += parseFloat(c.valor || 0);
             const comp = c.data_competencia || c.data_pagamento || '';
             porGrupo[grupo].itens.push({
-                descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
                 catNome: cat ? cat.nome : 'Custo', fonte: 'pagar'
             });
@@ -7183,6 +8144,7 @@
             const cardMensal = document.getElementById('cardDREMensal');
             if (cardMensal) cardMensal.style.display = 'none';
         }
+
     }
 
     function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
@@ -7207,19 +8169,33 @@
             </tr>`;
         };
 
-        const linhaSubtotal = (label, valor, destaque) => {
-            const bg = destaque ? 'var(--cor-primaria)' : '#f0f0f0';
-            const fc = destaque ? 'white' : '#333';
-            return `<tr style="font-weight:700;background:${bg};color:${fc};">
-                <td style="padding:8px 12px;">${label}</td>
-                <td style="text-align:right;padding:8px;color:${destaque ? 'white' : cor(valor)};">R$ ${fmtV(Math.abs(valor))} ${!destaque ? '' : ''}</td>
-                <td style="text-align:right;color:${destaque?'rgba(255,255,255,0.8)':'#777'};">${pct(Math.abs(valor))}</td>
+        const seloSinal = (valor) => {
+            const positivo = valor >= 0;
+            return positivo
+                ? '<span style="background:#d4edda;color:#155724;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;white-space:nowrap;">▲ POSITIVO</span>'
+                : '<span style="background:#f8d7da;color:#721c24;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;margin-left:10px;white-space:nowrap;">▼ NEGATIVO</span>';
+        };
+
+        const linhaSubtotal = (label, valor, destaque, mostrarSelo) => {
+            if (destaque) {
+                const corValor = valor >= 0 ? '#28a745' : '#dc3545';
+                return `<tr style="font-weight:700;background:#e9ecef;color:#333;border-top:2px solid #ccc;border-bottom:2px solid #ccc;">
+                    <td style="padding:6px 12px;">${label}${seloSinal(valor)}</td>
+                    <td style="text-align:right;padding:6px;color:${corValor};font-size:14px;">R$ ${fmtV(Math.abs(valor))}</td>
+                    <td style="text-align:right;color:#777;">${pct(Math.abs(valor))}</td>
+                    <td></td>
+                </tr><tr><td colspan="4" style="height:2px;padding:0;background:#f9f9f9;"></td></tr>`;
+            }
+            return `<tr style="font-weight:700;background:#f0f0f0;color:#333;">
+                <td style="padding:4px 12px;">${label}${mostrarSelo ? seloSinal(valor) : ''}</td>
+                <td style="text-align:right;padding:4px;color:${cor(valor)};">R$ ${fmtV(Math.abs(valor))}</td>
+                <td style="text-align:right;color:#777;">${pct(Math.abs(valor))}</td>
                 <td></td>
-            </tr><tr><td colspan="4" style="height:4px;background:#f9f9f9;"></td></tr>`;
+            </tr><tr><td colspan="4" style="height:2px;padding:0;background:#f9f9f9;"></td></tr>`;
         };
 
         const linhaSecao = (label) =>
-            `<tr style="background:#f5f5f5;"><td colspan="4" style="font-weight:700;font-size:12px;color:#555;padding:6px 12px;text-transform:uppercase;letter-spacing:0.5px;">${label}</td></tr>`;
+            `<tr style="background:#f5f5f5;"><td colspan="4" style="font-weight:700;font-size:11px;color:#555;padding:3px 12px;text-transform:uppercase;letter-spacing:0.5px;">${label}</td></tr>`;
 
         let html = '';
         html += linhaSecao('RECEITAS');
@@ -7257,70 +8233,99 @@
         html += linhaSecao('RESULTADO FINANCEIRO');
         html += linhaGrupo(DRE_GRUPOS[5].label, porGrupo['RECEITA_FINANCEIRA'].total, 'RECEITA_FINANCEIRA');
         html += linhaGrupo(DRE_GRUPOS[6].label, -porGrupo['DESP_FINANCEIRA'].total, 'DESP_FINANCEIRA');
-        html += linhaSubtotal('= EBITDA (Resultado Operacional)', ebitda, false);
+        html += linhaSubtotal('= EBITDA (Resultado Operacional)', ebitda, false, true);
 
         html += linhaSecao('OUTROS');
         html += linhaGrupo(DRE_GRUPOS[7].label, -porGrupo['EMPRESTIMO'].total, 'EMPRESTIMO');
         html += linhaGrupo(DRE_GRUPOS[8].label, -porGrupo['INVESTIMENTO'].total, 'INVESTIMENTO');
         html += linhaGrupo(DRE_GRUPOS[9].label, porGrupo['OUTRAS_RECEITAS'].total, 'OUTRAS_RECEITAS');
         html += linhaGrupo(DRE_GRUPOS[10].label, -porGrupo['OUTRAS_DESPESAS'].total, 'OUTRAS_DESPESAS');
-        const sinalResultado = resultLiq >= 0 ? '+' : '-';
-        html += `<tr style="font-weight:700;background:#fff;border-top:2px solid #ddd;">
-            <td style="padding:8px 12px;color:#333;">= RESULTADO LÍQUIDO DO EXERCÍCIO</td>
-            <td style="text-align:right;padding:8px;color:${cor(resultLiq)};">${sinalResultado} R$ ${fmtV(Math.abs(resultLiq))}</td>
-            <td style="text-align:right;color:#777;">${pct(Math.abs(resultLiq))}</td>
-            <td></td>
-        </tr>`;
+        html += linhaSubtotal('= RESULTADO LÍQUIDO DO EXERCÍCIO', resultLiq, true);
 
         tbody.innerHTML = html;
     }
 
     let _dreDetalheCache = {};
 
-    function verDetalheDRE(grupoId) {
-        const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
-        if (!grupo) return;
-        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+    // Renderiza as linhas da tabela de detalhe do DRE (usado tanto pela visão anual quanto mensal).
+    // Cada item pode ser de 3 fontes: 'dre' (lançamento direto), 'receber' ou 'pagar' — todos editáveis.
+    function _renderLinhasDetalheDRE(itens) {
         const tbody = document.querySelector('#tabelaDetalheDRE tbody');
-        const itens = (_dreDetalheCache[grupoId] || []);
         if (!tbody) return;
         tbody.innerHTML = '';
-        itens.forEach(item => {
+        itens.forEach((item, idx) => {
             const val = parseFloat(item.valor || 0);
-            tbody.innerHTML += `<tr>
-                <td>${item.competencia || '-'}</td>
+            let acoes = '<span style="color:#aaa;font-size:11px;">—</span>';
+            if (item.id != null) {
+                if (item.fonte === 'dre') {
+                    acoes = '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>';
+                } else if (item.fonte === 'receber') {
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'receber\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_receber\')" class="btn btn-danger btn-small">🗑️</button>';
+                } else if (item.fonte === 'pagar') {
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'pagar\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_pagar\')" class="btn btn-danger btn-small">🗑️</button>';
+                }
+            }
+            tbody.innerHTML += `<tr style="${idx % 2 === 1 ? 'background:#fafafa;' : ''}">
+                <td style="white-space:nowrap;font-weight:500;">${item.competencia || '-'}</td>
                 <td>${item.descricao || '-'}</td>
                 <td>${item.catNome || '-'}</td>
                 <td>${item.parte || '-'}</td>
                 <td>${item.centro || '-'}</td>
-                <td style="text-align:right;font-weight:600;">R$ ${val.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                <td>${item.fonte === 'dre' && item.id ? '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️</button> <button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>' : '<span style="color:#aaa;font-size:11px;">automático</span>'}</td>
+                <td style="text-align:right;font-weight:700;font-size:14px;color:${val < 0 ? '#dc3545' : '#28a745'};white-space:nowrap;">R$ ${Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                <td style="white-space:nowrap;">${acoes}</td>
             </tr>`;
         });
-        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:16px;">Nenhum lançamento</td></tr>';
+        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento neste período</td></tr>';
+    }
+
+    function verDetalheDRE(grupoId) {
+        const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
+        if (!grupo) return;
+        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+        const subEl = document.getElementById('subtituloDetalheDRE');
+        if (subEl) subEl.textContent = 'Todos os meses';
+        const itens = (_dreDetalheCache[grupoId] || []);
+        _renderLinhasDetalheDRE(itens);
         document.getElementById('modalDetalheDRE').classList.add('active');
     }
+
+    // Estado de visibilidade dos meses na tabela DRE Mensal (índice 0=Jan ... 11=Dez)
+    let _mesesVisiveisDRE = Array(12).fill(true);
+    // Cache dos itens que compõem cada célula da tabela DRE Mensal, para o clique abrir o detalhe
+    let _dreMensalAno = null;
+    let _dreMensalItensGrupo = {};   // { grupoId: [ itens[], itens[], ... 12x ] }
+    let _dreMensalCPV = [];          // [ [nome, {valores:[12], itens:[12x[]]}], ... ]
+    let _dreMensalDA  = [];          // idem, para Despesas Administrativas
 
     function gerarTabelaMensalDRE(dreLancs, contasRec, contasPag, ano) {
         const headerRow = document.getElementById('dreHeaderMeses');
         const tbody = document.querySelector('#tabelaDREMensal tbody');
         if (!headerRow || !tbody) return;
         const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        _dreMensalAno = ano;
 
         // Cabeçalho com meses
         headerRow.innerHTML = '<th style="min-width:180px;text-align:left;">Descrição</th>' +
-            mNomes.map(m => '<th style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
+            mNomes.map((m, idx) => '<th data-mes="' + idx + '" style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
             '<th style="text-align:right;min-width:100px;">Total</th>';
 
-        // Para cada mês, calcular valores por grupo
+        // Para cada mês, calcular valores E itens (para detalhe) por grupo
         const dados = {};
-        DRE_GRUPOS.forEach(g => { dados[g.id] = Array(12).fill(0); });
+        DRE_GRUPOS.forEach(g => { dados[g.id] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) }; });
 
         // DRE diretos
         (dreLancs || []).filter(l => l.competencia && l.competencia.startsWith(ano)).forEach(l => {
             const m = parseInt(l.competencia.substring(5,7)) - 1;
             if (m < 0 || m > 11 || !dados[l.grupo]) return;
-            dados[l.grupo][m] += parseFloat(l.valor || 0);
+            dados[l.grupo].valores[m] += parseFloat(l.valor || 0);
+            const cat = dadosCache.categorias.find(x => x.id === l.categoria_id);
+            dados[l.grupo].itens[m].push({
+                id: l.id, descricao: l.descricao, valor: l.valor, competencia: l.competencia,
+                catNome: cat ? cat.nome : (l.categoria || '-'), parte: l.parte || '-', centro: l.centro || '-', fonte: 'dre'
+            });
         });
 
         // Contas recebidas — por competência (inclui pendentes no regime de competência)
@@ -7329,7 +8334,13 @@
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
             if (m < 0 || m > 11 || !dados[g]) return;
-            dados[g][m] += parseFloat(c.valor || 0);
+            dados[g].valores[m] += parseFloat(c.valor || 0);
+            dados[g].itens[m].push({
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia,
+                catNome: cat ? cat.nome : 'Receita',
+                parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
+                fonte: 'receber'
+            });
         });
 
         // Contas pagas — por competência (inclui pendentes no regime de competência)
@@ -7338,25 +8349,34 @@
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
             if (m < 0 || m > 11 || !dados[g]) return;
-            dados[g][m] += parseFloat(c.valor || 0);
+            dados[g].valores[m] += parseFloat(c.valor || 0);
+            dados[g].itens[m].push({
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia,
+                catNome: cat ? cat.nome : 'Custo',
+                parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
+                fonte: 'pagar'
+            });
         });
+
+        _dreMensalItensGrupo = {};
+        Object.keys(dados).forEach(g => { _dreMensalItensGrupo[g] = dados[g].itens; });
 
         // Calcular subtotais por mês
         const calcMes = (m) => {
-            const rb = dados['RECEITA_BRUTA'][m];
-            const ded = dados['DEDUCOES'][m];
+            const rb = dados['RECEITA_BRUTA'].valores[m];
+            const ded = dados['DEDUCOES'].valores[m];
             const rl = rb - ded;
-            const cpv = dados['CPV'][m];
+            const cpv = dados['CPV'].valores[m];
             const lb = rl - cpv;
-            const dc = dados['DESP_COMERCIAL'][m];
-            const da = dados['DESP_ADMIN'][m];
-            const rf = dados['RECEITA_FINANCEIRA'][m];
-            const df = dados['DESP_FINANCEIRA'][m];
+            const dc = dados['DESP_COMERCIAL'].valores[m];
+            const da = dados['DESP_ADMIN'].valores[m];
+            const rf = dados['RECEITA_FINANCEIRA'].valores[m];
+            const df = dados['DESP_FINANCEIRA'].valores[m];
             const ebt = lb - dc - da + rf - df;
-            const emp = dados['EMPRESTIMO'][m];
-            const inv = dados['INVESTIMENTO'][m];
-            const or = dados['OUTRAS_RECEITAS'][m];
-            const od = dados['OUTRAS_DESPESAS'][m];
+            const emp = dados['EMPRESTIMO'].valores[m];
+            const inv = dados['INVESTIMENTO'].valores[m];
+            const or = dados['OUTRAS_RECEITAS'].valores[m];
+            const od = dados['OUTRAS_DESPESAS'].valores[m];
             const res = ebt - emp - inv + or - od;
             return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, emp, inv, or, od, res };
         };
@@ -7364,8 +8384,7 @@
         const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
 
-        // ---- Subcategorias do CPV por mes ----
-        // Agrupa contas_a_pagar do grupo CPV por nome de categoria
+        // ---- Subcategorias do CPV por mes (com itens) ----
         const cpvSubcats = {};
         contasPag.filter(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
@@ -7373,22 +8392,35 @@
         }).forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const nome = cat ? cat.nome : 'Sem Categoria';
-            if (!cpvSubcats[nome]) cpvSubcats[nome] = Array(12).fill(0);
+            if (!cpvSubcats[nome]) cpvSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) cpvSubcats[nome][m] += parseFloat(c.valor || 0);
+            if (m >= 0 && m < 12) {
+                cpvSubcats[nome].valores[m] += parseFloat(c.valor || 0);
+                cpvSubcats[nome].itens[m].push({
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                });
+            }
         });
         // Tambem DRE lancamentos do grupo CPV
         (dreLancs || []).filter(l => l.grupo === 'CPV' && l.competencia && l.competencia.startsWith(ano)).forEach(l => {
             const nome = l.categoria || 'CPV/CSP';
-            if (!cpvSubcats[nome]) cpvSubcats[nome] = Array(12).fill(0);
+            if (!cpvSubcats[nome]) cpvSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(l.competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) cpvSubcats[nome][m] += parseFloat(l.valor || 0);
+            if (m >= 0 && m < 12) {
+                cpvSubcats[nome].valores[m] += parseFloat(l.valor || 0);
+                cpvSubcats[nome].itens[m].push({
+                    id: l.id, descricao: l.descricao, valor: l.valor, competencia: l.competencia, catNome: nome,
+                    parte: l.parte || '-', centro: l.centro || '-', fonte: 'dre'
+                });
+            }
         });
         const cpvSubOrdenado = Object.entries(cpvSubcats).sort((a,b) =>
-            b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)
+            b[1].valores.reduce((s,v)=>s+v,0) - a[1].valores.reduce((s,v)=>s+v,0)
         );
+        _dreMensalCPV = cpvSubOrdenado;
 
-        // ---- Subcategorias DESP_ADMIN por mes ----
+        // ---- Subcategorias DESP_ADMIN por mes (com itens) ----
         const daSubcats = {};
         contasPag.filter(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
@@ -7396,31 +8428,41 @@
         }).forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const nome = cat ? cat.nome : 'Sem Categoria';
-            if (!daSubcats[nome]) daSubcats[nome] = Array(12).fill(0);
+            if (!daSubcats[nome]) daSubcats[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             const m = parseInt(c.data_competencia.substring(5,7)) - 1;
-            if (m >= 0 && m < 12) daSubcats[nome][m] += parseFloat(c.valor || 0);
+            if (m >= 0 && m < 12) {
+                daSubcats[nome].valores[m] += parseFloat(c.valor || 0);
+                daSubcats[nome].itens[m].push({
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                });
+            }
         });
         const daSubOrdenado = Object.entries(daSubcats).sort((a,b) =>
-            b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)
+            b[1].valores.reduce((s,v)=>s+v,0) - a[1].valores.reduce((s,v)=>s+v,0)
         );
+        _dreMensalDA = daSubOrdenado;
 
         const linhas = [
-            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '' },
-            { label: '(-) Dedu\u00e7\u00f5es',   fn: m => -calcMes(m).ded, bg: '' },
+            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '', grupoId: 'RECEITA_BRUTA' },
+            { label: '(-) Dedu\u00e7\u00f5es',   fn: m => -calcMes(m).ded, bg: '', grupoId: 'DEDUCOES' },
             { label: '= Receita L\u00edquida',    fn: m => calcMes(m).rl,   bg: '#f5f5f5', bold: true },
-            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '', bold: false, expandir: cpvSubOrdenado },
+            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '', bold: false, grupoId: 'CPV', expandir: cpvSubOrdenado, expandirTipo: 'cpv' },
             { label: '= Lucro Bruto',             fn: m => calcMes(m).lb,   bg: '#f5f5f5', bold: true },
-            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '' },
-            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '', expandir: daSubOrdenado },
-            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '' },
-            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '' },
+            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '', grupoId: 'DESP_COMERCIAL' },
+            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '', grupoId: 'DESP_ADMIN', expandir: daSubOrdenado, expandirTipo: 'da' },
+            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '', grupoId: 'RECEITA_FINANCEIRA' },
+            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '', grupoId: 'DESP_FINANCEIRA' },
             { label: '= EBITDA',                  fn: m => calcMes(m).ebt,  bg: '#e8f4fd', bold: true },
-            { label: '(-) Empr\u00e9stimos',      fn: m => -calcMes(m).emp, bg: '' },
-            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '' },
-            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '' },
-            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '' },
-            { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: 'var(--cor-primaria)', cor: 'white', bold: true },
+            { label: '(-) Empr\u00e9stimos',      fn: m => -calcMes(m).emp, bg: '', grupoId: 'EMPRESTIMO' },
+            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '', grupoId: 'INVESTIMENTO' },
+            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '', grupoId: 'OUTRAS_RECEITAS' },
+            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '', grupoId: 'OUTRAS_DESPESAS' },
+            { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
         ];
+
+        const corSinal = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#999;';
+        const fmtVSinal = v => v !== 0 ? (v < 0 ? '- ' : '+ ') + 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
 
         tbody.innerHTML = '';
         linhas.forEach(linha => {
@@ -7429,26 +8471,109 @@
             const rowBg = linha.bg ? 'background:' + linha.bg + ';' : '';
             const rowFc = linha.cor ? 'color:' + linha.cor + ';' : '';
             const bold  = linha.bold ? 'font-weight:700;' : '';
+            const clicavelGrupo = !!linha.grupoId;
+
+            const celMes = (v, m) => {
+                const estilo = (linha.sinal ? corSinal(v) : (linha.cor ? '' : cor(v))) + 'padding:5px 8px;text-align:right;' +
+                    (clicavelGrupo ? 'cursor:pointer;' : '');
+                const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',${m})" title="Clique para ver os lançamentos"` : '';
+                return `<td data-mes="${m}" style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(v) : fmtV(v)}</td>`;
+            };
+            const celTotal = (() => {
+                const estilo = 'text-align:right;padding:5px 8px;font-weight:700;' + (linha.sinal ? corSinal(total) : (linha.cor ? '' : cor(total))) +
+                    (clicavelGrupo ? 'cursor:pointer;' : '');
+                const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',-1)" title="Clique para ver os lançamentos do ano"` : '';
+                return `<td style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(total) : fmtV(total)}</td>`;
+            })();
+
             tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
                 '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
-                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (linha.cor ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
-                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (linha.cor ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
+                vals.map((v, m) => celMes(v, m)).join('') +
+                celTotal +
                 '</tr>';
 
-            // Subcategorias expandidas
+            // Subcategorias expandidas (clicáveis também)
             if (linha.expandir && linha.expandir.length > 0) {
-                linha.expandir.forEach(([nomeSub, mesesSub]) => {
+                linha.expandir.forEach(([nomeSub, subDados], subIdx) => {
+                    const mesesSub = subDados.valores;
                     const totalSub = mesesSub.reduce((s,v)=>s+v,0);
                     if (totalSub === 0) return;
+                    const celMesSub = (v, m) => `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos">${v > 0 ? fmtV(-v) : '-'}</td>`;
                     tbody.innerHTML += '<tr style="background:#fafafa;">' +
                         '<td style="padding:4px 8px 4px 22px;font-size:11px;color:#888;">' +
                         '<span style="color:#bbb;margin-right:4px;">\u21b3</span>' + nomeSub + '</td>' +
-                        mesesSub.map(v => '<td style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;">' + (v > 0 ? fmtV(-v) : '-') + '</td>').join('') +
-                        '<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;">' + fmtV(-totalSub) + '</td>' +
+                        mesesSub.map((v, m) => celMesSub(v, m)).join('') +
+                        `<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(-totalSub) + '</td>' +
                         '</tr>';
                 });
             }
         });
+
+        _popularChecksMesesDRE();
+        _aplicarVisibilidadeMesesDRE();
+    }
+
+    // ---- Ocultar/Exibir meses na tabela DRE Mensal ----
+    function toggleMenuMesesDRE() {
+        const menu = document.getElementById('menuMesesDRE');
+        if (!menu) return;
+        menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'block' : 'none';
+    }
+    document.addEventListener('click', function (ev) {
+        const menu = document.getElementById('menuMesesDRE');
+        if (!menu || menu.style.display !== 'block') return;
+        const wrap = menu.parentElement;
+        if (wrap && !wrap.contains(ev.target)) menu.style.display = 'none';
+    });
+    function _popularChecksMesesDRE() {
+        const cont = document.getElementById('checksMesesDRE');
+        if (!cont) return;
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        cont.innerHTML = mNomes.map((m, idx) =>
+            '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;">' +
+            '<input type="checkbox" ' + (_mesesVisiveisDRE[idx] ? 'checked' : '') + ' onchange="toggleMesVisivelDRE(' + idx + ')" style="width:14px;height:14px;margin:0;">' + m + '</label>'
+        ).join('');
+    }
+    function toggleMesVisivelDRE(m) {
+        _mesesVisiveisDRE[m] = !_mesesVisiveisDRE[m];
+        _aplicarVisibilidadeMesesDRE();
+    }
+    function marcarTodosMesesDRE(valor) {
+        _mesesVisiveisDRE = Array(12).fill(valor);
+        _popularChecksMesesDRE();
+        _aplicarVisibilidadeMesesDRE();
+    }
+    function _aplicarVisibilidadeMesesDRE() {
+        document.querySelectorAll('#tabelaDREMensal [data-mes]').forEach(el => {
+            const m = parseInt(el.getAttribute('data-mes'));
+            el.style.display = _mesesVisiveisDRE[m] ? '' : 'none';
+        });
+    }
+
+    // Abre o modal de detalhe de uma célula da DRE Mensal (grupo ou subcategoria, de um mês específico ou do ano todo)
+    // tipo: 'grupo' | 'cpv' | 'da'    chave: grupoId (string) para 'grupo', ou índice (number) para 'cpv'/'da'    mes: 0-11, ou -1 para o ano todo
+    function abrirDetalheMensalDRE(tipo, chave, mes) {
+        const mNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        let itens = [];
+        let titulo = '';
+        if (tipo === 'grupo') {
+            const grupo = DRE_GRUPOS.find(g => g.id === chave);
+            titulo = grupo ? grupo.label.trim() : chave;
+            const porMes = _dreMensalItensGrupo[chave] || [];
+            itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
+        } else {
+            const origem = tipo === 'cpv' ? _dreMensalCPV : _dreMensalDA;
+            const entry = origem[chave];
+            if (!entry) return;
+            titulo = entry[0];
+            const porMes = entry[1].itens;
+            itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
+        }
+        document.getElementById('tituloDetalheDRE').textContent = titulo;
+        const subEl = document.getElementById('subtituloDetalheDRE');
+        if (subEl) subEl.textContent = (mes === -1 ? 'Ano todo' : mNomes[mes]) + ' / ' + _dreMensalAno;
+        _renderLinhasDetalheDRE(itens.slice().sort((a,b) => (a.competencia||'').localeCompare(b.competencia||'')));
+        document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
     // Lançamentos DRE diretos
@@ -7548,6 +8673,49 @@
         a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
         a.download = 'DRE_' + (document.getElementById('filtroAnoDRE').value || 'completo') + '.csv';
         a.click();
+    }
+
+    function exportarExcelDRE() {
+        _garantirXLSX(_exportarExcelDREInterno);
+    }
+
+    function _exportarExcelDREInterno() {
+        const linhasDom = document.querySelectorAll('#dreCorpo tr');
+        if (!linhasDom.length) {
+            alert('Não há dados de DRE para exportar.');
+            return;
+        }
+        try {
+            const rows = [['Descrição', 'Valor (R$)', 'AV %']];
+            linhasDom.forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length === 1) {
+                    // Linha de seção (RECEITAS, CUSTOS, DESPESAS OPERACIONAIS, ...)
+                    const texto = tds[0].textContent.trim();
+                    if (texto) rows.push([texto, '', '']);
+                } else if (tds.length >= 3) {
+                    const desc = tds[0].textContent.trim();
+                    if (!desc) return;
+                    const valorTxt = tds[1].textContent.trim();
+                    const avTxt = tds[2].textContent.trim();
+                    // Converte "R$ 1.234,56" em número, quando possível, para ficar como número no Excel
+                    const valorNum = parseFloat(valorTxt.replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
+                    rows.push([desc, isNaN(valorNum) ? valorTxt : valorNum, avTxt]);
+                }
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            ws['!cols'] = [{wch:42},{wch:16},{wch:10}];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'DRE');
+
+            const anoSel = document.getElementById('filtroAnoDRE') ? (document.getElementById('filtroAnoDRE').value || 'completo') : 'completo';
+            const mesSel = document.getElementById('filtroMesDRE') ? document.getElementById('filtroMesDRE').value : '';
+            XLSX.writeFile(wb, 'DRE_' + anoSel + (mesSel ? '_' + mesSel : '') + '.xlsx');
+        } catch (e) {
+            console.error('Erro ao gerar Excel do DRE:', e);
+            alert('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e));
+        }
     }
 
     // ================================================================
@@ -7894,13 +9062,13 @@
 
         const configs = {
             receber: {
-                titulo: 'Contas a Receber (Pendentes)',
+                titulo: 'Contas a Receber',
                 colunas: ['Cliente', 'Descrição', 'NF', 'Competência', 'Vencimento', 'Valor', 'Parcela', 'Status'],
                 larguras: [40, 55, 20, 22, 22, 22, 16, 18],
                 tableId: 'tabelaPendentesReceber'
             },
             pagar: {
-                titulo: 'Contas a Pagar (Pendentes)',
+                titulo: 'Contas a Pagar',
                 colunas: ['Fornecedor', 'Categoria', 'Descrição', 'NF', 'Competência', 'Vencimento', 'Valor', 'Parcela', 'Status'],
                 larguras: [32, 28, 40, 16, 20, 20, 22, 14, 16],
                 tableId: 'tabelaPendentesPagar'
@@ -8549,20 +9717,80 @@
 </div>
 
 <div class="modal" id="modalDetalheDRE">
-    <div class="modal-content" style="max-width:700px;">
+    <div class="modal-content" style="max-width:920px;">
         <div class="modal-header">
-            <span id="tituloDetalheDRE">Detalhes</span>
+            <div>
+                <div id="tituloDetalheDRE" style="font-size:16px;">Detalhes</div>
+                <div id="subtituloDetalheDRE" style="font-size:12px;font-weight:400;color:#888;margin-top:2px;"></div>
+            </div>
             <button class="modal-close" onclick="closeModal('modalDetalheDRE')">&times;</button>
         </div>
-        <div class="table-container">
-            <table id="tabelaDetalheDRE">
-                <thead><tr><th>Competência</th><th>Descrição</th><th>Categoria</th><th>Parte</th><th>Centro</th><th style="text-align:right;">Valor</th><th>Ações</th></tr></thead>
+        <div class="table-container" style="max-height:60vh;overflow-y:auto;">
+            <table id="tabelaDetalheDRE" style="font-size:14px;">
+                <thead style="position:sticky;top:0;z-index:2;">
+                    <tr>
+                        <th style="min-width:90px;">Competência</th>
+                        <th style="min-width:200px;">Descrição</th>
+                        <th style="min-width:140px;">Categoria</th>
+                        <th style="min-width:140px;">Fornecedor/Cliente</th>
+                        <th style="min-width:100px;">Centro</th>
+                        <th style="min-width:130px;text-align:right;">Valor</th>
+                        <th style="min-width:150px;">Ações</th>
+                    </tr>
+                </thead>
                 <tbody></tbody>
             </table>
         </div>
         <div class="form-actions" style="margin-top:12px;">
             <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
         </div>
+    </div>
+</div>
+
+<!-- MODAL EDITAR GRUPO CUSTO FIXO (edita todos os lançamentos do grupo de uma vez) -->
+<div class="modal" id="modalEditarGrupoCustoFixo">
+    <div class="modal-content" style="max-width:640px;">
+        <div class="modal-header">
+            <span id="editGrupoCFTitulo">💠 Editar Custo Fixo</span>
+            <button class="modal-close" onclick="closeModal('modalEditarGrupoCustoFixo')">&times;</button>
+        </div>
+        <div class="alert alert-success" id="alertEditarGrupoCF"></div>
+        <form onsubmit="salvarEdicaoGrupoCustoFixo(event)">
+            <input type="hidden" id="editGrupoCFTipo">
+            <div class="form-row">
+                <div class="form-group" id="editGrupoCFFornecedorWrap">
+                    <label>Fornecedor</label>
+                    <select id="editGrupoCFFornecedor"><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group" id="editGrupoCFClienteWrap" style="display:none;">
+                    <label>Cliente</label>
+                    <select id="editGrupoCFCliente"><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="editGrupoCFCategoria"><option value="">Selecione...</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Descrição base</label>
+                    <input type="text" id="editGrupoCFDescricao">
+                </div>
+                <div class="form-group">
+                    <label>Observações</label>
+                    <input type="text" id="editGrupoCFObs">
+                    <small id="editGrupoCFObsFinal" style="display:block;color:#999;margin-top:4px;"></small>
+                </div>
+            </div>
+            <div style="font-size:12px;font-weight:600;color:var(--cor-primaria);margin:10px 0 6px;">
+                📋 Lançamentos do grupo <small style="font-weight:400;color:#999;">(vencimento e valor editáveis por parcela)</small>:
+            </div>
+            <div id="editGrupoCFLista" style="max-height:280px;overflow-y:auto;border:1px solid #eee;border-radius:6px;padding:8px;font-size:12px;"></div>
+            <div class="form-actions" style="margin-top:14px;">
+                <button type="submit" class="btn btn-success">💾 Salvar Todos</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEditarGrupoCustoFixo')">Cancelar</button>
+            </div>
+        </form>
     </div>
 </div>
 
