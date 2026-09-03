@@ -3309,13 +3309,21 @@
         atualizarLegendaMetas();
         restaurarFiltros();
         _bindFiltrosSave();
+        // Carrega dados de referência em paralelo (categorias primeiro, pois produtos
+        // usa o nome da categoria ao renderizar sua tabela).
         await carregarCategorias();
-        await carregarProdutos();
-        await carregarFornecedores();
-        await carregarClientes();
-        await carregarBancos();
-        await carregarContasReceber();
-        await carregarContasPagar();
+        await Promise.all([
+            carregarProdutos(),
+            carregarFornecedores(),
+            carregarClientes(),
+            carregarBancos()
+        ]);
+        // Contas a Pagar/Receber dependem de fornecedores, clientes e categorias
+        // já carregados (para exibir os nomes), então só disparam depois da onda acima.
+        await Promise.all([
+            carregarContasReceber(),
+            carregarContasPagar()
+        ]);
         await atualizarDashboard();
         inicializarFiltrosCalendario();
     }
@@ -3626,7 +3634,13 @@
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
-            const valorAtual = select.value;
+            let valorAtual = select.value;
+            // Se o select ainda não tem valor (ex.: este reload ocorreu antes do
+            // restaurarFiltros() rodar), recupera o último filtro salvo do usuário
+            // para esse campo, em vez de deixar o filtro voltar para "Todos".
+            if (!valorAtual) {
+                try { valorAtual = localStorage.getItem(_filtroKey(id)) || ''; } catch (e) { /* ignora */ }
+            }
             select.innerHTML = '<option value="">Selecione...</option>';
             dadosCache.fornecedores.filter(f => f.ativo !== false).forEach(forn => {
                 const opt = document.createElement('option');
@@ -4004,6 +4018,11 @@
 
     // CONTAS A PAGAR
     async function carregarContasPagar() {
+        // Mostra um indicador de carregamento (evita a sensação de tela travada em listas grandes)
+        const tbody = document.querySelector('#tabelaPendentesPagar tbody');
+        if (tbody && dadosCache.contasPagar.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#888;padding:20px;">Carregando lançamentos...</td></tr>';
+        }
         // Traz TODOS os lançamentos (pendente + pago), o filtro de Status na tela decide o que exibir/somar
         const dados = await fetchSupabase('contas_a_pagar', 'GET');
         if (dados) {
