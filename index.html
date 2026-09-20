@@ -450,6 +450,16 @@
             border-bottom: 1px solid var(--cor-borda);
         }
 
+        /* DRE Mensal e Análise por Grupo DRE — cabeçalho fixo ao rolar (só a tabela rola) */
+        #tabelaDREMensal thead th,
+        #tabelaGrupoDRE thead th {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background-color: var(--cor-primaria);
+            color: #fff;
+        }
+
         /* Tabela compacta do Extrato Bancário */
         #tabelaExtrato th {
             padding: 8px 10px;
@@ -2059,7 +2069,11 @@
         <div id="analise-categoria" class="page">
             <div class="page-header">
                 <h1>Análise por Categoria (Contas a Pagar)</h1>
-                <button class="btn btn-secondary" onclick="exportarAnaliseCategoria()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="exportarExcelAnaliseCat()" style="background:#217346;color:white;">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="gerarPDFAnaliseCat()" style="background:#c0392b;color:white;">📄 PDF</button>
+                    <button class="btn btn-secondary" onclick="exportarAnaliseCategoria()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+                </div>
             </div>
 
             <div class="filter-container">
@@ -2120,7 +2134,24 @@
             </div>
 
             <div class="card" style="margin-top:16px;">
-                <div class="card-title" id="analiseCatTitulo">📊 Categoria x Mês (Janeiro a Dezembro)</div>
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span id="analiseCatTitulo">📊 Categoria x Mês (Janeiro a Dezembro)</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:400;">
+                        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#555;cursor:pointer;">
+                            <input type="checkbox" id="chkMostrarTotalAnaliseCat" checked onchange="toggleMostrarTotalAnaliseCat()" style="width:14px;height:14px;margin:0;"> Mostrar Acumulado Ano
+                        </label>
+                        <div style="position:relative;">
+                            <button type="button" class="btn btn-secondary btn-small" onclick="toggleMenuMesesAnaliseCat()">👁️ Ocultar/Exibir meses</button>
+                            <div id="menuMesesAnaliseCat" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:white;border:1px solid var(--cor-borda);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px;z-index:50;min-width:220px;font-size:12px;">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                    <a href="javascript:void(0)" onclick="marcarTodosMesesAnaliseCat(true)" style="color:var(--cor-primaria);font-weight:600;">Marcar todos</a>
+                                    <a href="javascript:void(0)" onclick="marcarTodosMesesAnaliseCat(false)" style="color:var(--cor-primaria);font-weight:600;">Desmarcar todos</a>
+                                </div>
+                                <div id="checksMesesAnaliseCat" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="table-container" style="overflow-x:auto;">
                     <table id="tabelaAnaliseCategoria" style="font-size:12px;min-width:900px;">
                         <thead>
@@ -2140,7 +2171,11 @@
         <div id="analise-grupo-dre" class="page">
             <div class="page-header">
                 <h1>Análise por Grupo DRE</h1>
-                <button class="btn btn-secondary" onclick="exportarAnaliseGrupoDRE()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="exportarExcelGrupoDRE()" style="background:#217346;color:white;">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="gerarPDFGrupoDRE()" style="background:#c0392b;color:white;">📄 PDF</button>
+                    <button class="btn btn-secondary" onclick="exportarAnaliseGrupoDRE()" style="background:#e67e22;color:white;">📥 Exportar CSV</button>
+                </div>
             </div>
 
             <div class="filter-container">
@@ -2182,7 +2217,7 @@
 
             <div id="grupoDREAviso" style="display:none;"></div>
 
-            <div class="dashboard-grid">
+            <div class="dashboard-grid" style="display:none;">
                 <div class="stat-card" style="border-left-color:#17a2b8;">
                     <div class="stat-label">📁 Grupo Selecionado</div>
                     <div class="stat-value" id="grupoDRESelecionadoLabel" style="font-size:15px;">Todos os grupos</div>
@@ -2198,8 +2233,25 @@
             </div>
 
             <div class="card" style="margin-top:16px;">
-                <div class="card-title" id="grupoDRETitulo">📊 Categorias x Mês (Janeiro a Dezembro)</div>
-                <div class="table-container" style="overflow-x:auto;">
+                <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                    <span id="grupoDRETitulo">📊 Categorias x Mês (Janeiro a Dezembro)</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:400;">
+                        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#555;cursor:pointer;">
+                            <input type="checkbox" id="chkMostrarTotalGrupoDRE" checked onchange="toggleMostrarTotalGrupoDRE()" style="width:14px;height:14px;margin:0;"> Mostrar Acumulado Ano
+                        </label>
+                        <div style="position:relative;">
+                            <button type="button" class="btn btn-secondary btn-small" onclick="toggleMenuMesesGrupoDRE()">👁️ Ocultar/Exibir meses</button>
+                            <div id="menuMesesGrupoDRE" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:white;border:1px solid var(--cor-borda);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px;z-index:50;min-width:220px;font-size:12px;">
+                                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                                    <a href="javascript:void(0)" onclick="marcarTodosMesesGrupoDRE(true)" style="color:var(--cor-primaria);font-weight:600;">Marcar todos</a>
+                                    <a href="javascript:void(0)" onclick="marcarTodosMesesGrupoDRE(false)" style="color:var(--cor-primaria);font-weight:600;">Desmarcar todos</a>
+                                </div>
+                                <div id="checksMesesGrupoDRE" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-container" style="overflow:auto;max-height:70vh;">
                     <table id="tabelaGrupoDRE" style="font-size:12px;min-width:950px;">
                         <thead>
                             <tr id="grupoDREHeaderRow">
@@ -2371,7 +2423,10 @@
                     </h1>
                     <div style="font-size:13px;color:#777;margin-top:2px;">Receita, despesa e resultado de cada dia do mês</div>
                 </div>
-                <button class="btn btn-secondary" onclick="gerarPDFFluxoDiario()" style="background:#e67e22;color:white;">📄 PDF</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="exportarExcelFluxoDiario()" style="background:#217346;color:white;">📊 Excel</button>
+                    <button class="btn btn-secondary" onclick="gerarPDFFluxoDiario()" style="background:#e67e22;color:white;">📄 PDF</button>
+                </div>
             </div>
 
             <div class="filter-container">
@@ -2558,7 +2613,7 @@
                     </div>
                 </div>
             </div>
-            <div class="dashboard-grid" style="margin-bottom:16px;">
+            <div class="dashboard-grid" style="margin-bottom:16px;display:none;">
                 <div class="stat-card" style="border-left-color:#28a745;">
                     <div class="stat-label">💰 Receita Bruta</div>
                     <div class="stat-value" id="dreCardReceita" style="color:#28a745;font-size:20px;">R$ 0,00</div>
@@ -2628,7 +2683,7 @@
                     </div>
                     </div>
                 </div>
-                <div style="overflow-x:auto;">
+                <div style="overflow:auto;max-height:70vh;">
                     <table id="tabelaDREMensal" style="font-size:12px;min-width:900px;">
                         <thead><tr id="dreHeaderMeses"><th style="min-width:180px;">Descrição</th></tr></thead>
                         <tbody></tbody>
@@ -4967,6 +5022,12 @@
             await carregarContasRecebidas();
             await carregarContasPagas();
             await atualizarDashboard();
+            // Se editado a partir de uma tela de análise/DRE, recarrega-a e fecha o detalhe
+            if (typeof _detalheAnaliseReload === 'function') {
+                const fn = _detalheAnaliseReload; _detalheAnaliseReload = null;
+                closeModal('modalDetalheDRE');
+                fn();
+            }
         }
     }
 
@@ -4981,6 +5042,12 @@
                 carregarContasRecebidas();
                 carregarContasPagas();
                 atualizarDashboard();
+                // Se o detalhe foi aberto a partir de uma tela de análise, recarrega-a e fecha o modal
+                if (typeof _detalheAnaliseReload === 'function') {
+                    const fn = _detalheAnaliseReload; _detalheAnaliseReload = null;
+                    closeModal('modalDetalheDRE');
+                    fn();
+                }
             }
         }
     }
@@ -8651,6 +8718,7 @@
         if (subEl) subEl.textContent = 'Todos os meses';
         const itens = (_dreDetalheCache[grupoId] || []);
         _renderLinhasDetalheDRE(itens);
+        _detalheAnaliseReload = carregarDRE;
         document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
@@ -8985,6 +9053,7 @@
         const subEl = document.getElementById('subtituloDetalheDRE');
         if (subEl) subEl.textContent = (mes === -1 ? 'Ano todo' : mNomes[mes]) + ' / ' + _dreMensalAno;
         _renderLinhasDetalheDRE(itens.slice().sort((a,b) => (a.competencia||'').localeCompare(b.competencia||'')));
+        _detalheAnaliseReload = carregarDRE;
         document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
@@ -9257,24 +9326,32 @@
                 : '✅ Mostrando todos os lançamentos de Contas a Pagar com competência preenchida, agrupados por mês (Jan–Dez).';
         }
 
-        // Pivô: categoria -> [12 meses]
+        // Pivô: categoria -> [12 meses] (+ itens por mês para o detalhamento)
         const pivot = {};
         filtrado.forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const nome = cat ? cat.nome : 'Sem Categoria';
             const m = parseInt(c.data_competencia.substring(5, 7), 10) - 1;
             if (m < 0 || m > 11) return;
-            if (!pivot[nome]) pivot[nome] = Array(12).fill(0);
-            pivot[nome][m] += parseFloat(c.valor || 0);
+            if (!pivot[nome]) pivot[nome] = { meses: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
+            pivot[nome].meses[m] += parseFloat(c.valor || 0);
+            pivot[nome].itens[m].push({
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: (c.data_competencia || '').substring(0, 7),
+                catNome: nome, parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
+                centro: c.centro || '-', fonte: 'pagar'
+            });
         });
 
         const linhas = Object.entries(pivot)
-            .map(([nome, meses]) => ({ nome, meses, total: meses.reduce((s, v) => s + v, 0) }))
+            .map(([nome, dados]) => ({ nome, meses: dados.meses, itens: dados.itens, total: dados.meses.reduce((s, v) => s + v, 0) }))
             .sort((a, b) => b.total - a.total);
 
         const totalGeral = linhas.reduce((s, l) => s + l.total, 0);
         const totalPorMes = Array(12).fill(0);
         linhas.forEach(l => l.meses.forEach((v, i) => totalPorMes[i] += v));
+
+        // Cache para o drill-down
+        _analiseCatDrill = linhas;
 
         // Cards
         document.getElementById('analiseCatTotal').textContent = fmtBRL(totalGeral);
@@ -9283,23 +9360,34 @@
             ? linhas[0].nome + ' (' + fmtBRL(linhas[0].total) + ')'
             : '-';
 
-        // Cabeçalho (Jan a Dez sempre fixo)
+        // Seta de tendência mês a mês (alta = vermelho, queda = verde)
+        const setaTendCat = (atual, anterior) => {
+            if (atual <= 0 || anterior <= 0) return '';
+            if (atual > anterior) return ' <span style="color:#dc3545;font-size:10px;" title="Aumentou vs mês anterior">▲</span>';
+            if (atual < anterior) return ' <span style="color:#28a745;font-size:10px;" title="Diminuiu vs mês anterior">▼</span>';
+            return '';
+        };
+
+        // Cabeçalho (Jan a Dez)
         const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
         const headerRow = document.getElementById('analiseCatHeaderRow');
         headerRow.innerHTML = '<th style="text-align:left;min-width:160px;">Categoria</th>' +
-            mNomes.map(m => '<th style="text-align:right;min-width:80px;">' + m + '</th>').join('') +
-            '<th style="text-align:right;min-width:100px;">Total</th>';
+            mNomes.map((m, i) => '<th data-mes="' + i + '" style="text-align:right;min-width:90px;">' + m + '</th>').join('') +
+            '<th class="ac-col-total" style="text-align:right;min-width:110px;">Acumulado Ano</th>';
 
         // Corpo
         const tbody = document.getElementById('analiseCatBody');
         if (linhas.length === 0) {
             tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para os filtros selecionados.</td></tr>';
         } else {
-            tbody.innerHTML = linhas.map(l =>
+            tbody.innerHTML = linhas.map((l, idxLinha) =>
                 '<tr>' +
                 '<td style="text-align:left;font-weight:600;">' + l.nome + '</td>' +
-                l.meses.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:#dc3545;' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
-                '<td style="text-align:right;font-weight:700;color:#dc3545;">' + fmtBRL(l.total) + '</td>' +
+                l.meses.map((v, m) => {
+                    const clic = v > 0 ? ' onclick="abrirDetalheAnaliseCat(' + idxLinha + ',' + m + ')" style="text-align:right;cursor:pointer;color:#dc3545;" title="Ver lançamentos"' : ' style="text-align:right;color:#ccc;"';
+                    return '<td data-mes="' + m + '"' + clic + '>' + (v > 0 ? fmtBRL(v) + setaTendCat(v, m > 0 ? l.meses[m - 1] : 0) : '-') + '</td>';
+                }).join('') +
+                '<td class="ac-col-total" onclick="abrirDetalheAnaliseCat(' + idxLinha + ',-1)" style="text-align:right;font-weight:700;color:#dc3545;cursor:pointer;" title="Ver lançamentos do ano">' + fmtBRL(l.total) + '</td>' +
                 '</tr>'
             ).join('');
         }
@@ -9307,10 +9395,87 @@
         // Rodapé (totais)
         const tfoot = document.getElementById('analiseCatFoot');
         tfoot.innerHTML = '<tr style="font-weight:700;background:#f5f5f5;">' +
-            '<td style="text-align:left;">TOTAL</td>' +
-            totalPorMes.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:#dc3545;' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
-            '<td style="text-align:right;color:#dc3545;">' + fmtBRL(totalGeral) + '</td>' +
+            '<td style="text-align:left;">Acumulado Ano</td>' +
+            totalPorMes.map((v, i) => '<td data-mes="' + i + '" style="text-align:right;' + (v > 0 ? 'color:#dc3545;' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+            '<td class="ac-col-total" style="text-align:right;color:#dc3545;">' + fmtBRL(totalGeral) + '</td>' +
             '</tr>';
+
+        _popularChecksMesesAnaliseCat();
+        _aplicarVisibilidadeAnaliseCat();
+    }
+
+    // ---- Estado e controles de meses/total da Análise por Categoria ----
+    let _mesesVisiveisAnaliseCat = Array(12).fill(true);
+    let _analiseCatMostrarTotal = true;
+    function toggleMenuMesesAnaliseCat() {
+        const menu = document.getElementById('menuMesesAnaliseCat');
+        if (!menu) return;
+        menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+    }
+    document.addEventListener('click', function (ev) {
+        const menu = document.getElementById('menuMesesAnaliseCat');
+        if (!menu || menu.style.display !== 'block') return;
+        const wrap = menu.parentElement;
+        if (wrap && !wrap.contains(ev.target)) menu.style.display = 'none';
+    });
+    function _popularChecksMesesAnaliseCat() {
+        const cont = document.getElementById('checksMesesAnaliseCat');
+        if (!cont) return;
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        cont.innerHTML = mNomes.map((m, idx) =>
+            '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;">' +
+            '<input type="checkbox" ' + (_mesesVisiveisAnaliseCat[idx] ? 'checked' : '') + ' onchange="toggleMesVisivelAnaliseCat(' + idx + ')" style="width:14px;height:14px;margin:0;">' + m + '</label>'
+        ).join('');
+    }
+    function toggleMesVisivelAnaliseCat(m) {
+        _mesesVisiveisAnaliseCat[m] = !_mesesVisiveisAnaliseCat[m];
+        _aplicarVisibilidadeAnaliseCat();
+    }
+    function marcarTodosMesesAnaliseCat(v) {
+        _mesesVisiveisAnaliseCat = Array(12).fill(v);
+        _popularChecksMesesAnaliseCat();
+        _aplicarVisibilidadeAnaliseCat();
+    }
+    function toggleMostrarTotalAnaliseCat() {
+        _analiseCatMostrarTotal = !_analiseCatMostrarTotal;
+        _aplicarVisibilidadeAnaliseCat();
+    }
+    function _aplicarVisibilidadeAnaliseCat() {
+        document.querySelectorAll('#tabelaAnaliseCategoria [data-mes]').forEach(el => {
+            const m = parseInt(el.getAttribute('data-mes'));
+            el.style.display = _mesesVisiveisAnaliseCat[m] ? '' : 'none';
+        });
+        document.querySelectorAll('#tabelaAnaliseCategoria .ac-col-total').forEach(el => {
+            el.style.display = _analiseCatMostrarTotal ? '' : 'none';
+        });
+        const chk = document.getElementById('chkMostrarTotalAnaliseCat');
+        if (chk) chk.checked = _analiseCatMostrarTotal;
+    }
+
+    function exportarExcelAnaliseCat() {
+        _garantirXLSXStyle(function () {
+            const ano = (document.getElementById('filtroAnoAnaliseCat') || {}).value || 'completo';
+            _exportarTabelaColoridaXLSX(document.getElementById('tabelaAnaliseCategoria'), 'Analise_Categoria_' + ano + '.xlsx', 'Categoria');
+        });
+    }
+    function gerarPDFAnaliseCat() {
+        const ano = (document.getElementById('filtroAnoAnaliseCat') || {}).value || 'completo';
+        _gerarPDFTabelaColorida(document.getElementById('tabelaAnaliseCategoria'), 'Análise por Categoria (Contas a Pagar)' + (ano !== 'completo' ? ' - ' + ano : ''), 'Analise_Categoria_' + ano + '.pdf', 'landscape');
+    }
+
+    let _analiseCatDrill = [];
+    function abrirDetalheAnaliseCat(idxLinha, mes) {
+        const l = _analiseCatDrill[idxLinha];
+        if (!l) return;
+        const mNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        let itens = mes === -1 ? [].concat(...l.itens) : (l.itens[mes] || []);
+        itens = itens.slice().sort((a, b) => (a.competencia || '').localeCompare(b.competencia || ''));
+        document.getElementById('tituloDetalheDRE').textContent = l.nome;
+        const sub = document.getElementById('subtituloDetalheDRE');
+        if (sub) sub.textContent = (mes === -1 ? 'Ano todo' : mNomes[mes]) + ' — clique em Editar ou Excluir para alterar o lançamento';
+        _renderLinhasDetalheDRE(itens);
+        _detalheAnaliseReload = carregarAnaliseCategoria;
+        document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
     function limparFiltrosAnaliseCat() {
@@ -9397,7 +9562,13 @@
                 valor: c.valor,
                 grupo: (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA',
                 catNome: cat ? cat.nome : 'Sem Categoria',
-                catId: c.categoria_id
+                catId: c.categoria_id,
+                item: {
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: (c.data_competencia || '').substring(0, 7),
+                    catNome: cat ? cat.nome : 'Sem Categoria',
+                    parte: (dadosCache.clientes.find(x => x.id === c.cliente_id) || {}).nome || '-',
+                    centro: c.centro || '-', fonte: 'receber'
+                }
             });
         });
         contasPag.filter(c => !!c.data_competencia).forEach(c => {
@@ -9407,7 +9578,13 @@
                 valor: c.valor,
                 grupo: (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN',
                 catNome: cat ? cat.nome : 'Sem Categoria',
-                catId: c.categoria_id
+                catId: c.categoria_id,
+                item: {
+                    id: c.id, descricao: c.descricao, valor: c.valor, competencia: (c.data_competencia || '').substring(0, 7),
+                    catNome: cat ? cat.nome : 'Sem Categoria',
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
+                    centro: c.centro || '-', fonte: 'pagar'
+                }
             });
         });
 
@@ -9434,14 +9611,15 @@
         document.getElementById('grupoDRESelecionadoLabel').textContent =
             grupoSel ? (_GRUPOS_DRE_LABELS[grupoSel] || grupoSel) : 'Todos os grupos';
 
-        // Pivô: grupo + categoria -> [12 meses]
+        // Pivô: grupo + categoria -> [12 meses] (+ itens por mês para o detalhamento)
         const pivot = {};
         registros.forEach(r => {
             const m = parseInt(r.data_competencia.substring(5, 7), 10) - 1;
             if (m < 0 || m > 11) return;
             const key = r.grupo + '||' + r.catNome;
-            if (!pivot[key]) pivot[key] = { grupo: r.grupo, catNome: r.catNome, meses: Array(12).fill(0) };
+            if (!pivot[key]) pivot[key] = { grupo: r.grupo, catNome: r.catNome, meses: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
             pivot[key].meses[m] += parseFloat(r.valor || 0);
+            if (r.item) pivot[key].itens[m].push(r.item);
         });
 
         const linhas = Object.values(pivot)
@@ -9452,49 +9630,145 @@
         const totalPorMes = Array(12).fill(0);
         linhas.forEach(l => l.meses.forEach((v, i) => totalPorMes[i] += v));
 
+        // Cache para o drill-down (clique nos números)
+        _grupoDREDrill = linhas;
+
         // Cards
         document.getElementById('grupoDRETotal').textContent = fmtBRL(totalGeral);
         document.getElementById('grupoDREQtd').textContent = registros.length;
 
-        // Cabeçalho (Jan a Dez sempre fixo)
+        // Seta de tendência mês a mês (vs mês anterior). Alta = vermelho, queda = verde.
+        const setaTend = (atual, anterior) => {
+            if (atual <= 0 || anterior <= 0) return '';
+            if (atual > anterior) return ' <span style="color:#dc3545;font-size:10px;" title="Aumentou vs mês anterior">▲</span>';
+            if (atual < anterior) return ' <span style="color:#28a745;font-size:10px;" title="Diminuiu vs mês anterior">▼</span>';
+            return '';
+        };
+
+        // Cabeçalho (Jan a Dez)
         const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
         const headerRow = document.getElementById('grupoDREHeaderRow');
         headerRow.innerHTML = '<th style="text-align:left;min-width:150px;">Grupo DRE</th>' +
             '<th style="text-align:left;min-width:160px;">Categoria</th>' +
-            mNomes.map(m => '<th style="text-align:right;min-width:80px;">' + m + '</th>').join('') +
-            '<th style="text-align:right;min-width:100px;">Total</th>';
+            mNomes.map((m, i) => '<th data-mes="' + i + '" style="text-align:right;min-width:90px;">' + m + '</th>').join('') +
+            '<th class="gd-col-total" style="text-align:right;min-width:110px;">Acumulado Ano</th>';
 
-        // Corpo (com separador visual por grupo)
+        // Agrupa as linhas por grupo (mantendo o índice original para o drill-down)
+        const linhasPorGrupo = {};
+        linhas.forEach((l, idxLinha) => {
+            if (!linhasPorGrupo[l.grupo]) linhasPorGrupo[l.grupo] = [];
+            linhasPorGrupo[l.grupo].push({ l: l, idx: idxLinha });
+        });
+
+        // Define quais grupos exibir: com "Todos os grupos" (sem filtros), exibe TODOS os grupos da DRE
+        let gruposExibir;
+        if (grupoSel) gruposExibir = [grupoSel];
+        else if (catSel) gruposExibir = DRE_GRUPOS.map(g => g.id).filter(id => linhasPorGrupo[id]);
+        else gruposExibir = DRE_GRUPOS.map(g => g.id);
+
+        // Corpo (com separador visual por grupo — inclui grupos sem movimento)
         const tbody = document.getElementById('grupoDREBody');
-        if (linhas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para os filtros selecionados.</td></tr>';
-        } else {
-            let grupoAnterior = null;
-            let html = '';
-            linhas.forEach(l => {
-                if (l.grupo !== grupoAnterior) {
-                    html += '<tr style="background:#f5f5f5;"><td colspan="15" style="font-weight:700;font-size:11px;color:#555;padding:6px 10px;text-transform:uppercase;letter-spacing:0.5px;">' +
-                        (_GRUPOS_DRE_LABELS[l.grupo] || l.grupo) + '</td></tr>';
-                    grupoAnterior = l.grupo;
-                }
-                const cor = _GRUPOS_DRE_RECEITA.has(l.grupo) ? '#28a745' : '#dc3545';
+        let html = '';
+        gruposExibir.forEach(gid => {
+            const cor = _GRUPOS_DRE_RECEITA.has(gid) ? '#28a745' : '#dc3545';
+            html += '<tr style="background:#f5f5f5;"><td colspan="15" style="font-weight:700;font-size:11px;color:#555;padding:6px 10px;text-transform:uppercase;letter-spacing:0.5px;">' +
+                (_GRUPOS_DRE_LABELS[gid] || gid) + '</td></tr>';
+            const doGrupo = linhasPorGrupo[gid] || [];
+            if (doGrupo.length === 0) {
+                html += '<tr><td style="text-align:left;color:#999;font-size:11px;">' + (_GRUPOS_DRE_LABELS[gid] || gid) + '</td>' +
+                    '<td colspan="14" style="text-align:left;color:#bbb;font-style:italic;font-size:12px;">Sem lançamentos no período</td></tr>';
+                return;
+            }
+            doGrupo.forEach(({ l, idx }) => {
                 html += '<tr>' +
                     '<td style="text-align:left;color:#999;font-size:11px;">' + (_GRUPOS_DRE_LABELS[l.grupo] || l.grupo) + '</td>' +
                     '<td style="text-align:left;font-weight:600;">' + l.catNome + '</td>' +
-                    l.meses.map(v => '<td style="text-align:right;' + (v > 0 ? 'color:' + cor + ';' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
-                    '<td style="text-align:right;font-weight:700;color:' + cor + ';">' + fmtBRL(l.total) + '</td>' +
+                    l.meses.map((v, m) => {
+                        const clic = v > 0 ? ' onclick="abrirDetalheGrupoDRE(' + idx + ',' + m + ')" style="text-align:right;cursor:pointer;color:' + cor + ';" title="Ver lançamentos"' : ' style="text-align:right;color:#ccc;"';
+                        return '<td data-mes="' + m + '"' + clic + '>' + (v > 0 ? fmtBRL(v) + setaTend(v, m > 0 ? l.meses[m - 1] : 0) : '-') + '</td>';
+                    }).join('') +
+                    '<td class="gd-col-total" onclick="abrirDetalheGrupoDRE(' + idx + ',-1)" style="text-align:right;font-weight:700;cursor:pointer;color:' + cor + ';" title="Ver lançamentos do ano">' + fmtBRL(l.total) + '</td>' +
                     '</tr>';
             });
-            tbody.innerHTML = html;
-        }
+        });
+        tbody.innerHTML = html || '<tr><td colspan="15" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado.</td></tr>';
 
         // Rodapé (totais gerais)
         const tfoot = document.getElementById('grupoDREFoot');
         tfoot.innerHTML = '<tr style="font-weight:700;background:#f5f5f5;">' +
-            '<td colspan="2" style="text-align:left;">TOTAL</td>' +
-            totalPorMes.map(v => '<td style="text-align:right;' + (v > 0 ? '' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
-            '<td style="text-align:right;">' + fmtBRL(totalGeral) + '</td>' +
+            '<td colspan="2" style="text-align:left;">Acumulado Ano</td>' +
+            totalPorMes.map((v, i) => '<td data-mes="' + i + '" style="text-align:right;' + (v > 0 ? '' : 'color:#ccc;') + '">' + (v > 0 ? fmtBRL(v) : '-') + '</td>').join('') +
+            '<td class="gd-col-total" style="text-align:right;">' + fmtBRL(totalGeral) + '</td>' +
             '</tr>';
+
+        _popularChecksMesesGrupoDRE();
+        _aplicarVisibilidadeGrupoDRE();
+    }
+
+    // ---- Estado e controles de meses/total da Análise por Grupo DRE ----
+    let _grupoDREDrill = [];
+    let _mesesVisiveisGrupoDRE = Array(12).fill(true);
+    let _grupoDREMostrarTotal = true;
+    let _detalheAnaliseReload = null;   // função para recarregar a análise após editar/excluir no detalhe
+
+    function toggleMenuMesesGrupoDRE() {
+        const menu = document.getElementById('menuMesesGrupoDRE');
+        if (!menu) return;
+        menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+    }
+    document.addEventListener('click', function (ev) {
+        const menu = document.getElementById('menuMesesGrupoDRE');
+        if (!menu || menu.style.display !== 'block') return;
+        const wrap = menu.parentElement;
+        if (wrap && !wrap.contains(ev.target)) menu.style.display = 'none';
+    });
+    function _popularChecksMesesGrupoDRE() {
+        const cont = document.getElementById('checksMesesGrupoDRE');
+        if (!cont) return;
+        const mNomes = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+        cont.innerHTML = mNomes.map((m, idx) =>
+            '<label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-weight:400;">' +
+            '<input type="checkbox" ' + (_mesesVisiveisGrupoDRE[idx] ? 'checked' : '') + ' onchange="toggleMesVisivelGrupoDRE(' + idx + ')" style="width:14px;height:14px;margin:0;">' + m + '</label>'
+        ).join('');
+    }
+    function toggleMesVisivelGrupoDRE(m) {
+        _mesesVisiveisGrupoDRE[m] = !_mesesVisiveisGrupoDRE[m];
+        _aplicarVisibilidadeGrupoDRE();
+    }
+    function marcarTodosMesesGrupoDRE(v) {
+        _mesesVisiveisGrupoDRE = Array(12).fill(v);
+        _popularChecksMesesGrupoDRE();
+        _aplicarVisibilidadeGrupoDRE();
+    }
+    function toggleMostrarTotalGrupoDRE() {
+        _grupoDREMostrarTotal = !_grupoDREMostrarTotal;
+        _aplicarVisibilidadeGrupoDRE();
+    }
+    function _aplicarVisibilidadeGrupoDRE() {
+        document.querySelectorAll('#tabelaGrupoDRE [data-mes]').forEach(el => {
+            const m = parseInt(el.getAttribute('data-mes'));
+            el.style.display = _mesesVisiveisGrupoDRE[m] ? '' : 'none';
+        });
+        document.querySelectorAll('#tabelaGrupoDRE .gd-col-total').forEach(el => {
+            el.style.display = _grupoDREMostrarTotal ? '' : 'none';
+        });
+        const chk = document.getElementById('chkMostrarTotalGrupoDRE');
+        if (chk) chk.checked = _grupoDREMostrarTotal;
+    }
+
+    // Drill-down: abre os lançamentos de uma célula (linha x mês, ou -1 para o ano)
+    function abrirDetalheGrupoDRE(idxLinha, mes) {
+        const l = _grupoDREDrill[idxLinha];
+        if (!l) return;
+        const mNomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        let itens = mes === -1 ? [].concat(...l.itens) : (l.itens[mes] || []);
+        itens = itens.slice().sort((a, b) => (a.competencia || '').localeCompare(b.competencia || ''));
+        document.getElementById('tituloDetalheDRE').textContent = (_GRUPOS_DRE_LABELS[l.grupo] || l.grupo) + ' • ' + l.catNome;
+        const sub = document.getElementById('subtituloDetalheDRE');
+        if (sub) sub.textContent = (mes === -1 ? 'Ano todo' : mNomes[mes]) + ' — clique em Editar ou Excluir para alterar o lançamento';
+        _renderLinhasDetalheDRE(itens);
+        _detalheAnaliseReload = carregarAnaliseGrupoDRE;
+        document.getElementById('modalDetalheDRE').classList.add('active');
     }
 
     function limparFiltrosGrupoDRE() {
@@ -9503,6 +9777,154 @@
         document.getElementById('filtroAnoGrupoDRE').value = '';
         if (typeof salvarFiltros === 'function') salvarFiltros();
         carregarAnaliseGrupoDRE();
+    }
+
+    // Exporta qualquer tabela HTML para .xlsx replicando as cores exibidas na tela
+    // (respeita colunas ocultas e linhas com colspan, como os separadores de grupo)
+    function _exportarTabelaColoridaXLSX(tabela, filename, sheetName, dropLastCols) {
+        if (!tabela) { alert('Não há tabela para exportar.'); return; }
+        const headCells = Array.prototype.slice.call(tabela.querySelectorAll('thead th'))
+            .filter(c => !(c.style && c.style.display === 'none'));
+        const nCols = Math.max(1, headCells.length - (dropLastCols || 0));
+        const aoa = [], estilos = [];
+        const trs = Array.prototype.slice.call(tabela.querySelectorAll('tr'));
+        trs.forEach(tr => {
+            const cells = Array.prototype.slice.call(tr.querySelectorAll('th, td'))
+                .filter(c => !(c.style && c.style.display === 'none'));
+            if (!cells.length) return;
+            const rowVals = [], rowEst = [];
+            cells.forEach(c => {
+                const span = Math.max(1, parseInt(c.getAttribute('colspan') || '1', 10));
+                const cs = getComputedStyle(c);
+                const est = {
+                    fill: _bgEfetivoHex(c),
+                    fontColor: _corParaHex(cs.color) || '000000',
+                    negrito: c.tagName === 'TH' || parseInt(cs.fontWeight) >= 600 || cs.fontWeight === 'bold',
+                    halign: (cs.textAlign === 'center' ? 'center' : (cs.textAlign === 'right' ? 'right' : 'left')),
+                    header: c.tagName === 'TH'
+                };
+                rowVals.push((c.innerText || '').replace(/\s+/g, ' ').trim());
+                rowEst.push(est);
+                for (let k = 1; k < span; k++) { rowVals.push(''); rowEst.push(est); }
+            });
+            while (rowVals.length < nCols) { rowVals.push(''); rowEst.push(rowEst[rowEst.length - 1] || {}); }
+            aoa.push(rowVals.slice(0, nCols));
+            estilos.push(rowEst.slice(0, nCols));
+        });
+        if (aoa.length <= 1) { alert('Não há dados para exportar.'); return; }
+        try {
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            const bordaFina = { style: 'thin', color: { rgb: 'D9D9D9' } };
+            for (let r = 0; r < aoa.length; r++) {
+                for (let cIdx = 0; cIdx < aoa[r].length; cIdx++) {
+                    const addr = XLSX.utils.encode_cell({ r: r, c: cIdx });
+                    if (!ws[addr]) continue;
+                    const st = estilos[r][cIdx] || {};
+                    ws[addr].s = {
+                        fill: st.fill ? { patternType: 'solid', fgColor: { rgb: st.fill } } : undefined,
+                        font: { color: { rgb: st.fontColor || '000000' }, bold: !!st.negrito, sz: st.header ? 10 : 9 },
+                        alignment: { horizontal: st.halign || 'left', vertical: 'center', wrapText: false },
+                        border: { top: bordaFina, bottom: bordaFina, left: bordaFina, right: bordaFina }
+                    };
+                }
+            }
+            const cols = [{ wch: 26 }, { wch: 26 }];
+            for (let i = 2; i < nCols; i++) cols.push({ wch: 15 });
+            ws['!cols'] = cols;
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, sheetName || 'Planilha');
+            XLSX.writeFile(wb, filename);
+        } catch (e) {
+            console.error('Erro ao gerar Excel colorido:', e);
+            alert('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e));
+        }
+    }
+
+    function exportarExcelGrupoDRE() {
+        _garantirXLSXStyle(function () {
+            const ano = (document.getElementById('filtroAnoGrupoDRE') || {}).value || 'completo';
+            _exportarTabelaColoridaXLSX(document.getElementById('tabelaGrupoDRE'), 'Analise_Grupo_DRE_' + ano + '.xlsx', 'Grupo DRE');
+        });
+    }
+
+    // Gera PDF de uma tabela HTML replicando as cores da tela (respeita colunas ocultas e colspan)
+    function _gerarPDFTabelaColorida(tabela, titulo, filename, orientacao) {
+        if (!tabela) { alert('Não há tabela para imprimir.'); return; }
+        const { jsPDF } = window.jspdf;
+        const headCells = Array.prototype.slice.call(tabela.querySelectorAll('thead th')).filter(c => !(c.style && c.style.display === 'none'));
+        const nCols = headCells.length || 1;
+        const linhas = [];
+        Array.prototype.slice.call(tabela.querySelectorAll('tr')).forEach(tr => {
+            const cells = Array.prototype.slice.call(tr.querySelectorAll('th, td')).filter(c => !(c.style && c.style.display === 'none'));
+            if (!cells.length) return;
+            const row = [];
+            cells.forEach(c => {
+                const span = Math.max(1, parseInt(c.getAttribute('colspan') || '1', 10));
+                const cs = getComputedStyle(c);
+                const cell = {
+                    txt: normalizarTexto((c.innerText || '').replace(/\s+/g, ' ').trim()),
+                    fill: _hexParaRGB(_bgEfetivoHex(c)),
+                    color: _corParaRGB(cs.color) || [40, 40, 40],
+                    bold: c.tagName === 'TH' || parseInt(cs.fontWeight) >= 600 || cs.fontWeight === 'bold',
+                    align: (cs.textAlign === 'center' ? 'center' : (cs.textAlign === 'right' ? 'right' : 'left'))
+                };
+                row.push(cell);
+                for (let k = 1; k < span; k++) row.push(Object.assign({}, cell, { txt: '' }));
+            });
+            while (row.length < nCols) row.push({ txt: '', fill: (row[row.length - 1] || {}).fill, color: [40, 40, 40], bold: false, align: 'left' });
+            linhas.push(row.slice(0, nCols));
+        });
+        if (linhas.length <= 1) { alert('Não há dados para imprimir.'); return; }
+        const est = linhas;
+        const head = [linhas[0].map(c => c.txt)];
+        const body = linhas.slice(1).map(r => r.map(c => c.txt));
+        const orient = orientacao === 'portrait' ? 'portrait' : 'landscape';
+        const doc = new jsPDF({ orientation: orient, unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        doc.setFillColor(255, 122, 66); doc.rect(0, 0, pageW, 14, 'F');
+        doc.setTextColor(255, 255, 255); doc.setFontSize(12); doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 9);
+        doc.setFontSize(9); doc.setFont(undefined, 'normal');
+        doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), pageW - 10, 9, { align: 'right' });
+        doc.setTextColor(40, 40, 40); doc.setFontSize(12); doc.setFont(undefined, 'bold');
+        doc.text(normalizarTexto(titulo), pageW / 2, 21, { align: 'center' });
+        const fonte = orient === 'portrait' ? (nCols > 10 ? 5 : 7) : (nCols > 12 ? 6 : 8);
+        doc.autoTable({
+            head: head, body: body, startY: 26,
+            styles: { fontSize: fonte, cellPadding: 1.2, overflow: 'linebreak', lineColor: [225, 225, 225], lineWidth: 0.1, textColor: [40, 40, 40], valign: 'middle' },
+            columnStyles: { 0: { halign: 'left', cellWidth: orient === 'portrait' ? 26 : 38 }, 1: { halign: 'left' } },
+            theme: 'grid', margin: { left: 6, right: 6 }, tableWidth: 'auto',
+            didParseCell: function (data) {
+                const ri = data.section === 'head' ? 0 : data.row.index + 1;
+                const cell = est[ri] && est[ri][data.column.index];
+                if (!cell) return;
+                data.cell.styles.halign = cell.align;
+                if (cell.bold) data.cell.styles.fontStyle = 'bold';
+                if (cell.fill) data.cell.styles.fillColor = cell.fill;
+                data.cell.styles.textColor = cell.color;
+            }
+        });
+        const totalPg = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPg; p++) {
+            doc.setPage(p); doc.setFontSize(7); doc.setTextColor(120, 120, 120); doc.setFont(undefined, 'normal');
+            doc.text('Página ' + p + ' de ' + totalPg, pageW / 2, pageH - 5, { align: 'center' });
+        }
+        doc.save(filename);
+    }
+
+    function gerarPDFGrupoDRE() {
+        const ano = (document.getElementById('filtroAnoGrupoDRE') || {}).value || 'completo';
+        _gerarPDFTabelaColorida(document.getElementById('tabelaGrupoDRE'), 'Análise por Grupo DRE' + (ano !== 'completo' ? ' - ' + ano : ''), 'Analise_Grupo_DRE_' + ano + '.pdf', 'landscape');
+    }
+
+    // Exporta os lançamentos do modal de detalhe para .xlsx (sem a coluna Ações), com cores
+    function exportarExcelDetalheLancamentos() {
+        _garantirXLSXStyle(function () {
+            const titulo = ((document.getElementById('tituloDetalheDRE') || {}).textContent || 'Lancamentos').trim();
+            const nome = 'Lancamentos_' + titulo.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40) + '.xlsx';
+            _exportarTabelaColoridaXLSX(document.getElementById('tabelaDetalheDRE'), nome || 'Lancamentos.xlsx', 'Lançamentos', 1);
+        });
     }
 
     function exportarAnaliseGrupoDRE() {
@@ -10302,6 +10724,74 @@
         cont.innerHTML = html;
     }
 
+    // Exporta o Fluxo de Caixa Diário para .xlsx com as mesmas cores da tela
+    function exportarExcelFluxoDiario() {
+        if (!_fdDadosDias || !_fdDadosDias.dias || !_fdDadosDias.dias.length) { alert('Não há dados para exportar. Selecione um ano/mês.'); return; }
+        _garantirXLSXStyle(_exportarExcelFluxoDiarioInterno);
+    }
+    function _exportarExcelFluxoDiarioInterno() {
+        try {
+            const { ano, mes, dias, totRec, totDesp, totRes } = _fdDadosDias;
+            const centro = { horizontal: 'center', vertical: 'center' };
+            const dir = { horizontal: 'right', vertical: 'center' };
+            const bordaFina = { style: 'thin', color: { rgb: 'E1E1E1' } };
+            const borda = { top: bordaFina, bottom: bordaFina, left: bordaFina, right: bordaFina };
+            const aoa = [], est = [];
+            // Cabeçalho (fundo cinza escuro, branco)
+            aoa.push(['Dia', 'Receita', 'Despesa', 'Resultado do Dia']);
+            const hCell = a => ({ fill: { patternType: 'solid', fgColor: { rgb: '5A6570' } }, font: { color: { rgb: 'FFFFFF' }, bold: true, sz: 10 }, alignment: a, border: borda });
+            est.push([hCell(centro), hCell(dir), hCell(dir), hCell(dir)]);
+            // Linhas por dia
+            dias.forEach(d => {
+                const recTxt = d.rec ? fmtBRL(d.rec) : 'R$ —';
+                const despTxt = d.desp ? fmtBRL(d.desp) : 'R$ —';
+                let resTxt, resSt;
+                if (!d.temMov) {
+                    resTxt = '—';
+                    resSt = { font: { color: { rgb: 'BBBBBB' } }, alignment: dir, border: borda };
+                } else {
+                    const pos = d.res >= 0;
+                    resTxt = pos ? fmtBRL(d.res) : '(' + fmtBRL(d.res) + ')';
+                    resSt = { fill: { patternType: 'solid', fgColor: { rgb: pos ? '28A745' : 'DC3545' } }, font: { color: { rgb: 'FFFFFF' }, bold: true }, alignment: dir, border: borda };
+                }
+                aoa.push([String(d.dia), recTxt, despTxt, resTxt]);
+                est.push([
+                    { font: { color: { rgb: '666666' }, bold: true }, alignment: centro, border: borda },
+                    { font: { color: { rgb: d.rec ? '28A745' : 'CCCCCC' } }, alignment: dir, border: borda },
+                    { font: { color: { rgb: d.desp ? 'DC3545' : 'CCCCCC' } }, alignment: dir, border: borda },
+                    resSt
+                ]);
+            });
+            // Total
+            const posT = totRes >= 0;
+            aoa.push(['Total', fmtBRL(totRec), fmtBRL(totDesp), posT ? fmtBRL(totRes) : '(' + fmtBRL(totRes) + ')']);
+            const totBase = { fill: { patternType: 'solid', fgColor: { rgb: 'F0F0F0' } }, font: { bold: true }, alignment: dir, border: borda };
+            est.push([
+                Object.assign({}, totBase, { alignment: { horizontal: 'left', vertical: 'center' } }),
+                Object.assign({}, totBase, { font: { bold: true, color: { rgb: '28A745' } } }),
+                Object.assign({}, totBase, { font: { bold: true, color: { rgb: 'DC3545' } } }),
+                Object.assign({}, totBase, { font: { bold: true, color: { rgb: posT ? '28A745' : 'DC3545' } } })
+            ]);
+
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            for (let r = 0; r < aoa.length; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const addr = XLSX.utils.encode_cell({ r: r, c: c });
+                    if (ws[addr]) ws[addr].s = est[r][c];
+                }
+            }
+            ws['!cols'] = [{ wch: 8 }, { wch: 18 }, { wch: 18 }, { wch: 22 }];
+            const contaSel = (document.getElementById('contaFluxoDiario') || {}).value || '';
+            const contaLabel = !contaSel ? 'Consolidado' : (((dadosCache.bancos || []).find(x => String(x.id) === String(contaSel)) || {}).nome || 'Conta');
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Fluxo Diário');
+            XLSX.writeFile(wb, 'Fluxo_Diario_' + ano + '-' + String(mes).padStart(2, '0') + '_' + contaLabel.replace(/[^a-zA-Z0-9]+/g, '_') + '.xlsx');
+        } catch (e) {
+            console.error('Erro ao gerar Excel do Fluxo Diário:', e);
+            alert('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e));
+        }
+    }
+
     function gerarPDFFluxoDiario() {
         if (!_fdDadosDias || !_fdDadosDias.dias) { alert('Não há dados para imprimir.'); return; }
         const { jsPDF } = window.jspdf;
@@ -10604,6 +11094,7 @@
             </table>
         </div>
         <div class="form-actions" style="margin-top:12px;">
+            <button class="btn btn-secondary" onclick="exportarExcelDetalheLancamentos()" style="background:#217346;color:white;">📊 Excel</button>
             <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
         </div>
     </div>
