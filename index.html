@@ -779,6 +779,7 @@
             <div class="menu-item" onclick="showPage('analise-categoria')">🗂️ Análise por Categoria</div>
             <div class="menu-item" onclick="showPage('analise-grupo-dre')">📁 Análise por Grupo DRE</div>
             <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
+            <div class="menu-item" onclick="showPage('fluxo-diario')">🗓️ Fluxo Diário</div>
             <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
             <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
         </div>
@@ -786,6 +787,7 @@
         <div class="menu-section">
             <div class="menu-section-title">Cadastros</div>
             <div class="menu-item" onclick="showPage('categorias')">📁 Categorias</div>
+            <div class="menu-item" onclick="showPage('grupos-dre')">🏷️ Grupos da DRE</div>
             <div class="menu-item" onclick="showPage('produtos')">📦 Produtos</div>
             <div class="menu-item" onclick="showPage('fornecedores')">🏭 Fornecedores</div>
             <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
@@ -930,10 +932,17 @@
         <div id="categorias" class="page">
             <div class="page-header">
                 <h1>Categorias</h1>
-                <button class="btn btn-primary btn-small" onclick="openModalCategoria()">+ Nova Categoria</button>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-small" onclick="abrirEditorLegendasDRE()">🏷️ Editar legendas do DRE</button>
+                    <button class="btn btn-primary btn-small" onclick="openModalCategoria()">+ Nova Categoria</button>
+                </div>
             </div>
 
             <div class="alert alert-success" id="alertCategorias"></div>
+
+            <div style="margin-bottom:12px;">
+                <input type="text" id="buscaCategoria" oninput="atualizarTabelaCategorias()" placeholder="🔎 Pesquisar por nome ou grupo DRE..." style="width:100%;max-width:420px;padding:9px 12px;border:1px solid var(--cor-borda);border-radius:8px;font-size:14px;">
+            </div>
 
             <div class="table-container">
                 <table id="tabelaCategorias">
@@ -949,6 +958,22 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- GRUPOS DA DRE -->
+        <div id="grupos-dre" class="page">
+            <div class="page-header">
+                <h1>Grupos da DRE</h1>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-small" onclick="restaurarLegendasDREPagina()">↩️ Restaurar padrão</button>
+                    <button class="btn btn-primary btn-small" onclick="salvarLegendasDREPagina()">💾 Salvar</button>
+                </div>
+            </div>
+            <div class="alert alert-success" id="alertGruposDRE"></div>
+            <div class="card">
+                <p style="font-size:13px;color:#666;margin:0 0 16px;">Edite os nomes (legendas) das linhas da DRE. As alterações valem para a DRE por Competência e para a DRE Mensal, e ficam salvas neste navegador.</p>
+                <div id="corpoGruposDRE" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
             </div>
         </div>
 
@@ -2337,6 +2362,80 @@
             </div>
         </div>
 
+        <!-- FLUXO DE CAIXA DIÁRIO -->
+        <div id="fluxo-diario" class="page">
+            <div class="page-header">
+                <div>
+                    <h1 style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">Fluxo de Caixa Diário
+                        <span id="fdBadgeConta" style="font-size:12px;font-weight:600;background:#e8f4fd;color:#1565c0;padding:3px 10px;border-radius:12px;">📊 Consolidado</span>
+                    </h1>
+                    <div style="font-size:13px;color:#777;margin-top:2px;">Receita, despesa e resultado de cada dia do mês</div>
+                </div>
+                <button class="btn btn-secondary" onclick="gerarPDFFluxoDiario()" style="background:#e67e22;color:white;">📄 PDF</button>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="filtroAnoFluxoDiario" onchange="carregarFluxoDiario()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="filtroMesFluxoDiario" onchange="carregarFluxoDiario()">
+                            <option value="01">Janeiro</option><option value="02">Fevereiro</option>
+                            <option value="03">Março</option><option value="04">Abril</option>
+                            <option value="05">Maio</option><option value="06">Junho</option>
+                            <option value="07">Julho</option><option value="08">Agosto</option>
+                            <option value="09">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:flex-end;gap:6px;padding-bottom:2px;">
+                        <button class="btn btn-secondary btn-small" onclick="fluxoDiarioNavegar(-1)" title="Mês anterior">◀</button>
+                        <button class="btn btn-secondary btn-small" onclick="fluxoDiarioMesAtual()">Mês atual</button>
+                        <button class="btn btn-secondary btn-small" onclick="fluxoDiarioNavegar(1)" title="Próximo mês">▶</button>
+                    </div>
+                    <div class="form-group">
+                        <label>Base</label>
+                        <select id="baseFluxoDiario" onchange="carregarFluxoDiario()">
+                            <option value="realizado">Realizado (o que entrou e saiu)</option>
+                            <option value="previsto">Previsto (por vencimento)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Conta / Banco</label>
+                        <select id="contaFluxoDiario" onchange="carregarFluxoDiario()">
+                            <option value="">Todas as Contas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" style="margin-bottom:16px;">
+                <div class="stat-card" style="border-left-color:#28a745;">
+                    <div class="stat-value" id="fdReceitaMes" style="color:#28a745;font-size:24px;">R$ 0,00</div>
+                    <div class="stat-label">RECEITA DO MÊS</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#dc3545;">
+                    <div class="stat-value" id="fdDespesaMes" style="color:#dc3545;font-size:24px;">R$ 0,00</div>
+                    <div class="stat-label">DESPESA DO MÊS</div>
+                </div>
+                <div class="stat-card" id="fdResultadoMesBox">
+                    <div class="stat-value" id="fdResultadoMes" style="font-size:24px;">R$ 0,00</div>
+                    <div class="stat-label">RESULTADO DO MÊS</div>
+                </div>
+                <div class="stat-card" style="border-left-color:#6c757d;">
+                    <div class="stat-value" id="fdDiasMovimento" style="font-size:24px;">0 / 0</div>
+                    <div class="stat-label">DIAS COM MOVIMENTO</div>
+                </div>
+            </div>
+
+            <div id="fdAnalise" style="background:#f8f9fa;border:1px solid #eee;border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#444;"></div>
+
+            <div id="fdTabelasContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;"></div>
+        </div>
+
         <!-- FLUXO DE CAIXA PROJETADO -->
         <div id="fcp" class="page">
             <div class="page-header">
@@ -2455,7 +2554,7 @@
                         <button class="btn btn-primary btn-small" onclick="abrirModalLancDRE()">+ Lançar</button>
                         <button class="btn btn-secondary btn-small" onclick="exportarDRE()">📥 Exportar</button>
                         <button class="btn btn-secondary btn-small" onclick="exportarExcelDRE()" style="background:#217346;color:white;">📊 Excel</button>
-                        <button class="btn btn-secondary btn-small" onclick="gerarPDFDRE()" style="background:#e67e22;color:white;">📄 PDF</button>
+                        <button class="btn btn-secondary btn-small" onclick="abrirModalPDFDRE()" style="background:#e67e22;color:white;">📄 PDF</button>
                     </div>
                 </div>
             </div>
@@ -2487,7 +2586,7 @@
                     <div class="stat-change" id="dreCardMargemLiq">Margem: 0%</div>
                 </div>
             </div>
-            <div class="card">
+            <div class="card" id="cardDRECompetencia" style="display:none;">
                 <div class="card-title" id="dreTituloPeriodo">DRE por Competência</div>
                 <div class="table-container">
                     <table id="tabelaDRE" style="font-size:13px;width:auto;min-width:600px;max-width:900px;">
@@ -2506,6 +2605,17 @@
             <div class="card" id="cardDREMensal" style="display:none;margin-top:16px;">
                 <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
                     <span id="tituloDREMensal">📅 DRE Mensal</span>
+                    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:400;">
+                        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#555;cursor:pointer;">
+                            Amortiz. Empréstimos:
+                            <select onchange="alterarBaseEmprestimoDRE(this.value)" style="font-size:12px;padding:4px 6px;border:1px solid var(--cor-borda);border-radius:6px;">
+                                <option value="competencia">Por competência</option>
+                                <option value="vencimento">Por vencimento</option>
+                            </select>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:#555;cursor:pointer;">
+                            <input type="checkbox" id="chkMostrarTotalDRE" checked onchange="toggleMostrarTotalDRE()" style="width:14px;height:14px;margin:0;"> Mostrar Acumulado Ano
+                        </label>
                     <div style="position:relative;">
                         <button type="button" class="btn btn-secondary btn-small" onclick="toggleMenuMesesDRE()">👁️ Ocultar/Exibir meses</button>
                         <div id="menuMesesDRE" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:white;border:1px solid var(--cor-borda);border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.15);padding:10px;z-index:50;min-width:220px;font-size:12px;">
@@ -2515,6 +2625,7 @@
                             </div>
                             <div id="checksMesesDRE" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;"></div>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div style="overflow-x:auto;">
@@ -2900,6 +3011,42 @@
                 <button type="button" class="btn btn-secondary" onclick="closeModal('modalCategoria')">Cancelar</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR LEGENDAS DO DRE -->
+<div class="modal" id="modalLegendasDRE">
+    <div class="modal-content" style="max-width:560px;">
+        <div class="modal-header">
+            <span>🏷️ Editar legendas do DRE</span>
+            <button class="modal-close" onclick="closeModal('modalLegendasDRE')">&times;</button>
+        </div>
+        <p style="font-size:12px;color:#777;margin:0 0 12px;">Personalize os nomes das linhas do DRE. As alterações valem para a DRE por Competência e para a DRE Mensal.</p>
+        <div id="corpoLegendasDRE" style="max-height:55vh;overflow-y:auto;padding-right:6px;"></div>
+        <div class="form-actions">
+            <button type="button" class="btn btn-success" onclick="salvarLegendasDRE()">Salvar legendas</button>
+            <button type="button" class="btn btn-secondary" onclick="restaurarLegendasDRE()">Restaurar padrão</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalLegendasDRE')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ORIENTAÇÃO DO PDF DA DRE -->
+<div class="modal" id="modalPDFDRE">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <span>📄 Imprimir DRE Mensal em PDF</span>
+            <button class="modal-close" onclick="closeModal('modalPDFDRE')">&times;</button>
+        </div>
+        <p style="font-size:13px;color:#666;margin:0 0 16px;">Escolha a orientação da página:</p>
+        <div style="display:flex;gap:12px;">
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFDRE('portrait')">
+                <div style="font-size:24px;">📄</div>Retrato
+            </button>
+            <button type="button" class="btn btn-secondary" style="flex:1;padding:18px 8px;" onclick="gerarPDFDRE('landscape')">
+                <div style="font-size:24px;">📄</div>Paisagem
+            </button>
+        </div>
     </div>
 </div>
 
@@ -3306,6 +3453,7 @@
     // CARREGAMENTO INICIAL
     async function carregarDadosIniciais() {
         carregarMetas();
+        carregarDRELegendas();
         atualizarLegendaMetas();
         restaurarFiltros();
         _bindFiltrosSave();
@@ -3349,8 +3497,16 @@
     function atualizarTabelaCategorias() {
         const tbody = document.querySelector('#tabelaCategorias tbody');
         tbody.innerHTML = '';
+        const buscaEl = document.getElementById('buscaCategoria');
+        const termo = buscaEl ? (buscaEl.value || '').trim().toLowerCase() : '';
+        let exibidas = 0;
         dadosCache.categorias.forEach(cat => {
             const grupoLabel = cat.grupo_dre ? (_GRUPOS_DRE_LABELS[cat.grupo_dre] || cat.grupo_dre) : '-';
+            if (termo) {
+                const alvo = ((cat.nome || '') + ' ' + grupoLabel + ' ' + (cat.tipo || '') + ' ' + (cat.descricao || '')).toLowerCase();
+                if (!alvo.includes(termo)) return;
+            }
+            exibidas++;
             tbody.innerHTML += `<tr>
                 <td><b>${cat.nome}</b></td>
                 <td><span style="background:#e8f4fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-size:11px;">${grupoLabel}</span></td>
@@ -3363,6 +3519,10 @@
                 </td>
             </tr>`;
         });
+        if (exibidas === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">' +
+                (termo ? 'Nenhuma categoria encontrada para "' + termo + '".' : 'Nenhuma categoria cadastrada.') + '</td></tr>';
+        }
     }
 
     function atualizarSelectCategorias() {
@@ -5258,6 +5418,7 @@
 
             // Carrega dados quando a página for exibida
             if (pageId === 'categorias') carregarCategorias();
+            else if (pageId === 'grupos-dre') renderizarPaginaGruposDRE();
             else if (pageId === 'produtos') carregarProdutos();
             else if (pageId === 'fornecedores') carregarFornecedores();
             else if (pageId === 'clientes') carregarClientes();
@@ -5269,6 +5430,7 @@
             else if (pageId === 'relatorio-receber') carregarRelatorioReceber();
             else if (pageId === 'relatorio-pagar') carregarRelatorioPagar();
             else if (pageId === 'dfc') carregarDFC();
+            else if (pageId === 'fluxo-diario') carregarFluxoDiario();
             else if (pageId === 'dre') carregarDRE();
             else if (pageId === 'analise-categoria') carregarAnaliseCategoria();
             else if (pageId === 'analise-grupo-dre') carregarAnaliseGrupoDRE();
@@ -8051,6 +8213,126 @@
         { id: 'OUTRAS_DESPESAS',    label: '  (-) Outras Despesas',                sinal: -1 },
     ];
 
+    // ---- Legendas editáveis da DRE (personalizáveis via tela Categorias) ----
+    // Cobrem tanto as linhas de grupo quanto os subtotais das duas DREs.
+    const DRE_LEGENDAS_PADRAO = {
+        RECEITA_BRUTA:        '1. Receita Bruta de Vendas/Serviços',
+        DEDUCOES:             '(-) Deduções / Impostos s/ Receita',
+        RECEITA_LIQUIDA:      '= Receita Líquida',
+        CPV:                  '(-) CPV / Custo dos Serviços',
+        LUCRO_BRUTO:          '= Lucro Bruto',
+        DESP_COMERCIAL:       '(-) Despesas Comerciais',
+        DESP_ADMIN:           '(-) Despesas Administrativas',
+        EBITDA:               '= EBITDA / Resultado Operacional',
+        RECEITA_FINANCEIRA:   '(+) Receitas Financeiras',
+        DESP_FINANCEIRA:      '(-) Despesas Financeiras',
+        RESULTADO_FINANCEIRO: '= Resultado Financeiro',
+        LAJIR:                '= Resultado Antes do IR (Lajir)',
+        EMPRESTIMO:           '(-) Amortização de Empréstimos',
+        INVESTIMENTO:         '(-) Investimentos',
+        OUTRAS_RECEITAS:      '(+) Outras Receitas',
+        OUTRAS_DESPESAS:      '(-) Outras Despesas',
+        RESULTADO_LIQUIDO:    '= Geração de Caixa Após as Dívidas'
+    };
+    // Ordem e rótulos amigáveis para o editor de legendas
+    const DRE_LEGENDAS_CAMPOS = [
+        ['RECEITA_BRUTA',        'Receita Bruta'],
+        ['DEDUCOES',             'Deduções / Impostos'],
+        ['RECEITA_LIQUIDA',      'Subtotal: Receita Líquida'],
+        ['CPV',                  'CPV / Custo dos Serviços'],
+        ['LUCRO_BRUTO',          'Subtotal: Lucro Bruto'],
+        ['DESP_COMERCIAL',       'Despesas Comerciais'],
+        ['DESP_ADMIN',           'Despesas Administrativas'],
+        ['EBITDA',               'Subtotal: EBITDA / Resultado Operacional'],
+        ['RECEITA_FINANCEIRA',   'Receitas Financeiras'],
+        ['DESP_FINANCEIRA',      'Despesas Financeiras'],
+        ['RESULTADO_FINANCEIRO', 'Subtotal: Resultado Financeiro'],
+        ['LAJIR',                'Subtotal: Resultado Antes do IR (Lajir)'],
+        ['EMPRESTIMO',           'Amortização de Empréstimos'],
+        ['INVESTIMENTO',         'Investimentos'],
+        ['OUTRAS_RECEITAS',      'Outras Receitas'],
+        ['OUTRAS_DESPESAS',      'Outras Despesas'],
+        ['RESULTADO_LIQUIDO',    'Subtotal: Geração de Caixa Após as Dívidas']
+    ];
+    var dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO);
+    function carregarDRELegendas() {
+        try {
+            const s = localStorage.getItem('cap_dre_legendas');
+            if (s) dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO, JSON.parse(s));
+        } catch (e) { /* ignora */ }
+    }
+    // Retorna a legenda (personalizada ou padrão) de uma linha da DRE
+    function legDRE(id) { return (dreLegendas && dreLegendas[id]) || DRE_LEGENDAS_PADRAO[id] || id; }
+
+    // ---- Editor de legendas da DRE ----
+    function abrirEditorLegendasDRE() {
+        const cont = document.getElementById('corpoLegendasDRE');
+        if (cont) {
+            cont.innerHTML = DRE_LEGENDAS_CAMPOS.map(([id, rotulo]) =>
+                '<div class="form-group" style="margin-bottom:10px;">' +
+                '<label style="font-size:12px;color:#555;">' + rotulo + '</label>' +
+                '<input type="text" data-leg-id="' + id + '" value="' +
+                String(legDRE(id)).replace(/"/g, '&quot;') + '">' +
+                '</div>'
+            ).join('');
+        }
+        document.getElementById('modalLegendasDRE').classList.add('active');
+    }
+    function salvarLegendasDRE() {
+        const inputs = document.querySelectorAll('#corpoLegendasDRE input[data-leg-id]');
+        const novo = {};
+        inputs.forEach(inp => {
+            const id = inp.getAttribute('data-leg-id');
+            const val = (inp.value || '').trim();
+            novo[id] = val || DRE_LEGENDAS_PADRAO[id];
+        });
+        dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO, novo);
+        try { localStorage.setItem('cap_dre_legendas', JSON.stringify(dreLegendas)); } catch (e) {}
+        closeModal('modalLegendasDRE');
+        if (typeof carregarDRE === 'function') carregarDRE();
+        const alerta = document.getElementById('alertCategorias');
+        if (alerta) { alerta.textContent = '✅ Legendas da DRE atualizadas.'; alerta.style.display = 'block'; setTimeout(() => { alerta.style.display = 'none'; }, 3000); }
+    }
+    function restaurarLegendasDRE() {
+        dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO);
+        try { localStorage.removeItem('cap_dre_legendas'); } catch (e) {}
+        abrirEditorLegendasDRE();
+    }
+
+    // ---- Tela dedicada: Grupos da DRE ----
+    function renderizarPaginaGruposDRE() {
+        const cont = document.getElementById('corpoGruposDRE');
+        if (!cont) return;
+        cont.innerHTML = DRE_LEGENDAS_CAMPOS.map(([id, rotulo]) =>
+            '<div class="form-group" style="margin:0;">' +
+            '<label style="font-size:12px;color:#555;">' + rotulo + '</label>' +
+            '<input type="text" data-leg-pg="' + id + '" value="' +
+            String(legDRE(id)).replace(/"/g, '&quot;') + '">' +
+            '</div>'
+        ).join('');
+    }
+    function salvarLegendasDREPagina() {
+        const inputs = document.querySelectorAll('#corpoGruposDRE input[data-leg-pg]');
+        const novo = {};
+        inputs.forEach(inp => {
+            const id = inp.getAttribute('data-leg-pg');
+            const val = (inp.value || '').trim();
+            novo[id] = val || DRE_LEGENDAS_PADRAO[id];
+        });
+        dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO, novo);
+        try { localStorage.setItem('cap_dre_legendas', JSON.stringify(dreLegendas)); } catch (e) {}
+        const alerta = document.getElementById('alertGruposDRE');
+        if (alerta) { alerta.textContent = '✅ Legendas dos grupos da DRE salvas.'; alerta.style.display = 'block'; setTimeout(() => { alerta.style.display = 'none'; }, 3000); }
+        if (typeof carregarDRE === 'function') carregarDRE();
+    }
+    function restaurarLegendasDREPagina() {
+        if (!confirm('Restaurar todas as legendas dos grupos da DRE para o padrão?')) return;
+        dreLegendas = Object.assign({}, DRE_LEGENDAS_PADRAO);
+        try { localStorage.removeItem('cap_dre_legendas'); } catch (e) {}
+        renderizarPaginaGruposDRE();
+        if (typeof carregarDRE === 'function') carregarDRE();
+    }
+
     async function carregarDRE() {
         // Buscar lançamentos DRE diretos + contas recebidas/pagas por competência
         const lancsDRE = await fetchSupabase('lancamentos_dre', 'GET');
@@ -8090,11 +8372,18 @@
             contasRec,
             'data_competencia'
         );
-        // Contas pagas/pendentes por competência
-        const pagComp = filtrarComp(
-            contasPag,
-            'data_competencia'
-        );
+        // Contas pagas/pendentes por competência (Amortização de Empréstimos pode usar vencimento)
+        const pagComp = contasPag.filter(c => {
+            const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
+            const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
+            const usaVenc = (g === 'EMPRESTIMO' && _dreEmprestimoBase === 'vencimento');
+            const dataRef = usaVenc ? c.data_vencimento : c.data_competencia;
+            if (!dataRef) return false;
+            const d = dataRef.substring(0, 7);
+            if (anoSel && !d.startsWith(anoSel)) return false;
+            if (mesSel && !d.endsWith('-' + mesSel)) return false;
+            return true;
+        });
 
         // Aviso pendentes
         const pendentes = contasRec.filter(c => c.status === 'pendente').length
@@ -8168,12 +8457,14 @@
         const despAdm   = porGrupo['DESP_ADMIN'].total;
         const recFin    = porGrupo['RECEITA_FINANCEIRA'].total;
         const despFin   = porGrupo['DESP_FINANCEIRA'].total;
-        const ebitda    = lucroBruto - despCom - despAdm + recFin - despFin;
+        const ebitdaOper = lucroBruto - despCom - despAdm;   // EBITDA / Resultado Operacional (antes do resultado financeiro)
+        const resultFin  = recFin - despFin;                  // Resultado Financeiro
+        const lajir      = ebitdaOper + resultFin;            // Resultado Antes do IR (Lajir)
         const emprest   = porGrupo['EMPRESTIMO'].total;
         const invest    = porGrupo['INVESTIMENTO'].total;
         const outRec    = porGrupo['OUTRAS_RECEITAS'].total;
         const outDesp   = porGrupo['OUTRAS_DESPESAS'].total;
-        const resultLiq = ebitda - emprest - invest + outRec - outDesp;
+        const resultLiq = lajir - emprest - invest + outRec - outDesp;  // Geração de Caixa Após as Dívidas
 
         // Atualizar cards
         const setCard = (id, v, positivo) => {
@@ -8199,7 +8490,7 @@
         if (elML) elML.textContent = 'Margem Líquida: ' + pct(resultLiq);
 
         // Renderizar tabela DRE estruturada
-        renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq);
+        renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitdaOper, resultFin, lajir, resultLiq);
 
         // Tabela mensal e gráfico
         if (anoSel) {
@@ -8216,7 +8507,7 @@
 
     }
 
-    function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitda, resultLiq) {
+    function renderizarDRE(porGrupo, recBruta, recLiq, lucroBruto, ebitdaOper, resultFin, lajir, resultLiq) {
         // Popular cache de detalhe para o botão "Ver"
         _dreDetalheCache = {};
         DRE_GRUPOS.forEach(g => { _dreDetalheCache[g.id] = porGrupo[g.id] ? porGrupo[g.id].itens : []; });
@@ -8268,12 +8559,12 @@
 
         let html = '';
         html += linhaSecao('RECEITAS');
-        html += linhaGrupo(DRE_GRUPOS[0].label, porGrupo['RECEITA_BRUTA'].total, 'RECEITA_BRUTA');
-        html += linhaGrupo(DRE_GRUPOS[1].label, -porGrupo['DEDUCOES'].total, 'DEDUCOES');
-        html += linhaSubtotal('= Receita Líquida', recLiq, false);
+        html += linhaGrupo(legDRE('RECEITA_BRUTA'), porGrupo['RECEITA_BRUTA'].total, 'RECEITA_BRUTA');
+        html += linhaGrupo(legDRE('DEDUCOES'), -porGrupo['DEDUCOES'].total, 'DEDUCOES');
+        html += linhaSubtotal(legDRE('RECEITA_LIQUIDA'), recLiq, false);
 
         html += linhaSecao('CUSTOS');
-        html += linhaGrupo(DRE_GRUPOS[2].label, -porGrupo['CPV'].total, 'CPV');
+        html += linhaGrupo(legDRE('CPV'), -porGrupo['CPV'].total, 'CPV');
         // Sub-linhas CPV por categoria
         if (porGrupo['CPV'] && porGrupo['CPV'].itens.length > 0) {
             // Agrupar itens CPV por categoria
@@ -8293,23 +8584,25 @@
                 </tr>`;
             });
         }
-        html += linhaSubtotal('= Lucro Bruto', lucroBruto, false);
+        html += linhaSubtotal(legDRE('LUCRO_BRUTO'), lucroBruto, false);
 
         html += linhaSecao('DESPESAS OPERACIONAIS');
-        html += linhaGrupo(DRE_GRUPOS[3].label, -porGrupo['DESP_COMERCIAL'].total, 'DESP_COMERCIAL');
-        html += linhaGrupo(DRE_GRUPOS[4].label, -porGrupo['DESP_ADMIN'].total, 'DESP_ADMIN');
+        html += linhaGrupo(legDRE('DESP_COMERCIAL'), -porGrupo['DESP_COMERCIAL'].total, 'DESP_COMERCIAL');
+        html += linhaGrupo(legDRE('DESP_ADMIN'), -porGrupo['DESP_ADMIN'].total, 'DESP_ADMIN');
+        html += linhaSubtotal(legDRE('EBITDA'), ebitdaOper, false);
 
         html += linhaSecao('RESULTADO FINANCEIRO');
-        html += linhaGrupo(DRE_GRUPOS[5].label, porGrupo['RECEITA_FINANCEIRA'].total, 'RECEITA_FINANCEIRA');
-        html += linhaGrupo(DRE_GRUPOS[6].label, -porGrupo['DESP_FINANCEIRA'].total, 'DESP_FINANCEIRA');
-        html += linhaSubtotal('= EBITDA (Resultado Operacional)', ebitda, false, true);
+        html += linhaGrupo(legDRE('RECEITA_FINANCEIRA'), porGrupo['RECEITA_FINANCEIRA'].total, 'RECEITA_FINANCEIRA');
+        html += linhaGrupo(legDRE('DESP_FINANCEIRA'), -porGrupo['DESP_FINANCEIRA'].total, 'DESP_FINANCEIRA');
+        html += linhaSubtotal(legDRE('RESULTADO_FINANCEIRO'), resultFin, false);
+        html += linhaSubtotal(legDRE('LAJIR'), lajir, false, true);
 
         html += linhaSecao('OUTROS');
-        html += linhaGrupo(DRE_GRUPOS[7].label, -porGrupo['EMPRESTIMO'].total, 'EMPRESTIMO');
-        html += linhaGrupo(DRE_GRUPOS[8].label, -porGrupo['INVESTIMENTO'].total, 'INVESTIMENTO');
-        html += linhaGrupo(DRE_GRUPOS[9].label, porGrupo['OUTRAS_RECEITAS'].total, 'OUTRAS_RECEITAS');
-        html += linhaGrupo(DRE_GRUPOS[10].label, -porGrupo['OUTRAS_DESPESAS'].total, 'OUTRAS_DESPESAS');
-        html += linhaSubtotal('= RESULTADO LÍQUIDO DO EXERCÍCIO', resultLiq, true);
+        html += linhaGrupo(legDRE('EMPRESTIMO'), -porGrupo['EMPRESTIMO'].total, 'EMPRESTIMO');
+        html += linhaGrupo(legDRE('INVESTIMENTO'), -porGrupo['INVESTIMENTO'].total, 'INVESTIMENTO');
+        html += linhaGrupo(legDRE('OUTRAS_RECEITAS'), porGrupo['OUTRAS_RECEITAS'].total, 'OUTRAS_RECEITAS');
+        html += linhaGrupo(legDRE('OUTRAS_DESPESAS'), -porGrupo['OUTRAS_DESPESAS'].total, 'OUTRAS_DESPESAS');
+        html += linhaSubtotal(legDRE('RESULTADO_LIQUIDO'), resultLiq, true);
 
         tbody.innerHTML = html;
     }
@@ -8353,7 +8646,7 @@
     function verDetalheDRE(grupoId) {
         const grupo = DRE_GRUPOS.find(g => g.id === grupoId);
         if (!grupo) return;
-        document.getElementById('tituloDetalheDRE').textContent = grupo.label.trim();
+        document.getElementById('tituloDetalheDRE').textContent = (legDRE(grupoId) || grupo.label).trim();
         const subEl = document.getElementById('subtituloDetalheDRE');
         if (subEl) subEl.textContent = 'Todos os meses';
         const itens = (_dreDetalheCache[grupoId] || []);
@@ -8363,6 +8656,10 @@
 
     // Estado de visibilidade dos meses na tabela DRE Mensal (índice 0=Jan ... 11=Dez)
     let _mesesVisiveisDRE = Array(12).fill(true);
+    // Estado: mostrar/ocultar a coluna Acumulado Ano
+    let _dreMostrarTotal = true;
+    // Base de reconhecimento da Amortização de Empréstimos na DRE: 'competencia' | 'vencimento'
+    let _dreEmprestimoBase = 'competencia';
     // Cache dos itens que compõem cada célula da tabela DRE Mensal, para o clique abrir o detalhe
     let _dreMensalAno = null;
     let _dreMensalItensGrupo = {};   // { grupoId: [ itens[], itens[], ... 12x ] }
@@ -8378,8 +8675,12 @@
 
         // Cabeçalho com meses
         headerRow.innerHTML = '<th style="min-width:180px;text-align:left;">Descrição</th>' +
-            mNomes.map((m, idx) => '<th data-mes="' + idx + '" style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>').join('') +
-            '<th style="text-align:right;min-width:100px;">Total</th>';
+            mNomes.map((m, idx) =>
+                '<th data-mes="' + idx + '" style="text-align:right;min-width:90px;">' + m + '/' + String(ano).slice(2) + '</th>' +
+                '<th data-mes="' + idx + '" class="dre-col-pct" style="text-align:right;min-width:48px;font-size:10px;" title="% sobre a Receita Bruta do mês">%</th>'
+            ).join('') +
+            '<th class="dre-col-total" style="text-align:right;min-width:110px;">Acumulado Ano</th>' +
+            '<th class="dre-col-total dre-col-pct" style="text-align:right;min-width:60px;font-size:10px;" title="% sobre a Receita Bruta do ano">% RB</th>';
 
         // Para cada mês, calcular valores E itens (para detalhe) por grupo
         const dados = {};
@@ -8412,15 +8713,19 @@
             });
         });
 
-        // Contas pagas — por competência (inclui pendentes no regime de competência)
-        contasPag.filter(c => c.data_competencia && c.data_competencia.startsWith(ano)).forEach(c => {
-            const m = parseInt(c.data_competencia.substring(5,7)) - 1;
+        // Contas pagas — por competência (ou por vencimento para Amortização de Empréstimos, conforme a opção)
+        contasPag.forEach(c => {
             const cat = dadosCache.categorias.find(x => x.id === c.categoria_id);
             const g = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
-            if (m < 0 || m > 11 || !dados[g]) return;
+            if (!dados[g]) return;
+            const usaVenc = (g === 'EMPRESTIMO' && _dreEmprestimoBase === 'vencimento');
+            const dataRef = usaVenc ? c.data_vencimento : c.data_competencia;
+            if (!dataRef || !dataRef.startsWith(ano)) return;
+            const m = parseInt(dataRef.substring(5,7)) - 1;
+            if (m < 0 || m > 11) return;
             dados[g].valores[m] += parseFloat(c.valor || 0);
             dados[g].itens[m].push({
-                id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia,
+                id: c.id, descricao: c.descricao, valor: c.valor, competencia: dataRef,
                 catNome: cat ? cat.nome : 'Custo',
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
                 fonte: 'pagar'
@@ -8441,13 +8746,15 @@
             const da = dados['DESP_ADMIN'].valores[m];
             const rf = dados['RECEITA_FINANCEIRA'].valores[m];
             const df = dados['DESP_FINANCEIRA'].valores[m];
-            const ebt = lb - dc - da + rf - df;
+            const ebt = lb - dc - da;          // EBITDA / Resultado Operacional (antes do resultado financeiro)
+            const rfin = rf - df;              // Resultado Financeiro
+            const lajir = ebt + rfin;          // Resultado Antes do IR (Lajir)
             const emp = dados['EMPRESTIMO'].valores[m];
             const inv = dados['INVESTIMENTO'].valores[m];
             const or = dados['OUTRAS_RECEITAS'].valores[m];
             const od = dados['OUTRAS_DESPESAS'].valores[m];
-            const res = ebt - emp - inv + or - od;
-            return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, emp, inv, or, od, res };
+            const res = lajir - emp - inv + or - od;   // Geração de Caixa Após as Dívidas
+            return { rb, ded, rl, cpv, lb, dc, da, rf, df, ebt, rfin, lajir, emp, inv, or, od, res };
         };
 
         const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
@@ -8513,25 +8820,33 @@
         _dreMensalDA = daSubOrdenado;
 
         const linhas = [
-            { label: 'Receita Bruta',             fn: m => calcMes(m).rb,   bg: '', grupoId: 'RECEITA_BRUTA' },
-            { label: '(-) Dedu\u00e7\u00f5es',   fn: m => -calcMes(m).ded, bg: '', grupoId: 'DEDUCOES' },
-            { label: '= Receita L\u00edquida',    fn: m => calcMes(m).rl,   bg: '#f5f5f5', bold: true },
-            { label: '(-) CPV/CSP',               fn: m => -calcMes(m).cpv, bg: '', bold: false, grupoId: 'CPV', expandir: cpvSubOrdenado, expandirTipo: 'cpv' },
-            { label: '= Lucro Bruto',             fn: m => calcMes(m).lb,   bg: '#f5f5f5', bold: true },
-            { label: '(-) Desp. Comerciais',      fn: m => -calcMes(m).dc,  bg: '', grupoId: 'DESP_COMERCIAL' },
-            { label: '(-) Desp. Administrativas', fn: m => -calcMes(m).da,  bg: '', grupoId: 'DESP_ADMIN', expandir: daSubOrdenado, expandirTipo: 'da' },
-            { label: '(+) Rec. Financeiras',      fn: m => calcMes(m).rf,   bg: '', grupoId: 'RECEITA_FINANCEIRA' },
-            { label: '(-) Desp. Financeiras',     fn: m => -calcMes(m).df,  bg: '', grupoId: 'DESP_FINANCEIRA' },
-            { label: '= EBITDA',                  fn: m => calcMes(m).ebt,  bg: '#e8f4fd', bold: true },
-            { label: '(-) Empr\u00e9stimos',      fn: m => -calcMes(m).emp, bg: '', grupoId: 'EMPRESTIMO' },
-            { label: '(-) Investimentos',         fn: m => -calcMes(m).inv, bg: '', grupoId: 'INVESTIMENTO' },
-            { label: '(+) Outras Receitas',       fn: m => calcMes(m).or,   bg: '', grupoId: 'OUTRAS_RECEITAS' },
-            { label: '(-) Outras Despesas',       fn: m => -calcMes(m).od,  bg: '', grupoId: 'OUTRAS_DESPESAS' },
-            { label: '= Resultado L\u00edquido',  fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
+            { label: legDRE('RECEITA_BRUTA'),        fn: m => calcMes(m).rb,   bg: '', grupoId: 'RECEITA_BRUTA' },
+            { label: legDRE('DEDUCOES'),             fn: m => -calcMes(m).ded, bg: '', grupoId: 'DEDUCOES' },
+            { label: legDRE('RECEITA_LIQUIDA'),      fn: m => calcMes(m).rl,   bg: '#f5f5f5', bold: true },
+            { label: legDRE('CPV'),                  fn: m => -calcMes(m).cpv, bg: '', bold: false, grupoId: 'CPV', expandir: cpvSubOrdenado, expandirTipo: 'cpv' },
+            { label: legDRE('LUCRO_BRUTO'),          fn: m => calcMes(m).lb,   bg: '#f5f5f5', bold: true },
+            { label: legDRE('DESP_COMERCIAL'),       fn: m => -calcMes(m).dc,  bg: '', grupoId: 'DESP_COMERCIAL' },
+            { label: legDRE('DESP_ADMIN'),           fn: m => -calcMes(m).da,  bg: '', grupoId: 'DESP_ADMIN', expandir: daSubOrdenado, expandirTipo: 'da' },
+            { label: legDRE('EBITDA'),               fn: m => calcMes(m).ebt,  bg: '#e8f4fd', bold: true },
+            { label: legDRE('RECEITA_FINANCEIRA'),   fn: m => calcMes(m).rf,   bg: '', grupoId: 'RECEITA_FINANCEIRA' },
+            { label: legDRE('DESP_FINANCEIRA'),      fn: m => -calcMes(m).df,  bg: '', grupoId: 'DESP_FINANCEIRA' },
+            { label: legDRE('RESULTADO_FINANCEIRO'), fn: m => calcMes(m).rfin, bg: '#f5f5f5', bold: true },
+            { label: legDRE('LAJIR'),                fn: m => calcMes(m).lajir,bg: '#e8f4fd', bold: true },
+            { label: legDRE('EMPRESTIMO'),           fn: m => -calcMes(m).emp, bg: '', grupoId: 'EMPRESTIMO' },
+            { label: legDRE('INVESTIMENTO'),         fn: m => -calcMes(m).inv, bg: '', grupoId: 'INVESTIMENTO' },
+            { label: legDRE('OUTRAS_RECEITAS'),      fn: m => calcMes(m).or,   bg: '', grupoId: 'OUTRAS_RECEITAS' },
+            { label: legDRE('OUTRAS_DESPESAS'),      fn: m => -calcMes(m).od,  bg: '', grupoId: 'OUTRAS_DESPESAS' },
+            { label: legDRE('RESULTADO_LIQUIDO'),    fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
         ];
 
         const corSinal = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#999;';
         const fmtVSinal = v => v !== 0 ? (v < 0 ? '- ' : '+ ') + 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+
+        // Bases para as colunas de % (por mês = Receita Bruta do mês; Acumulado = Receita Bruta do ano)
+        const rbMes = m => dados['RECEITA_BRUTA'].valores[m];
+        const totalReceitaBrutaAno = dados['RECEITA_BRUTA'].valores.reduce((s, v) => s + v, 0);
+        const pctRB = v => totalReceitaBrutaAno > 0 ? (Math.abs(v) / totalReceitaBrutaAno * 100).toFixed(1) + '%' : '-';
+        const pctMes = (v, m) => { const base = rbMes(m); return base > 0 ? (Math.abs(v) / base * 100).toFixed(1) + '%' : '-'; };
 
         tbody.innerHTML = '';
         linhas.forEach(linha => {
@@ -8546,19 +8861,24 @@
                 const estilo = (linha.sinal ? corSinal(v) : (linha.cor ? '' : cor(v))) + 'padding:5px 8px;text-align:right;' +
                     (clicavelGrupo ? 'cursor:pointer;' : '');
                 const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',${m})" title="Clique para ver os lançamentos"` : '';
-                return `<td data-mes="${m}" style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(v) : fmtV(v)}</td>`;
+                const celVal = `<td data-mes="${m}" style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(v) : fmtV(v)}</td>`;
+                const celValPct = `<td data-mes="${m}" class="dre-col-pct" style="text-align:right;padding:5px 4px;font-size:10px;color:#999;">${pctMes(v, m)}</td>`;
+                return celVal + celValPct;
             };
             const celTotal = (() => {
                 const estilo = 'text-align:right;padding:5px 8px;font-weight:700;' + (linha.sinal ? corSinal(total) : (linha.cor ? '' : cor(total))) +
                     (clicavelGrupo ? 'cursor:pointer;' : '');
                 const clique = clicavelGrupo ? ` onclick="abrirDetalheMensalDRE('grupo','${linha.grupoId}',-1)" title="Clique para ver os lançamentos do ano"` : '';
-                return `<td style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(total) : fmtV(total)}</td>`;
+                return `<td class="dre-col-total" style="${estilo}"${clique}>${linha.sinal ? fmtVSinal(total) : fmtV(total)}</td>`;
             })();
+
+            const celPct = '<td class="dre-col-total dre-col-pct" style="text-align:right;padding:5px 8px;font-weight:600;color:#777;">' + pctRB(total) + '</td>';
 
             tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
                 '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
                 vals.map((v, m) => celMes(v, m)).join('') +
                 celTotal +
+                celPct +
                 '</tr>';
 
             // Subcategorias expandidas (clicáveis também)
@@ -8567,12 +8887,17 @@
                     const mesesSub = subDados.valores;
                     const totalSub = mesesSub.reduce((s,v)=>s+v,0);
                     if (totalSub === 0) return;
-                    const celMesSub = (v, m) => `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos">${v > 0 ? fmtV(-v) : '-'}</td>`;
+                    const celMesSub = (v, m) => {
+                        const celVal = `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos">${v > 0 ? fmtV(-v) : '-'}</td>`;
+                        const celValPct = `<td data-mes="${m}" class="dre-col-pct" style="text-align:right;padding:4px 4px;font-size:10px;color:#bbb;">${v > 0 ? pctMes(v, m) : '-'}</td>`;
+                        return celVal + celValPct;
+                    };
                     tbody.innerHTML += '<tr style="background:#fafafa;">' +
                         '<td style="padding:4px 8px 4px 22px;font-size:11px;color:#888;">' +
                         '<span style="color:#bbb;margin-right:4px;">\u21b3</span>' + nomeSub + '</td>' +
                         mesesSub.map((v, m) => celMesSub(v, m)).join('') +
-                        `<td style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(-totalSub) + '</td>' +
+                        `<td class="dre-col-total" style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(-totalSub) + '</td>' +
+                        '<td class="dre-col-total dre-col-pct" style="text-align:right;padding:4px 8px;font-size:11px;color:#aaa;">' + pctRB(totalSub) + '</td>' +
                         '</tr>';
                 });
             }
@@ -8580,6 +8905,7 @@
 
         _popularChecksMesesDRE();
         _aplicarVisibilidadeMesesDRE();
+        _aplicarVisibilidadeTotalDRE();
     }
 
     // ---- Ocultar/Exibir meses na tabela DRE Mensal ----
@@ -8618,6 +8944,23 @@
             el.style.display = _mesesVisiveisDRE[m] ? '' : 'none';
         });
     }
+    // ---- Ocultar/Exibir a coluna Acumulado Ano ----
+    function _aplicarVisibilidadeTotalDRE() {
+        document.querySelectorAll('#tabelaDREMensal .dre-col-total').forEach(el => {
+            el.style.display = _dreMostrarTotal ? '' : 'none';
+        });
+        const chk = document.getElementById('chkMostrarTotalDRE');
+        if (chk) chk.checked = _dreMostrarTotal;
+    }
+    function toggleMostrarTotalDRE() {
+        _dreMostrarTotal = !_dreMostrarTotal;
+        _aplicarVisibilidadeTotalDRE();
+    }
+    // ---- Base da Amortização de Empréstimos (competência x vencimento) ----
+    function alterarBaseEmprestimoDRE(valor) {
+        _dreEmprestimoBase = (valor === 'vencimento') ? 'vencimento' : 'competencia';
+        if (typeof carregarDRE === 'function') carregarDRE();
+    }
 
     // Abre o modal de detalhe de uma célula da DRE Mensal (grupo ou subcategoria, de um mês específico ou do ano todo)
     // tipo: 'grupo' | 'cpv' | 'da'    chave: grupoId (string) para 'grupo', ou índice (number) para 'cpv'/'da'    mes: 0-11, ou -1 para o ano todo
@@ -8627,7 +8970,7 @@
         let titulo = '';
         if (tipo === 'grupo') {
             const grupo = DRE_GRUPOS.find(g => g.id === chave);
-            titulo = grupo ? grupo.label.trim() : chave;
+            titulo = grupo ? (legDRE(chave) || grupo.label).trim() : chave;
             const porMes = _dreMensalItensGrupo[chave] || [];
             itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
         } else {
@@ -8745,44 +9088,126 @@
     }
 
     function exportarExcelDRE() {
-        _garantirXLSX(_exportarExcelDREInterno);
+        _garantirXLSXStyle(_exportarExcelDREColorido);
     }
 
-    function _exportarExcelDREInterno() {
-        const linhasDom = document.querySelectorAll('#dreCorpo tr');
-        if (!linhasDom.length) {
-            alert('Não há dados de DRE para exportar.');
-            return;
+    // Extrai a DRE Mensal (tabela exibida) como matriz, respeitando colunas ocultas (meses/Total)
+    function _dreMensalParaMatriz() {
+        const tabela = document.getElementById('tabelaDREMensal');
+        if (!tabela) return null;
+        const matriz = [];
+        tabela.querySelectorAll('tr').forEach(tr => {
+            const linha = [];
+            tr.querySelectorAll('th, td').forEach(cel => {
+                if (cel.style && cel.style.display === 'none') return; // ignora colunas ocultas
+                linha.push((cel.innerText || '').replace(/ /g, ' ').replace(/\s+/g, ' ').trim());
+            });
+            if (linha.some(c => c !== '')) matriz.push(linha);
+        });
+        return matriz;
+    }
+
+    // Converte cor CSS (rgb/rgba) para HEX de 6 dígitos; retorna null se transparente
+    function _corParaHex(cssCor) {
+        if (!cssCor) return null;
+        const m = cssCor.match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        const p = m[1].split(',').map(s => parseFloat(s.trim()));
+        if (p.length >= 4 && p[3] === 0) return null; // transparente
+        const h = n => ('0' + Math.max(0, Math.min(255, Math.round(n))).toString(16)).slice(-2).toUpperCase();
+        return h(p[0]) + h(p[1]) + h(p[2]);
+    }
+    // Fundo efetivo de uma célula: sobe pelos ancestrais (tr/thead) até achar cor sólida
+    function _bgEfetivoHex(el) {
+        let n = el;
+        while (n && n.nodeType === 1) {
+            const hex = _corParaHex(getComputedStyle(n).backgroundColor);
+            if (hex) return hex;
+            if (n.tagName === 'TABLE') break;
+            n = n.parentElement;
         }
+        return null;
+    }
+    function _hexParaRGB(hex) {
+        if (!hex) return null;
+        return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+    }
+
+    // Carrega xlsx-js-style (fork do SheetJS com suporte a estilos/cores) sob demanda
+    var _xlsxStyleCarregando = false;
+    function _garantirXLSXStyle(callback) {
+        if (window.XLSX && window._xlsxComEstilo) { callback(); return; }
+        if (_xlsxStyleCarregando) { alert('A biblioteca de Excel ainda está carregando. Aguarde alguns segundos e tente novamente.'); return; }
+        _xlsxStyleCarregando = true;
+        const urls = [
+            'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js',
+            'https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx-js-style/1.2.0/xlsx.bundle.js'
+        ];
+        let i = 0;
+        (function tentar() {
+            if (i >= urls.length) { _xlsxStyleCarregando = false; alert('Não foi possível carregar o gerador de Excel. Verifique sua conexão e tente novamente.'); return; }
+            const s = document.createElement('script');
+            s.src = urls[i++];
+            s.onload = function () { _xlsxStyleCarregando = false; window._xlsxComEstilo = true; callback(); };
+            s.onerror = function () { tentar(); };
+            document.head.appendChild(s);
+        })();
+    }
+
+    // Exporta a DRE Mensal para .xlsx replicando as cores exibidas na tela
+    function _exportarExcelDREColorido() {
+        const tabela = document.getElementById('tabelaDREMensal');
+        const trs = tabela ? Array.prototype.slice.call(tabela.querySelectorAll('tr')) : [];
+        if (!trs.length) { alert('Não há dados na DRE Mensal para exportar. Selecione um ano.'); return; }
         try {
-            const rows = [['Descrição', 'Valor (R$)', 'AV %']];
-            linhasDom.forEach(tr => {
-                const tds = tr.querySelectorAll('td');
-                if (tds.length === 1) {
-                    // Linha de seção (RECEITAS, CUSTOS, DESPESAS OPERACIONAIS, ...)
-                    const texto = tds[0].textContent.trim();
-                    if (texto) rows.push([texto, '', '']);
-                } else if (tds.length >= 3) {
-                    const desc = tds[0].textContent.trim();
-                    if (!desc) return;
-                    const valorTxt = tds[1].textContent.trim();
-                    const avTxt = tds[2].textContent.trim();
-                    // Converte "R$ 1.234,56" em número, quando possível, para ficar como número no Excel
-                    const valorNum = parseFloat(valorTxt.replace('R$', '').trim().replace(/\./g, '').replace(',', '.'));
-                    rows.push([desc, isNaN(valorNum) ? valorTxt : valorNum, avTxt]);
-                }
+            const aoa = [];
+            const estilos = [];
+            trs.forEach(tr => {
+                const cels = Array.prototype.slice.call(tr.querySelectorAll('th, td')).filter(c => !(c.style && c.style.display === 'none'));
+                if (!cels.length) return;
+                const linhaVal = [];
+                const linhaEst = [];
+                cels.forEach((c, idx) => {
+                    linhaVal.push((c.innerText || '').replace(/\s+/g, ' ').trim());
+                    const cs = getComputedStyle(c);
+                    const ehHeader = c.tagName === 'TH';
+                    const fill = _bgEfetivoHex(c);
+                    const fontColor = _corParaHex(cs.color) || '000000';
+                    const negrito = ehHeader || parseInt(cs.fontWeight) >= 600 || cs.fontWeight === 'bold';
+                    let halign = cs.textAlign;
+                    if (halign !== 'center' && halign !== 'right') halign = (idx === 0 ? 'left' : 'right');
+                    linhaEst.push({ fill: fill, fontColor: fontColor, negrito: negrito, halign: halign, header: ehHeader });
+                });
+                aoa.push(linhaVal);
+                estilos.push(linhaEst);
             });
 
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws['!cols'] = [{wch:42},{wch:16},{wch:10}];
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'DRE');
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            const bordaFina = { style: 'thin', color: { rgb: 'D9D9D9' } };
+            for (let r = 0; r < aoa.length; r++) {
+                for (let cIdx = 0; cIdx < aoa[r].length; cIdx++) {
+                    const addr = XLSX.utils.encode_cell({ r: r, c: cIdx });
+                    if (!ws[addr]) continue;
+                    const st = estilos[r][cIdx];
+                    ws[addr].s = {
+                        fill: st.fill ? { patternType: 'solid', fgColor: { rgb: st.fill } } : undefined,
+                        font: { color: { rgb: st.fontColor }, bold: !!st.negrito, sz: st.header ? 10 : 9 },
+                        alignment: { horizontal: st.halign, vertical: 'center', wrapText: false },
+                        border: { top: bordaFina, bottom: bordaFina, left: bordaFina, right: bordaFina }
+                    };
+                }
+            }
+            const cols = [{ wch: 34 }];
+            for (let i = 1; i < aoa[0].length; i++) cols.push({ wch: aoa[0][i] === '%' ? 7 : 14 });
+            ws['!cols'] = cols;
 
-            const anoSel = document.getElementById('filtroAnoDRE') ? (document.getElementById('filtroAnoDRE').value || 'completo') : 'completo';
-            const mesSel = document.getElementById('filtroMesDRE') ? document.getElementById('filtroMesDRE').value : '';
-            XLSX.writeFile(wb, 'DRE_' + anoSel + (mesSel ? '_' + mesSel : '') + '.xlsx');
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'DRE Mensal');
+            const anoSel = document.getElementById('filtroAnoDRE') ? (document.getElementById('filtroAnoDRE').value || 'ano') : 'ano';
+            XLSX.writeFile(wb, 'DRE_Mensal_' + anoSel + '.xlsx');
         } catch (e) {
-            console.error('Erro ao gerar Excel do DRE:', e);
+            console.error('Erro ao gerar Excel do DRE Mensal:', e);
             alert('Não foi possível gerar o Excel: ' + (e && e.message ? e.message : e));
         }
     }
@@ -9432,7 +9857,109 @@
     // ================================================================
     // PDF — DRE
     // ================================================================
-    function gerarPDFDRE() {
+    // Converte cor CSS (rgb/rgba) para [r,g,b]; retorna null se transparente
+    function _corParaRGB(cssCor) {
+        if (!cssCor) return null;
+        const m = cssCor.match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        const p = m[1].split(',').map(s => parseFloat(s.trim()));
+        if (p.length >= 4 && p[3] === 0) return null;
+        return [Math.round(p[0]), Math.round(p[1]), Math.round(p[2])];
+    }
+
+    function abrirModalPDFDRE() {
+        const matriz = _dreMensalParaMatriz();
+        if (!matriz || matriz.length <= 1) { alert('Não há dados na DRE Mensal para imprimir. Selecione um ano.'); return; }
+        document.getElementById('modalPDFDRE').classList.add('active');
+    }
+
+    function gerarPDFDRE(orientacao) {
+        closeModal('modalPDFDRE');
+        const { jsPDF } = window.jspdf;
+        const tabela = document.getElementById('tabelaDREMensal');
+        const trs = tabela ? Array.prototype.slice.call(tabela.querySelectorAll('tr')) : [];
+        if (trs.length <= 1) { alert('Não há dados na DRE Mensal para imprimir. Selecione um ano.'); return; }
+        const orient = (orientacao === 'portrait') ? 'portrait' : 'landscape';
+
+        // Modelo de células com estilo (cores iguais às da tela)
+        const linhas = [];
+        trs.forEach(tr => {
+            const cels = Array.prototype.slice.call(tr.querySelectorAll('th, td')).filter(c => !(c.style && c.style.display === 'none'));
+            if (!cels.length) return;
+            linhas.push(cels.map((c, idx) => {
+                const cs = getComputedStyle(c);
+                return {
+                    txt: normalizarTexto((c.innerText || '').replace(/\s+/g, ' ').trim()),
+                    fill: _hexParaRGB(_bgEfetivoHex(c)),
+                    color: _corParaRGB(cs.color) || [0, 0, 0],
+                    bold: c.tagName === 'TH' || parseInt(cs.fontWeight) >= 600 || cs.fontWeight === 'bold',
+                    header: c.tagName === 'TH',
+                    align: (cs.textAlign === 'center' ? 'center' : (cs.textAlign === 'right' || idx > 0 ? 'right' : 'left'))
+                };
+            }));
+        });
+        const est = linhas;
+        const head = [linhas[0].map(c => c.txt)];
+        const body = linhas.slice(1).map(r => r.map(c => c.txt));
+
+        const doc = new jsPDF({ orientation: orient, unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+
+        // Cabeçalho da página
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 14, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 9);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        const hojeM = new Date().toLocaleDateString('pt-BR');
+        doc.text('Gerado em: ' + hojeM, pageW - 10, 9, { align: 'right' });
+
+        const anoSelM = document.getElementById('filtroAnoDRE') ? (document.getElementById('filtroAnoDRE').value || '') : '';
+        const tituloM = 'DRE Mensal' + (anoSelM ? ' - ' + anoSelM : '');
+        doc.setTextColor(40, 40, 40);
+        doc.setFontSize(13);
+        doc.setFont(undefined, 'bold');
+        doc.text(tituloM, pageW / 2, 21, { align: 'center' });
+
+        const nCols = head[0].length;
+        const fonte = orient === 'portrait' ? (nCols > 15 ? 4.5 : 6) : (nCols > 20 ? 5.5 : 7);
+
+        doc.autoTable({
+            head: head,
+            body: body,
+            startY: 26,
+            styles: { fontSize: fonte, cellPadding: 1.2, overflow: 'linebreak', lineColor: [225, 225, 225], lineWidth: 0.1, textColor: [40, 40, 40], valign: 'middle' },
+            columnStyles: { 0: { halign: 'left', cellWidth: orient === 'portrait' ? 30 : 42 } },
+            theme: 'grid',
+            margin: { left: 6, right: 6 },
+            tableWidth: 'auto',
+            didParseCell: function (data) {
+                const rowIdx = data.section === 'head' ? 0 : data.row.index + 1;
+                const cell = est[rowIdx] && est[rowIdx][data.column.index];
+                if (!cell) return;
+                data.cell.styles.halign = cell.align;
+                if (cell.bold) data.cell.styles.fontStyle = 'bold';
+                if (cell.fill) data.cell.styles.fillColor = cell.fill;
+                data.cell.styles.textColor = cell.color;
+            }
+        });
+
+        const totalPg = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPg; p++) {
+            doc.setPage(p);
+            doc.setFontSize(7);
+            doc.setTextColor(120, 120, 120);
+            doc.setFont(undefined, 'normal');
+            doc.text('Página ' + p + ' de ' + totalPg, pageW / 2, pageH - 5, { align: 'center' });
+        }
+        doc.save('DRE_Mensal_' + (anoSelM || 'ano') + '.pdf');
+    }
+
+    function gerarPDFDRE_old() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const pageW = doc.internal.pageSize.getWidth();
@@ -9560,6 +10087,272 @@
 
         const tituloArq = titulo.replace(/[^a-zA-Z0-9_\-]/g, '_').replace(/_+/g, '_');
         doc.save('DRE_' + tituloArq + '_' + hoje.replace(/\//g, '-') + '.pdf');
+    }
+
+    // ================================================================
+    // FLUXO DE CAIXA DIÁRIO
+    // ================================================================
+    const _FD_MESES = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    let _fdDadosDias = [];   // cache dos totais por dia para o PDF
+    let _fdInicializado = false;
+
+    function _fdSelValores() {
+        const anoEl = document.getElementById('filtroAnoFluxoDiario');
+        const mesEl = document.getElementById('filtroMesFluxoDiario');
+        const hoje = new Date();
+        let ano = anoEl && anoEl.value ? parseInt(anoEl.value) : hoje.getFullYear();
+        let mes = mesEl && mesEl.value ? parseInt(mesEl.value) : (hoje.getMonth() + 1);
+        return { ano, mes };
+    }
+
+    function fluxoDiarioMesAtual() {
+        const hoje = new Date();
+        const anoEl = document.getElementById('filtroAnoFluxoDiario');
+        const mesEl = document.getElementById('filtroMesFluxoDiario');
+        if (anoEl) anoEl.value = String(hoje.getFullYear());
+        if (mesEl) mesEl.value = String(hoje.getMonth() + 1).padStart(2, '0');
+        carregarFluxoDiario();
+    }
+
+    function fluxoDiarioNavegar(delta) {
+        let { ano, mes } = _fdSelValores();
+        mes += delta;
+        if (mes < 1) { mes = 12; ano--; }
+        else if (mes > 12) { mes = 1; ano++; }
+        const anoEl = document.getElementById('filtroAnoFluxoDiario');
+        const mesEl = document.getElementById('filtroMesFluxoDiario');
+        // garante que o ano exista nas opções
+        if (anoEl && !Array.prototype.some.call(anoEl.options, o => o.value === String(ano))) {
+            const opt = document.createElement('option'); opt.value = ano; opt.textContent = ano; anoEl.appendChild(opt);
+        }
+        if (anoEl) anoEl.value = String(ano);
+        if (mesEl) mesEl.value = String(mes).padStart(2, '0');
+        carregarFluxoDiario();
+    }
+
+    function _fdPreencherContas() {
+        const sel = document.getElementById('contaFluxoDiario');
+        if (!sel) return;
+        const atual = sel.value;
+        sel.innerHTML = '<option value="">Todas as Contas</option>';
+        (dadosCache.bancos || []).filter(b => b.ativo !== false).forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.id;
+            opt.textContent = b.nome + (b.tipo ? ' (' + b.tipo + ')' : '');
+            sel.appendChild(opt);
+        });
+        sel.value = atual;
+    }
+
+    async function carregarFluxoDiario() {
+        const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
+        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
+        if (contasReceber === null || contasPagar === null) return;
+
+        // Na primeira abertura, posiciona no mês/ano atual
+        if (!_fdInicializado) {
+            const h = new Date();
+            const anoEl = document.getElementById('filtroAnoFluxoDiario');
+            const mesEl = document.getElementById('filtroMesFluxoDiario');
+            if (anoEl && Array.prototype.some.call(anoEl.options, o => o.value === String(h.getFullYear()))) anoEl.value = String(h.getFullYear());
+            if (mesEl) mesEl.value = String(h.getMonth() + 1).padStart(2, '0');
+            _fdInicializado = true;
+        }
+
+        _fdPreencherContas();
+        const { ano, mes } = _fdSelValores();
+        const base = (document.getElementById('baseFluxoDiario') || {}).value || 'realizado';
+        const contaSel = (document.getElementById('contaFluxoDiario') || {}).value || '';
+        const mesStr = String(mes).padStart(2, '0');
+        const prefixo = ano + '-' + mesStr;
+        const diasNoMes = new Date(ano, mes, 0).getDate();
+
+        // Badge de conta
+        const badge = document.getElementById('fdBadgeConta');
+        if (badge) {
+            if (!contaSel) badge.textContent = '📊 Consolidado';
+            else {
+                const b = (dadosCache.bancos || []).find(x => String(x.id) === String(contaSel));
+                badge.textContent = '🏦 ' + (b ? b.nome : 'Conta');
+            }
+        }
+
+        const filtraConta = c => !contaSel || String(c.banco_id) === String(contaSel);
+
+        // Data de referência conforme a base
+        function dataRefReceber(c) { return base === 'previsto' ? c.data_vencimento : (c.status === 'recebido' ? c.data_recebimento : null); }
+        function dataRefPagar(c) { return base === 'previsto' ? c.data_vencimento : (c.status === 'pago' ? c.data_pagamento : null); }
+
+        const receitaDia = Array(diasNoMes + 1).fill(0);
+        const despesaDia = Array(diasNoMes + 1).fill(0);
+
+        contasReceber.forEach(c => {
+            if (!filtraConta(c)) return;
+            const d = dataRefReceber(c);
+            if (!d || !d.startsWith(prefixo)) return;
+            const dia = parseInt(d.substring(8, 10));
+            if (dia >= 1 && dia <= diasNoMes) receitaDia[dia] += parseFloat(c.valor || 0);
+        });
+        contasPagar.forEach(c => {
+            if (!filtraConta(c)) return;
+            const d = dataRefPagar(c);
+            if (!d || !d.startsWith(prefixo)) return;
+            const dia = parseInt(d.substring(8, 10));
+            if (dia >= 1 && dia <= diasNoMes) despesaDia[dia] += parseFloat(c.valor || 0);
+        });
+
+        // Totais e análise
+        let totRec = 0, totDesp = 0, diasMov = 0;
+        let melhorDia = null, piorDia = null, melhorVal = -Infinity, piorVal = Infinity;
+        const dias = [];
+        for (let d = 1; d <= diasNoMes; d++) {
+            const rec = receitaDia[d], desp = despesaDia[d], res = rec - desp;
+            const temMov = (rec !== 0 || desp !== 0);
+            totRec += rec; totDesp += desp;
+            if (temMov) {
+                diasMov++;
+                if (res > melhorVal) { melhorVal = res; melhorDia = d; }
+                if (res < piorVal) { piorVal = res; piorDia = d; }
+            }
+            dias.push({ dia: d, rec, desp, res, temMov });
+        }
+        const totRes = totRec - totDesp;
+        _fdDadosDias = { ano, mes, dias, totRec, totDesp, totRes };
+
+        // Cards
+        document.getElementById('fdReceitaMes').textContent = fmtBRL(totRec);
+        document.getElementById('fdDespesaMes').textContent = fmtBRL(totDesp);
+        const resEl = document.getElementById('fdResultadoMes');
+        resEl.textContent = fmtValSig(totRes);
+        resEl.style.color = totRes >= 0 ? '#28a745' : '#dc3545';
+        const resBox = document.getElementById('fdResultadoMesBox');
+        if (resBox) resBox.style.borderLeftColor = totRes >= 0 ? '#28a745' : '#dc3545';
+        document.getElementById('fdDiasMovimento').textContent = diasMov + ' / ' + diasNoMes;
+
+        // Análise
+        const analiseEl = document.getElementById('fdAnalise');
+        if (analiseEl) {
+            if (diasMov > 0) {
+                analiseEl.innerHTML = '<strong>ANÁLISE DO RESULTADO</strong>&nbsp;&nbsp; ' +
+                    'Melhor dia de ' + _FD_MESES[mes] + ': <strong>dia ' + melhorDia + '</strong> (' +
+                    '<span style="color:' + (melhorVal >= 0 ? '#28a745' : '#dc3545') + ';">' + fmtValSig(melhorVal) + '</span>)' +
+                    '&nbsp;&nbsp;|&nbsp;&nbsp; Pior dia: <strong>dia ' + piorDia + '</strong> (' +
+                    '<span style="color:' + (piorVal >= 0 ? '#28a745' : '#dc3545') + ';">' + fmtValSig(piorVal) + '</span>)';
+            } else {
+                analiseEl.innerHTML = '<strong>ANÁLISE DO RESULTADO</strong>&nbsp;&nbsp; Nenhum movimento neste mês.';
+            }
+        }
+
+        // Tabelas (1-10, 11-20, 21-fim)
+        _fdRenderizarTabelas(dias, diasNoMes, ano, mes, { totRec, totDesp, totRes });
+    }
+
+    function _fdRenderizarTabelas(dias, diasNoMes, ano, mes, totais) {
+        const cont = document.getElementById('fdTabelasContainer');
+        if (!cont) return;
+        const hoje = new Date();
+        const ehMesAtual = (ano === hoje.getFullYear() && mes === (hoje.getMonth() + 1));
+        const diaHoje = hoje.getDate();
+
+        const fmtCel = v => v !== 0 ? fmtBRL(v) : 'R$ —';
+        const blocos = [[1, 10], [11, 20], [21, diasNoMes]];
+
+        let html = '';
+        blocos.forEach((faixa, idxBloco) => {
+            const ehUltimo = idxBloco === 2;
+            let linhas = '';
+            for (let d = faixa[0]; d <= faixa[1]; d++) {
+                const info = dias[d - 1];
+                if (!info) continue;
+                const destaqueHoje = (ehMesAtual && d === diaHoje) ? 'box-shadow:0 0 0 2px #e67e22 inset;' : '';
+                let resCel;
+                if (!info.temMov) {
+                    resCel = '<td style="text-align:right;color:#bbb;padding:7px 10px;' + destaqueHoje + '">—</td>';
+                } else {
+                    const pos = info.res >= 0;
+                    const txt = pos ? fmtBRL(info.res) : '(' + fmtBRL(info.res) + ')';
+                    resCel = '<td style="text-align:right;font-weight:700;color:#fff;background:' + (pos ? '#28a745' : '#dc3545') + ';padding:7px 10px;' + destaqueHoje + '">' + txt + '</td>';
+                }
+                linhas += '<tr style="' + (d % 2 === 0 ? 'background:#fafafa;' : '') + '">' +
+                    '<td style="padding:7px 10px;color:#666;font-weight:600;">' + d + '</td>' +
+                    '<td style="text-align:right;padding:7px 10px;color:' + (info.rec ? '#28a745' : '#ccc') + ';">' + fmtCel(info.rec) + '</td>' +
+                    '<td style="text-align:right;padding:7px 10px;color:' + (info.desp ? '#dc3545' : '#ccc') + ';">' + fmtCel(info.desp) + '</td>' +
+                    resCel +
+                    '</tr>';
+            }
+            let tfoot = '';
+            if (ehUltimo) {
+                const pos = totais.totRes >= 0;
+                tfoot = '<tfoot><tr style="font-weight:700;background:#f0f0f0;">' +
+                    '<td style="padding:8px 10px;">Total</td>' +
+                    '<td style="text-align:right;padding:8px 10px;color:#28a745;">' + fmtBRL(totais.totRec) + '</td>' +
+                    '<td style="text-align:right;padding:8px 10px;color:#dc3545;">' + fmtBRL(totais.totDesp) + '</td>' +
+                    '<td style="text-align:right;padding:8px 10px;color:' + (pos ? '#28a745' : '#dc3545') + ';">' + (pos ? fmtBRL(totais.totRes) : '(' + fmtBRL(totais.totRes) + ')') + '</td>' +
+                    '</tr></tfoot>';
+            }
+            html += '<div class="card" style="padding:0;overflow:hidden;">' +
+                '<table style="width:100%;font-size:12px;border-collapse:collapse;">' +
+                '<thead><tr style="background:#5a6570;color:#fff;">' +
+                '<th style="text-align:left;padding:8px 10px;width:44px;">DIA</th>' +
+                '<th style="text-align:right;padding:8px 10px;">RECEITA</th>' +
+                '<th style="text-align:right;padding:8px 10px;">DESPESA</th>' +
+                '<th style="text-align:right;padding:8px 10px;">RESULTADO DO DIA</th>' +
+                '</tr></thead><tbody>' + linhas + '</tbody>' + tfoot + '</table></div>';
+        });
+        cont.innerHTML = html;
+    }
+
+    function gerarPDFFluxoDiario() {
+        if (!_fdDadosDias || !_fdDadosDias.dias) { alert('Não há dados para imprimir.'); return; }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const { ano, mes, dias, totRec, totDesp, totRes } = _fdDadosDias;
+
+        doc.setFillColor(255, 122, 66);
+        doc.rect(0, 0, pageW, 14, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12); doc.setFont(undefined, 'bold');
+        doc.text('CAP Gestão Financeira', 10, 9);
+        doc.setFontSize(9); doc.setFont(undefined, 'normal');
+        doc.text('Gerado em: ' + new Date().toLocaleDateString('pt-BR'), pageW - 10, 9, { align: 'right' });
+
+        const contaSel = (document.getElementById('contaFluxoDiario') || {}).value || '';
+        const contaLabel = !contaSel ? 'Consolidado' : (((dadosCache.bancos || []).find(x => String(x.id) === String(contaSel)) || {}).nome || 'Conta');
+        doc.setTextColor(40, 40, 40); doc.setFontSize(13); doc.setFont(undefined, 'bold');
+        doc.text('Fluxo de Caixa Diário - ' + _FD_MESES[mes] + '/' + ano + ' (' + contaLabel + ')', pageW / 2, 21, { align: 'center' });
+
+        const body = dias.map(d => {
+            const res = d.temMov ? (d.res >= 0 ? fmtBRL(d.res) : '(' + fmtBRL(d.res) + ')') : '—';
+            return [String(d.dia), d.rec ? fmtBRL(d.rec) : '—', d.desp ? fmtBRL(d.desp) : '—', res];
+        });
+        doc.autoTable({
+            head: [['Dia', 'Receita', 'Despesa', 'Resultado do Dia']],
+            body: body,
+            foot: [['Total', fmtBRL(totRec), fmtBRL(totDesp), (totRes >= 0 ? fmtBRL(totRes) : '(' + fmtBRL(totRes) + ')')]],
+            startY: 26,
+            styles: { fontSize: 8, cellPadding: 1.5, halign: 'right' },
+            columnStyles: { 0: { halign: 'center', cellWidth: 18 } },
+            headStyles: { fillColor: [90, 101, 112], textColor: 255, halign: 'right' },
+            footStyles: { fillColor: [240, 240, 240], textColor: [40, 40, 40], fontStyle: 'bold', halign: 'right' },
+            theme: 'grid',
+            margin: { left: 12, right: 12 },
+            didParseCell: function (data) {
+                if (data.section === 'body' && data.column.index === 3) {
+                    const t = String(data.cell.raw || '');
+                    if (t.indexOf('(') === 0) data.cell.styles.textColor = [200, 0, 0];
+                    else if (t !== '—') data.cell.styles.textColor = [0, 128, 0];
+                }
+            }
+        });
+
+        const totalPg = doc.internal.getNumberOfPages();
+        for (let p = 1; p <= totalPg; p++) {
+            doc.setPage(p); doc.setFontSize(7); doc.setTextColor(120, 120, 120); doc.setFont(undefined, 'normal');
+            doc.text('Página ' + p + ' de ' + totalPg, pageW / 2, pageH - 5, { align: 'center' });
+        }
+        doc.save('Fluxo_Diario_' + ano + '-' + String(mes).padStart(2, '0') + '.pdf');
     }
 
     // ================================================================
