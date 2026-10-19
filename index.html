@@ -16,6 +16,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script>
+        (function(){ var t='claro'; try{ t=localStorage.getItem('cap_tema')||'claro'; }catch(e){}
+          document.documentElement.setAttribute('data-tema', t==='escuro'?'escuro':'claro'); })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -716,7 +720,407 @@
         .hidden {
             display: none !important;
         }
-    </style>
+        .secao-oculta { display: none !important; }
+/* ================= PAINEL DE LANÇAMENTOS ================= */
+#modalPainelLanc { z-index: 999; }
+#modalPainelLanc .modal-content.pl-box {
+    max-width: 1200px; width: 96%; padding: 0; overflow: hidden;
+    display: flex; flex-direction: column; max-height: 92vh; border-radius: 12px;
+}
+.pl-head {
+    padding: 18px 24px; color: #fff; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    background: linear-gradient(135deg, #FF7A42 0%, #e2581f 100%);
+}
+.pl-kicker { font-size: 11px; letter-spacing: .8px; text-transform: uppercase; opacity: .85; font-weight: 600; }
+.pl-title { font-size: 20px; font-weight: 700; margin-top: 2px; }
+.pl-sub { font-size: 12px; opacity: .9; margin-top: 4px; }
+.pl-x { background: rgba(255,255,255,.18); border: 0; color: #fff; width: 34px; height: 34px; border-radius: 8px; font-size: 20px; cursor: pointer; flex-shrink: 0; }
+.pl-x:hover { background: rgba(255,255,255,.3); }
+.pl-kpis { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; padding: 16px 24px 6px; }
+.pl-kpi { border: 1px solid var(--cor-borda); border-radius: 10px; padding: 10px 14px; border-top: 3px solid #6c757d; }
+.pl-kpi .k { font-size: 10.5px; text-transform: uppercase; letter-spacing: .6px; color: #7a7a7a; font-weight: 600; }
+.pl-kpi .v { font-size: 18px; font-weight: 700; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pl-kpi.ent { border-top-color: #28a745; } .pl-kpi.ent .v { color: #28a745; }
+.pl-kpi.sai { border-top-color: #dc3545; } .pl-kpi.sai .v { color: #dc3545; }
+.pl-kpi.sal { border-top-color: #FF7A42; }
+.pl-kpi.pen { border-top-color: #e6a817; } .pl-kpi.pen .v { color: #c98a00; }
+.pl-toolbar { display: flex; gap: 10px; align-items: center; padding: 12px 24px; flex-wrap: wrap; }
+.pl-busca { flex: 1; min-width: 220px; padding: 9px 12px 9px 34px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 13px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23999' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E") no-repeat 11px center; }
+.pl-busca:focus { outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 0 3px rgba(255,122,66,.15); }
+.pl-seg { display: inline-flex; border: 1px solid var(--cor-borda); border-radius: 8px; overflow: hidden; }
+.pl-seg button { border: 0; background: transparent; padding: 8px 13px; font-size: 12.5px; cursor: pointer; color: inherit; border-right: 1px solid var(--cor-borda); }
+.pl-seg button:last-child { border-right: 0; }
+.pl-seg button.on { background: var(--cor-primaria); color: #fff; font-weight: 600; }
+.pl-wrap { flex: 1; overflow: auto; margin: 0 24px; border: 1px solid var(--cor-borda); border-radius: 10px; min-height: 120px; }
+.pl-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pl-table thead th { position: sticky; top: 0; z-index: 2; background: #2c3e50; color: #fff; font-size: 11px; text-transform: uppercase;
+    letter-spacing: .5px; padding: 10px 12px; text-align: left; white-space: nowrap; font-weight: 600; }
+.pl-table thead th.r, .pl-table td.r { text-align: right; }
+.pl-table td { padding: 10px 12px; border-bottom: 1px solid var(--cor-borda); vertical-align: middle; }
+.pl-table tbody tr:hover td { background: rgba(255,122,66,.06); }
+.pl-desc { font-weight: 600; }
+.pl-meta { font-size: 11.5px; color: #8a8a8a; margin-top: 2px; }
+.pl-parc { display: inline-block; background: #e3f2fd; color: #1565c0; border-radius: 10px; padding: 1px 7px; font-size: 10.5px; font-weight: 600; margin-left: 6px; }
+.pl-tipo { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+.pl-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.pl-badge.ok { background: #d4edda; color: #155724; }
+.pl-badge.pend { background: #fff3cd; color: #856404; }
+.pl-badge.atr { background: #f8d7da; color: #721c24; }
+.pl-val { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pl-acts { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: nowrap; }
+.pl-btn { border: 1px solid var(--cor-borda); background: transparent; color: inherit; border-radius: 7px; padding: 6px 10px; font-size: 12px; cursor: pointer; white-space: nowrap; font-weight: 600; }
+.pl-btn:hover { border-color: #999; }
+.pl-btn.pay { background: #28a745; border-color: #28a745; color: #fff; }
+.pl-btn.pay:hover { background: #218838; }
+.pl-btn.rev { color: #b07d00; border-color: #e6c35c; }
+.pl-btn.del { color: #dc3545; border-color: #f1b0b7; }
+.pl-btn.del:hover { background: #dc3545; color: #fff; border-color: #dc3545; }
+.pl-vazio { text-align: center; padding: 40px 10px; color: #999; }
+.pl-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 24px; flex-wrap: wrap; }
+.pl-foot .info { font-size: 12px; color: #888; }
+.pl-carregando { text-align: center; padding: 40px; color: #999; }
+td.dfc-clic, td.fd-clic, #tabelaFCPMensal td.fcp-clic { cursor: pointer; }
+td.dfc-clic:hover, #tabelaFCPMensal td.fcp-clic:hover { text-decoration: underline; background-color: rgba(255,122,66,0.12) !important; }
+td.fd-clic:hover { text-decoration: underline; filter: brightness(0.93); }
+@media (max-width: 760px) {
+    .pl-kpis { grid-template-columns: repeat(2, minmax(0,1fr)); padding: 12px 14px 4px; }
+    .pl-toolbar, .pl-foot { padding-left: 14px; padding-right: 14px; }
+    .pl-wrap { margin: 0 14px; }
+    .pl-head { padding: 14px; }
+}
+html[data-tema="escuro"] .pl-busca { background-color: var(--esc-sup2); }
+html[data-tema="escuro"] .pl-table thead th { background: #2a3038; }
+html[data-tema="escuro"] .pl-kpi .k, html[data-tema="escuro"] .pl-meta, html[data-tema="escuro"] .pl-foot .info { color: var(--esc-muted); }
+html[data-tema="escuro"] .pl-badge.ok { background: #173a22; color: #7ddc96; }
+html[data-tema="escuro"] .pl-badge.pend { background: #3d3415; color: #ffd866; }
+html[data-tema="escuro"] .pl-badge.atr { background: #43191e; color: #ff8a95; }
+html[data-tema="escuro"] .pl-parc { background: #13303f; color: #7ab8ff; }
+html[data-tema="escuro"] .pl-kpi.pen .v { color: #ffd866; }
+/* ================= APRESENTAÇÃO MENSAL ================= */
+.ap-previa { display: flex; flex-direction: column; gap: 22px; align-items: center; overflow-x: auto; padding: 4px 2px 8px; }
+.ap-slide-wrap { display: flex; flex-direction: column; gap: 6px; }
+.ap-slide-rot { font-size: 12px; color: #888; font-weight: 600; }
+.ap-slide { box-shadow: 0 4px 18px rgba(0,0,0,0.14); border-radius: 4px; }
+html[data-tema="escuro"] .ap-slide-rot { color: var(--esc-muted); }
+/* ================= DASHBOARD DE CHEQUES ================= */
+#modalPainelCheques { z-index: 999; }
+#modalPainelCheques .modal-content.pl-box { max-width: 1200px; width: 96%; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 92vh; border-radius: 12px; }
+.chq-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.chq-kpi { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border-top: 4px solid #6c757d; cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.chq-kpi:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0,0,0,0.12); }
+.chq-kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #777; font-weight: 600; }
+.chq-kpi .v { font-size: 21px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chq-kpi .s { font-size: 12px; color: #888; margin-top: 3px; }
+.chq-kpi.aberto { border-top-color: #e6a817; } .chq-kpi.aberto .v { color: #c98a00; }
+.chq-kpi.atr { border-top-color: #dc3545; } .chq-kpi.atr .v { color: #dc3545; }
+.chq-kpi.comp { border-top-color: #28a745; } .chq-kpi.comp .v { color: #28a745; }
+.chq-kpi.prox { border-top-color: #17a2b8; } .chq-kpi.prox .v { color: #138496; }
+.chq-kpi.info { border-top-color: #FF7A42; cursor: default; } .chq-kpi.info:hover { transform: none; box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
+.chq-insight { background: #fff8f3; border: 1px solid #ffd9c4; border-left: 4px solid #FF7A42; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; font-size: 13px; color: #444; line-height: 1.6; }
+.chq-insight:empty { display: none; }
+.chq-grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
+.chq-grid2 .card { margin-bottom: 0; }
+.chq-mini { width: 100%; border-collapse: collapse; font-size: 12px; }
+.chq-mini th { background: #2c3e50; color: #fff; padding: 7px 8px; text-align: right; font-weight: 600; white-space: nowrap; font-size: 11px; }
+.chq-mini th:first-child, .chq-mini td:first-child { text-align: left; }
+.chq-mini td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--cor-borda); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chq-mini td.clic { cursor: pointer; }
+.chq-mini td.clic:hover { text-decoration: underline; background: rgba(255,122,66,.1); }
+.chq-rank-row { display: grid; grid-template-columns: 28px minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 9px 6px; border-bottom: 1px solid var(--cor-borda); cursor: pointer; border-radius: 6px; }
+.chq-rank-row:hover { background: rgba(255,122,66,.07); }
+.chq-rank-pos { width: 26px; height: 26px; border-radius: 50%; background: #eef0f2; color: #555; font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.chq-rank-row:nth-child(1) .chq-rank-pos { background: #FF7A42; color: #fff; }
+.chq-rank-row:nth-child(2) .chq-rank-pos { background: #ffa77f; color: #fff; }
+.chq-rank-row:nth-child(3) .chq-rank-pos { background: #ffc9b0; color: #7a3410; }
+.chq-rank-nome { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chq-rank-meta { font-size: 11.5px; color: #888; margin-top: 2px; }
+.chq-rank-bar { height: 6px; background: #eef0f2; border-radius: 4px; margin-top: 6px; overflow: hidden; display: flex; }
+.chq-rank-bar span { display: block; height: 100%; }
+.chq-rank-val { text-align: right; font-weight: 700; font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.chq-rank-val small { display: block; font-weight: 500; font-size: 11px; color: #888; }
+.card-title .pl-seg button { color: var(--cor-texto); font-size: 12px; font-weight: 500; }
+.card-title .pl-seg button.on { color: #fff; font-weight: 600; }
+.chq-vazio { text-align: center; color: #999; padding: 24px 8px; font-size: 13px; }
+.chq-prox-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 8px 6px; border-bottom: 1px solid var(--cor-borda); cursor: pointer; font-size: 13px; border-radius: 6px; }
+.chq-prox-row:hover { background: rgba(255,122,66,.07); }
+.chq-dias { display: inline-block; min-width: 64px; text-align: center; font-size: 11px; font-weight: 700; border-radius: 12px; padding: 2px 8px; background: #e3f2fd; color: #1565c0; }
+.chq-dias.hoje { background: #fff3cd; color: #856404; }
+@media (max-width: 900px) { .chq-grid2 { grid-template-columns: 1fr; } }
+html[data-tema="escuro"] .chq-kpi { background: var(--esc-sup); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+html[data-tema="escuro"] .chq-kpi .k, html[data-tema="escuro"] .chq-kpi .s, html[data-tema="escuro"] .chq-rank-meta, html[data-tema="escuro"] .chq-rank-val small { color: var(--esc-muted); }
+html[data-tema="escuro"] .chq-kpi.aberto .v { color: #ffd866; }
+html[data-tema="escuro"] .chq-insight { background: #2a1d16; border-color: #5a3420; color: #e3e5e8; }
+html[data-tema="escuro"] .chq-mini th { background: #2a3038; }
+html[data-tema="escuro"] .chq-rank-pos, html[data-tema="escuro"] .chq-rank-bar { background: #2c3138; color: #ccc; }
+html[data-tema="escuro"] .chq-dias { background: #13303f; color: #7ab8ff; }
+html[data-tema="escuro"] .chq-dias.hoje { background: #3d3415; color: #ffd866; }
+
+
+
+/* ================= TEMAS: CLARO E ESCURO ================= */
+.tema-toggle {
+    margin: 0 12px 8px; padding: 9px 12px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; font-weight: 600; width: calc(100% - 24px);
+    background: rgba(255,122,66,0.12); color: var(--cor-primaria);
+    border: 1px solid rgba(255,122,66,0.35); transition: background .2s;
+}
+.tema-toggle:hover { background: rgba(255,122,66,0.22); }
+.tema-toggle-login {
+    position: fixed; top: 14px; right: 14px; z-index: 50; width: auto; margin: 0;
+    background: rgba(255,255,255,0.9);
+}
+.sidebar, .menu-item, .card, .stat-card, .table-container, .filter-container, .modal-content, .page-header {
+    transition: background-color .2s, color .2s, border-color .2s;
+}
+
+/* ---------- TEMA CLARO (inclui menu lateral) ---------- */
+html[data-tema="claro"] .sidebar {
+    background-color: #ffffff; color: #333;
+    border-right: 1px solid #e6e6e6; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+html[data-tema="claro"] .logo-sidebar,
+html[data-tema="claro"] .menu-section { border-color: rgba(0,0,0,0.08); }
+html[data-tema="claro"] .menu-section-title { color: #8a8a8a; }
+html[data-tema="claro"] .menu-item { color: #3a3a3a; }
+html[data-tema="claro"] .menu-item:hover { background-color: rgba(255,122,66,0.10); color: #222; }
+html[data-tema="claro"] .menu-item.active { background-color: rgba(255,122,66,0.16); color: #c4551f; font-weight: 600; }
+html[data-tema="claro"] .logout-btn { background-color: rgba(220,53,69,0.08); color: #c82333; }
+html[data-tema="claro"] .logout-btn:hover { background-color: var(--cor-erro); color: #fff; }
+html[data-tema="claro"] .sidebar [style*="color:#aaa"],
+html[data-tema="claro"] .sidebar [style*="color:#666"] { color: #888 !important; }
+
+/* ---------- TEMA ESCURO ---------- */
+html[data-tema="escuro"] {
+    --cor-fundo: #121418;
+    --cor-texto: #e3e5e8;
+    --cor-borda: #353a42;
+    --cor-secundaria: #1f2329;
+    --esc-sup: #1b1e23;
+    --esc-sup2: #24282e;
+    --esc-sup3: #2c3138;
+    --esc-muted: #9aa1aa;
+    color-scheme: dark;
+}
+html[data-tema="escuro"] body { background-color: var(--cor-fundo); color: var(--cor-texto); }
+html[data-tema="escuro"] .sidebar {
+    background-color: #16191d; color: #e3e5e8; border-right: 1px solid #262a30;
+}
+html[data-tema="escuro"] .menu-section-title { color: #7d848d; }
+html[data-tema="escuro"] .menu-item { color: #d5d8dc; }
+html[data-tema="escuro"] .menu-item.active { color: #ffb08c; }
+html[data-tema="escuro"] .card,
+html[data-tema="escuro"] .stat-card,
+html[data-tema="escuro"] .table-container,
+html[data-tema="escuro"] .filter-container,
+html[data-tema="escuro"] .modal-content,
+html[data-tema="escuro"] .login-box {
+    background: var(--esc-sup) !important; color: var(--cor-texto);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+html[data-tema="escuro"] .page-header { background: var(--cor-fundo); }
+html[data-tema="escuro"] .form-group label { color: #cfd3d8; }
+html[data-tema="escuro"] .stat-label,
+html[data-tema="escuro"] .stat-change,
+html[data-tema="escuro"] .user-info p,
+html[data-tema="escuro"] .login-logo p,
+html[data-tema="escuro"] .modal-close { color: var(--esc-muted); }
+html[data-tema="escuro"] input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+html[data-tema="escuro"] select,
+html[data-tema="escuro"] textarea {
+    background-color: var(--esc-sup2) !important; color: var(--cor-texto) !important;
+    border-color: var(--cor-borda) !important;
+}
+html[data-tema="escuro"] input::placeholder,
+html[data-tema="escuro"] textarea::placeholder { color: #737a84; }
+html[data-tema="escuro"] td { border-bottom-color: var(--cor-borda); }
+html[data-tema="escuro"] tbody tr:hover { background-color: rgba(255,122,66,0.08); }
+html[data-tema="escuro"] tfoot tr,
+html[data-tema="escuro"] tfoot td { background-color: var(--esc-sup3) !important; color: var(--cor-texto); }
+html[data-tema="escuro"] #tabelaExtrato td { border-bottom-color: var(--cor-borda); }
+html[data-tema="escuro"] #tabelaExtrato tr.linha-fim-semana td { background-color: #2a1f22; }
+html[data-tema="escuro"] .status-pendente { background-color: #3d3415; color: #ffd866; }
+html[data-tema="escuro"] .status-pago { background-color: #173a22; color: #7ddc96; }
+html[data-tema="escuro"] .status-atrasado { background-color: #43191e; color: #ff8a95; }
+html[data-tema="escuro"] .alert-success { background-color: #173a22; color: #7ddc96; border-color: #22553a; }
+html[data-tema="escuro"] .alert-error,
+html[data-tema="escuro"] .error-message { background-color: #43191e; color: #ff8a95; border-color: #6b2730; }
+html[data-tema="escuro"] .alert-info { background-color: #12333d; color: #7fd3e6; border-color: #1d4c5a; }
+html[data-tema="escuro"] .spinner { border-color: #333; border-top-color: var(--cor-primaria); }
+html[data-tema="escuro"] .btn-secondary { background-color: #4a5058; }
+html[data-tema="escuro"] .btn-secondary:hover { background-color: #5a616a; }
+html[data-tema="escuro"] .tema-toggle-login { background: rgba(30,33,38,0.9); }
+html[data-tema="escuro"] canvas { filter: none; }
+html[data-tema="escuro"] [style*="background:white"],
+html[data-tema="escuro"] [style*="background: white"],
+html[data-tema="escuro"] [style*="background:#fff;"],
+html[data-tema="escuro"] [style*="background: #fff;"],
+html[data-tema="escuro"] [style*="background:#fff\""],
+html[data-tema="escuro"] [style*="background: #fff\""],
+html[data-tema="escuro"] [style*="background:#fff'"],
+html[data-tema="escuro"] [style*="background: #fff'"],
+html[data-tema="escuro"] [style*="background:#ffffff"],
+html[data-tema="escuro"] [style*="background: #ffffff"],
+html[data-tema="escuro"] [style*="background:#fafafa"],
+html[data-tema="escuro"] [style*="background: #fafafa"],
+html[data-tema="escuro"] [style*="background:#f9f9f9"],
+html[data-tema="escuro"] [style*="background: #f9f9f9"],
+html[data-tema="escuro"] [style*="background:#fffbfb"],
+html[data-tema="escuro"] [style*="background: #fffbfb"],
+html[data-tema="escuro"] [style*="background-color:white"],
+html[data-tema="escuro"] [style*="background-color: white"],
+html[data-tema="escuro"] [style*="background-color:#fff;"],
+html[data-tema="escuro"] [style*="background-color: #fff;"],
+html[data-tema="escuro"] [style*="background-color:#ffffff"],
+html[data-tema="escuro"] [style*="background-color: #ffffff"] {
+    background: var(--esc-sup) !important;
+}
+html[data-tema="escuro"] [style*="background:#f8f9fa"],
+html[data-tema="escuro"] [style*="background: #f8f9fa"],
+html[data-tema="escuro"] [style*="background:#f5f5f5"],
+html[data-tema="escuro"] [style*="background: #f5f5f5"],
+html[data-tema="escuro"] [style*="background:#f0f0f0"],
+html[data-tema="escuro"] [style*="background: #f0f0f0"],
+html[data-tema="escuro"] [style*="background:#e9ecef"],
+html[data-tema="escuro"] [style*="background: #e9ecef"],
+html[data-tema="escuro"] [style*="background:#eee"],
+html[data-tema="escuro"] [style*="background: #eee"],
+html[data-tema="escuro"] [style*="background-color:#f8f9fa"],
+html[data-tema="escuro"] [style*="background-color: #f8f9fa"],
+html[data-tema="escuro"] [style*="background-color:#f5f5f5"],
+html[data-tema="escuro"] [style*="background-color: #f5f5f5"],
+html[data-tema="escuro"] [style*="background-color:#f0f0f0"],
+html[data-tema="escuro"] [style*="background-color: #f0f0f0"],
+html[data-tema="escuro"] [style*="background-color:#e9ecef"],
+html[data-tema="escuro"] [style*="background-color: #e9ecef"] {
+    background: var(--esc-sup3) !important; color: var(--cor-texto);
+}
+html[data-tema="escuro"] [style*="background:#d4edda"],
+html[data-tema="escuro"] [style*="background: #d4edda"],
+html[data-tema="escuro"] [style*="background:#f0fdf4"],
+html[data-tema="escuro"] [style*="background: #f0fdf4"],
+html[data-tema="escuro"] [style*="background-color:#d4edda"],
+html[data-tema="escuro"] [style*="background-color: #d4edda"] {
+    background: #173a22 !important;
+}
+html[data-tema="escuro"] [style*="background:#f8d7da"],
+html[data-tema="escuro"] [style*="background: #f8d7da"],
+html[data-tema="escuro"] [style*="background:#fdecea"],
+html[data-tema="escuro"] [style*="background: #fdecea"],
+html[data-tema="escuro"] [style*="background:#fde8e8"],
+html[data-tema="escuro"] [style*="background: #fde8e8"],
+html[data-tema="escuro"] [style*="background:#ffe5e5"],
+html[data-tema="escuro"] [style*="background: #ffe5e5"],
+html[data-tema="escuro"] [style*="background-color:#f8d7da"],
+html[data-tema="escuro"] [style*="background-color: #f8d7da"],
+html[data-tema="escuro"] [style*="background-color:#ffe5e5"],
+html[data-tema="escuro"] [style*="background-color: #ffe5e5"],
+html[data-tema="escuro"] [style*="background-color:#fdf2f2"],
+html[data-tema="escuro"] [style*="background-color: #fdf2f2"] {
+    background: #43191e !important;
+}
+html[data-tema="escuro"] [style*="background:#fff3cd"],
+html[data-tema="escuro"] [style*="background: #fff3cd"],
+html[data-tema="escuro"] [style*="background:#fff8e1"],
+html[data-tema="escuro"] [style*="background: #fff8e1"],
+html[data-tema="escuro"] [style*="background:#fffde7"],
+html[data-tema="escuro"] [style*="background: #fffde7"],
+html[data-tema="escuro"] [style*="background-color:#fff3cd"],
+html[data-tema="escuro"] [style*="background-color: #fff3cd"] {
+    background: #3d3415 !important;
+}
+html[data-tema="escuro"] [style*="background:#e8f4fd"],
+html[data-tema="escuro"] [style*="background: #e8f4fd"],
+html[data-tema="escuro"] [style*="background:#e3f2fd"],
+html[data-tema="escuro"] [style*="background: #e3f2fd"],
+html[data-tema="escuro"] [style*="background:#d1ecf1"],
+html[data-tema="escuro"] [style*="background: #d1ecf1"],
+html[data-tema="escuro"] [style*="background:#f0fafd"],
+html[data-tema="escuro"] [style*="background: #f0fafd"],
+html[data-tema="escuro"] [style*="background-color:#d1ecf1"],
+html[data-tema="escuro"] [style*="background-color: #d1ecf1"] {
+    background: #13303f !important;
+}
+html[data-tema="escuro"] [style*="background:#f0e8f8"],
+html[data-tema="escuro"] [style*="background: #f0e8f8"],
+html[data-tema="escuro"] [style*="background:#f3e8ff"],
+html[data-tema="escuro"] [style*="background: #f3e8ff"] {
+    background: #2d2040 !important;
+}
+html[data-tema="escuro"] [style*="color:#333"],
+html[data-tema="escuro"] [style*="color: #333"],
+html[data-tema="escuro"] [style*="color:#444"],
+html[data-tema="escuro"] [style*="color: #444"],
+html[data-tema="escuro"] [style*="color:#555"],
+html[data-tema="escuro"] [style*="color: #555"],
+html[data-tema="escuro"] [style*="color:#222"],
+html[data-tema="escuro"] [style*="color: #222"],
+html[data-tema="escuro"] [style*="color:#000"],
+html[data-tema="escuro"] [style*="color: #000"],
+html[data-tema="escuro"] [style*="color:black"],
+html[data-tema="escuro"] [style*="color: black"] {
+    color: #e3e5e8 !important;
+}
+html[data-tema="escuro"] [style*="color:#666"],
+html[data-tema="escuro"] [style*="color: #666"],
+html[data-tema="escuro"] [style*="color:#777"],
+html[data-tema="escuro"] [style*="color: #777"],
+html[data-tema="escuro"] [style*="color:#888"],
+html[data-tema="escuro"] [style*="color: #888"],
+html[data-tema="escuro"] [style*="color:#999"],
+html[data-tema="escuro"] [style*="color: #999"],
+html[data-tema="escuro"] [style*="color:#aaa"],
+html[data-tema="escuro"] [style*="color: #aaa"],
+html[data-tema="escuro"] [style*="color:#bbb"],
+html[data-tema="escuro"] [style*="color: #bbb"] {
+    color: var(--esc-muted) !important;
+}
+html[data-tema="escuro"] [style*="color:#155724"],
+html[data-tema="escuro"] [style*="color: #155724"] {
+    color: #7ddc96 !important;
+}
+html[data-tema="escuro"] [style*="color:#721c24"],
+html[data-tema="escuro"] [style*="color: #721c24"] {
+    color: #ff8a95 !important;
+}
+html[data-tema="escuro"] [style*="color:#856404"],
+html[data-tema="escuro"] [style*="color: #856404"] {
+    color: #ffd866 !important;
+}
+html[data-tema="escuro"] [style*="color:#0c5460"],
+html[data-tema="escuro"] [style*="color: #0c5460"] {
+    color: #7fd3e6 !important;
+}
+html[data-tema="escuro"] [style*="color:#1565c0"],
+html[data-tema="escuro"] [style*="color: #1565c0"] {
+    color: #7ab8ff !important;
+}
+html[data-tema="escuro"] [style*="color:#2c3e50"],
+html[data-tema="escuro"] [style*="color: #2c3e50"] {
+    color: #c9d3dd !important;
+}
+html[data-tema="escuro"] [style*="border:1px solid #ddd"],
+html[data-tema="escuro"] [style*="border: 1px solid #ddd"],
+html[data-tema="escuro"] [style*="border:1px solid #eee"],
+html[data-tema="escuro"] [style*="border: 1px solid #eee"],
+html[data-tema="escuro"] [style*="border:1px solid #dee2e6"],
+html[data-tema="escuro"] [style*="border: 1px solid #dee2e6"],
+html[data-tema="escuro"] [style*="border:1px solid #f0f0f0"],
+html[data-tema="escuro"] [style*="border: 1px solid #f0f0f0"],
+html[data-tema="escuro"] [style*="border-bottom:1px solid #f0f0f0"],
+html[data-tema="escuro"] [style*="border-bottom: 1px solid #f0f0f0"],
+html[data-tema="escuro"] [style*="border-bottom:1px solid #eee"],
+html[data-tema="escuro"] [style*="border-bottom: 1px solid #eee"],
+html[data-tema="escuro"] [style*="border-bottom:1px solid #ddd"],
+html[data-tema="escuro"] [style*="border-bottom: 1px solid #ddd"],
+html[data-tema="escuro"] [style*="border-top:1px solid #eee"],
+html[data-tema="escuro"] [style*="border-top: 1px solid #eee"],
+html[data-tema="escuro"] [style*="border-top:1px solid #ddd"],
+html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
+    border-color: var(--cor-borda) !important;
+}
+
+</style>
 </head>
 <body>
 
@@ -749,6 +1153,7 @@
     </div>
 </div>
 
+<button class="tema-toggle tema-toggle-login" id="btnTemaLogin" onclick="alternarTema()" title="Alternar tema">🌙 Tema escuro</button>
 <!-- MAIN APPLICATION -->
 <div class="main-container" id="mainContainer">
     <!-- SIDEBAR -->
@@ -762,6 +1167,10 @@
         <div class="menu-section-title">Menu</div>
         
         <div class="menu-item active" onclick="showPage('dashboard')">📊 Dashboard</div>
+        <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
+        <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
+        <div class="menu-item" onclick="showPage('fluxo-diario')">🗓️ Fluxo de Caixa Diário</div>
+        <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
 
         <div class="menu-section">
             <div class="menu-section-title">Lançamentos</div>
@@ -778,6 +1187,7 @@
 
         <div class="menu-section">
             <div class="menu-section-title">Cheques</div>
+            <div class="menu-item" onclick="showPage('chequesDashboard')">📊 Dashboard de Cheques</div>
             <div class="menu-item" onclick="showPage('chequesAberto')">🧾 Cheques em Aberto</div>
             <div class="menu-item" onclick="showPage('chequesCompensados')">✅ Cheques Compensados</div>
         </div>
@@ -788,10 +1198,6 @@
             <div class="menu-item" onclick="showPage('relatorio-pagar')">📉 Resumo Pagamentos</div>
             <div class="menu-item" onclick="showPage('analise-categoria')">🗂️ Análise por Categoria</div>
             <div class="menu-item" onclick="showPage('analise-grupo-dre')">📁 Análise por Grupo DRE</div>
-            <div class="menu-item" onclick="showPage('dfc')">💹 DFC</div>
-            <div class="menu-item" onclick="showPage('fluxo-diario')">🗓️ Fluxo Diário</div>
-            <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
-            <div class="menu-item" onclick="showPage('fcp')">🔮 Fluxo Projetado</div>
         </div>
 
         <div class="menu-section">
@@ -804,7 +1210,13 @@
             <div class="menu-item" onclick="showPage('bancos')">🏦 Bancos</div>
         </div>
 
+        <div class="menu-section">
+            <div class="menu-section-title">Relatórios</div>
+            <div class="menu-item" onclick="showPage('apresentacao')">📑 Apresentação Mensal</div>
+        </div>
+
               </div><!-- fim sidebar-menu -->
+        <button class="tema-toggle" id="btnTema" onclick="alternarTema()" title="Alternar entre tema claro e escuro">🌙 Tema escuro</button>
         <button class="logout-btn" onclick="handleLogout()">🚪 Sair</button>
         <div style="text-align:center; padding: 6px 0 10px;">
             <span onclick="diagnosticarConexao()" style="font-size:10px; color:#666; cursor:pointer; text-decoration:underline;">🔧 diagnóstico</span>
@@ -1663,6 +2075,130 @@
         </div>
 
         <!-- CHEQUES EM ABERTO -->
+        <!-- APRESENTAÇÃO MENSAL (DIRETORIA) -->
+        <div id="apresentacao" class="page">
+            <div class="page-header">
+                <div>
+                    <h1>📑 Apresentação Mensal — Diretoria</h1>
+                    <div style="font-size:13px;color:#777;margin-top:2px;">Relatório gerencial automático com gráficos, pontos de atenção e lançamentos a revisar</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary" onclick="apBaixarPPTX()" style="background:#c43e1c;color:white;">⬇ PowerPoint</button>
+                    <button class="btn btn-secondary" onclick="apBaixarPDF()" style="background:#e67e22;color:white;">⬇ PDF</button>
+                </div>
+            </div>
+            <div class="filter-container">
+                <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="apMes" onchange="apGerar()">
+                            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option>
+                            <option value="4">Abril</option><option value="5">Maio</option><option value="6">Junho</option>
+                            <option value="7">Julho</option><option value="8">Agosto</option><option value="9">Setembro</option>
+                            <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="apAno" onchange="apGerar()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Base da análise</label>
+                        <select id="apBase" onchange="apGerar()">
+                            <option value="competencia">Competência (como a DRE)</option>
+                            <option value="caixa">Caixa (recebido e pago)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="min-width:220px;">
+                        <label>Nome da empresa (capa)</label>
+                        <input type="text" id="apEmpresa" placeholder="Ex.: Minha Empresa Ltda" onchange="apGerar()">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" onclick="apGerar()">🔄 Atualizar</button>
+                    </div>
+                </div>
+                <div id="apStatus" style="font-size:12.5px;color:#666;margin-top:6px;"></div>
+            </div>
+            <div id="apPrevia" class="ap-previa"></div>
+            <div class="card" style="margin-top:18px;">
+                <div class="card-title" id="apDuvidososTitulo">🔎 Lançamentos a revisar</div>
+                <div style="font-size:12.5px;color:#777;margin:-6px 0 10px;">Verificações automáticas: possíveis duplicidades, valores atípicos para a categoria, cadastro incompleto, baixas com data futura e pendências muito antigas. Clique numa linha para abrir, editar, dar baixa ou excluir.</div>
+                <div id="apDuvidososLista"></div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD DE CHEQUES -->
+        <div id="chequesDashboard" class="page">
+            <div class="page-header">
+                <div>
+                    <h1>📊 Dashboard de Cheques</h1>
+                    <div style="font-size:13px;color:#777;margin-top:2px;">Visão geral dos cheques emitidos: em aberto, atrasados e compensados</div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-small" onclick="showPage('chequesAberto')">🧾 Lista em aberto</button>
+                    <button class="btn btn-primary btn-small" onclick="openModalCheque()">+ Novo Cheque</button>
+                </div>
+            </div>
+
+            <div class="filter-container">
+                <div class="filter-row" style="align-items:flex-end;gap:12px;flex-wrap:wrap;">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="chqDashAno" onchange="renderizarDashboardCheques()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fornecedor</label>
+                        <select id="chqDashFornecedor" onchange="renderizarDashboardCheques()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Banco</label>
+                        <select id="chqDashBanco" onchange="renderizarDashboardCheques()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gráfico em</label>
+                        <select id="chqDashMetrica" onchange="renderizarDashboardCheques()">
+                            <option value="valor">Valor (R$)</option>
+                            <option value="qtd">Quantidade</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chq-kpis" id="chqDashKpis"></div>
+
+            <div class="chq-insight" id="chqDashInsight"></div>
+
+            <div class="card">
+                <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                    <span id="chqDashTituloGrafico">📅 Cheques por mês — Jan a Dez</span>
+                    <span style="font-size:12px;font-weight:400;color:#888;">Mês pela data "bom para" · clique numa barra para ver os cheques</span>
+                </div>
+                <div class="chart-container" style="height:340px;"><canvas id="chartChequesMensal"></canvas></div>
+                <div style="overflow-x:auto;margin-top:12px;">
+                    <table class="chq-mini" id="chqDashTabelaMensal"></table>
+                </div>
+            </div>
+
+            <div class="chq-grid2">
+                <div class="card">
+                    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                        <span>🏆 Ranking de cheques em aberto</span>
+                        <div class="pl-seg" id="chqRankSeg">
+                            <button data-v="forn" class="on" onclick="_chqSetRank('forn')">Por fornecedor</button>
+                            <button data-v="cheque" onclick="_chqSetRank('cheque')">Maiores cheques</button>
+                        </div>
+                    </div>
+                    <div id="chqDashRank"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">⏰ Próximos vencimentos (30 dias)</div>
+                    <div id="chqDashProximos"></div>
+                    <div class="card-title" style="margin-top:18px;">🏦 Em aberto por banco</div>
+                    <div id="chqDashBancos"></div>
+                </div>
+            </div>
+        </div>
+
         <div id="chequesAberto" class="page">
             <div class="page-header">
                 <h1>🧾 Cheques em Aberto</h1>
@@ -2291,7 +2827,7 @@
             </div>
 
             <!-- Cards resumo DFC -->
-            <div class="dashboard-grid" style="margin-bottom:20px;">
+            <div class="dashboard-grid secao-oculta" id="cardsResumoDFC" style="margin-bottom:20px;">
                 <div class="stat-card" style="border-left-color:#28a745;">
                     <div class="stat-label">💰 Total Entradas</div>
                     <div class="stat-value" id="dfcCardEntradas" style="color:#28a745; font-size:22px;">R$ 0,00</div>
@@ -2320,7 +2856,7 @@
             </div>
 
             <!-- Tabela mensal Jan-Dez DFC -->
-            <div class="card" id="cardDFCMensal" style="display:none;">
+            <div class="card secao-oculta" id="cardDFCMensal" style="display:none;">
                 <div class="card-title" id="tituloDFCMensal">📅 DFC Mensal</div>
                 <div class="table-container">
                     <table id="tabelaDFCMensal" style="width:auto;min-width:500px;max-width:800px;">
@@ -2347,7 +2883,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card secao-oculta" id="cardAnaliseFluxoDFC">
                 <div class="card-title">Análise de Fluxo de Caixa</div>
                 <div class="table-container">
                     <table id="tabelaDFC">
@@ -2385,7 +2921,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card secao-oculta" id="cardGraficoDFC">
                 <div class="card-title">Fluxo de Caixa Acumulado</div>
                 <div class="chart-container">
                     <canvas id="chartDFC"></canvas>
@@ -2467,7 +3003,7 @@
                 </div>
             </div>
 
-            <div class="dashboard-grid" style="margin-bottom:16px;">
+            <div class="dashboard-grid secao-oculta" id="cardsResumoFluxoDiario" style="margin-bottom:16px;">
                 <div class="stat-card" style="border-left-color:#28a745;">
                     <div class="stat-value" id="fdReceitaMes" style="color:#28a745;font-size:24px;">R$ 0,00</div>
                     <div class="stat-label">RECEITA DO MÊS</div>
@@ -2573,7 +3109,7 @@
             </div>
 
             <!-- Gráfico projetado -->
-            <div class="card" style="margin-top:16px;">
+            <div class="card secao-oculta" id="cardGraficoFCP" style="margin-top:16px;">
                 <div class="card-title">Evolução do Saldo Projetado — Mês a Mês</div>
                 <div class="chart-container"><canvas id="chartFCP"></canvas></div>
             </div>
@@ -5503,6 +6039,8 @@
             else if (pageId === 'analise-grupo-dre') carregarAnaliseGrupoDRE();
             else if (pageId === 'fcp') carregarFCP();
             else if (pageId === 'bancos') carregarBancos();
+            else if (pageId === 'chequesDashboard') carregarDashboardCheques();
+            else if (pageId === 'apresentacao') apInit();
             else if (pageId === 'chequesAberto') carregarCheques();
             else if (pageId === 'chequesCompensados') carregarCheques();
             else if (pageId === 'dashboard') atualizarDashboard();
@@ -7619,6 +8157,14 @@
         var card = document.getElementById('cardDFCCategoria');
         if (card) card.style.display = '';
 
+        // ---- Registro de detalhamento (clique nos valores) ----
+        _dfcDrill = [];
+        function _catNomeDFC(c, padrao) { var ct = dadosCache.categorias.find(function(x){ return x.id === c.categoria_id; }); return ct ? ct.nome : padrao; }
+        function dfcReg(titulo, rec, pag) { _dfcDrill.push({ titulo: titulo, rec: rec, pag: pag, ano: anoSel }); return _dfcDrill.length - 1; }
+        function clicDFC(idx, m, v) {
+            return (idx != null && v && v !== 0) ? ' class="dfc-clic" onclick="abrirDetalheDFC(' + idx + ',' + m + ')" title="Clique para ver os lançamentos"' : '';
+        }
+
         var mesesLabel = anoSel
             ? ['Jan/' + String(anoSel).slice(2),'Fev/' + String(anoSel).slice(2),'Mar/' + String(anoSel).slice(2),
                'Abr/' + String(anoSel).slice(2),'Mai/' + String(anoSel).slice(2),'Jun/' + String(anoSel).slice(2),
@@ -7702,35 +8248,35 @@
                 + '</tr>';
         }
 
-        function addCatRow(nome, data, cor, bgEven, bgOdd, idx) {
+        function addCatRow(nome, data, cor, bgEven, bgOdd, idx, dIdx) {
             var bg = idx%2===0 ? bgEven : bgOdd;
             var cells = visao === 'mensal'
-                ? data.meses.map(function(v){
-                    return '<td style="text-align:right;padding:5px 8px;color:' + (v>0?cor:'#ccc') + ';font-weight:' + (v>0?'600':'400') + ';">'
+                ? data.meses.map(function(v, m){
+                    return '<td' + clicDFC(dIdx, m, v) + ' style="text-align:right;padding:5px 8px;color:' + (v>0?cor:'#ccc') + ';font-weight:' + (v>0?'600':'400') + ';">'
                         + (v>0 ? fmtValFull(v) : '—') + '</td>';
                   }).join('')
-                : '<td style="text-align:right;padding:5px 8px;color:' + (data.total>0?cor:'#ccc') + ';font-weight:600;">'
+                : '<td' + clicDFC(dIdx, -1, data.total) + ' style="text-align:right;padding:5px 8px;color:' + (data.total>0?cor:'#ccc') + ';font-weight:600;">'
                     + (data.total>0 ? fmtValFull(data.total) : '—') + '</td>';
             tbody.innerHTML += '<tr style="background:' + bg + ';">'
                 + '<td style="padding:6px 10px 6px 22px;font-size:12px;font-weight:500;color:#333;position:sticky;left:0;background:' + bg + ';">'
                 + nome + '</td>'
                 + cells
-                + '<td style="text-align:right;padding:5px 10px;font-weight:700;color:' + cor + ';">'
+                + '<td' + clicDFC(dIdx, -1, data.total) + ' style="text-align:right;padding:5px 10px;font-weight:700;color:' + cor + ';">'
                 + fmtValFull(data.total) + '</td>'
                 + '</tr>';
         }
 
-        function addSubtotal(label, valor, cor, bgCor, tipo) {
+        function addSubtotal(label, valor, cor, bgCor, tipo, dIdx) {
             tbody.innerHTML += '<tr style="background:' + bgCor + ';border-top:2px solid ' + cor + ';">'
                 + '<td style="font-weight:800;padding:8px 10px;font-size:12px;color:' + cor + ';position:sticky;left:0;background:' + bgCor + ';">' + label + '</td>'
                 + (visao === 'mensal'
-                    ? getSubtotalMeses(tipo, entradasCat, saidasCat, cor)
-                    : '<td style="text-align:right;padding:7px 8px;font-weight:700;color:' + cor + ';">' + fmtValFull(valor) + '</td>')
-                + '<td style="text-align:right;padding:8px 10px;font-weight:800;color:' + cor + ';">' + fmtValFull(valor) + '</td>'
+                    ? getSubtotalMeses(tipo, entradasCat, saidasCat, cor, dIdx)
+                    : '<td' + clicDFC(dIdx, -1, valor) + ' style="text-align:right;padding:7px 8px;font-weight:700;color:' + cor + ';">' + fmtValFull(valor) + '</td>')
+                + '<td' + clicDFC(dIdx, -1, valor) + ' style="text-align:right;padding:8px 10px;font-weight:800;color:' + cor + ';">' + fmtValFull(valor) + '</td>'
                 + '</tr>';
         }
 
-        function getSubtotalMeses(tipo, entCat, saiCat, cor) {
+        function getSubtotalMeses(tipo, entCat, saiCat, cor, dIdx) {
             var meses12 = [0,0,0,0,0,0,0,0,0,0,0,0];
             if (tipo === 'ent') {
                 Object.values(entCat).forEach(function(d){ d.meses.forEach(function(v,i){ meses12[i]+=v; }); });
@@ -7738,8 +8284,8 @@
                 // saiCat now has { total, meses, subs } structure
                 Object.values(saiCat).forEach(function(d){ d.meses.forEach(function(v,i){ meses12[i]+=v; }); });
             }
-            return meses12.map(function(v){
-                return '<td style="text-align:right;padding:7px 8px;font-weight:700;color:' + (v>0?cor:'#ccc') + ';">'
+            return meses12.map(function(v, m){
+                return '<td' + clicDFC(dIdx, m, v) + ' style="text-align:right;padding:7px 8px;font-weight:700;color:' + (v>0?cor:'#ccc') + ';">'
                     + (v>0 ? fmtValFull(v) : '\u2014') + '</td>';
             }).join('');
         }
@@ -7748,37 +8294,41 @@
         addSectionHeader('(+) ENTRADAS DE CAIXA', '#28a745', '#f0fff4');
         var entKeys = Object.keys(entradasCat).sort(function(a,b){ return entradasCat[b].total - entradasCat[a].total; });
         entKeys.forEach(function(nome, idx) {
-            addCatRow(nome, entradasCat[nome], '#28a745', 'white', '#f8fff8', idx);
+            addCatRow(nome, entradasCat[nome], '#28a745', 'white', '#f8fff8', idx,
+                dfcReg(nome, function(c){ return _catNomeDFC(c, 'Receitas de Clientes') === nome; }, null));
         });
-        addSubtotal('(=) TOTAL ENTRADAS', totalEntradas, '#28a745', '#e8f8ee', 'ent');
+        addSubtotal('(=) TOTAL ENTRADAS', totalEntradas, '#28a745', '#e8f8ee', 'ent', dfcReg('Total Entradas', function(){ return true; }, null));
 
         // ---- SAIDAS ----
         addSectionHeader('(-) SAIDAS DE CAIXA', '#dc3545', '#fff5f5');
         var saiKeys = Object.keys(saidasCat).sort(function(a,b){ return saidasCat[b].total - saidasCat[a].total; });
         saiKeys.forEach(function(pref, idx) {
-            addCatRow(pref, saidasCat[pref], '#dc3545', 'white', '#fff8f8', idx);
+            addCatRow(pref, saidasCat[pref], '#dc3545', 'white', '#fff8f8', idx,
+                dfcReg(pref, null, function(c){ return getCatPrefixo(_catNomeDFC(c, 'Sem Categoria')) === pref; }));
             // Subcategorias abertas abaixo do prefixo
             var subs = saidasCat[pref].subs || {};
             var subKeys = Object.keys(subs).sort(function(a,b){ return subs[b].total - subs[a].total; });
             subKeys.forEach(function(subNome) {
                 var d = subs[subNome];
+                var sIdx = dfcReg(subNome, null, function(c){ return _catNomeDFC(c, 'Sem Categoria') === subNome; });
                 var cells = visao === 'mensal'
-                    ? d.meses.map(function(v){
-                        return '<td style="text-align:right;padding:4px 8px;font-size:11px;color:' + (v>0?'#dc3545':'#ccc') + ';">'
+                    ? d.meses.map(function(v, m){
+                        return '<td' + clicDFC(sIdx, m, v) + ' style="text-align:right;padding:4px 8px;font-size:11px;color:' + (v>0?'#dc3545':'#ccc') + ';">'
                             + (v>0 ? fmtValFull(v) : '—') + '</td>';
                       }).join('')
-                    : '<td style="text-align:right;padding:4px 8px;font-size:11px;color:' + (d.total>0?'#dc3545':'#ccc') + ';">'
+                    : '<td' + clicDFC(sIdx, -1, d.total) + ' style="text-align:right;padding:4px 8px;font-size:11px;color:' + (d.total>0?'#dc3545':'#ccc') + ';">'
                         + (d.total>0 ? fmtValFull(d.total) : '—') + '</td>';
                 tbody.innerHTML += '<tr style="background:#fffbfb;">'
                     + '<td style="padding:4px 10px 4px 30px;font-size:11px;color:#999;position:sticky;left:0;background:#fffbfb;">'
                     + '<span style="color:#ddd;margin-right:5px;">↳</span>' + subNome + '</td>'
                     + cells
-                    + '<td style="text-align:right;padding:4px 10px;font-size:11px;font-weight:600;color:#dc3545;">'
+                    + '<td' + clicDFC(sIdx, -1, d.total) + ' style="text-align:right;padding:4px 10px;font-size:11px;font-weight:600;color:#dc3545;">'
                     + fmtValFull(d.total) + '</td>'
                     + '</tr>';
             });
         });
-        addSubtotal('(=) TOTAL SAIDAS', totalSaidas, '#dc3545', '#fde8e8', 'sai');
+        addSubtotal('(=) TOTAL SAIDAS', totalSaidas, '#dc3545', '#fde8e8', 'sai', dfcReg('Total Saídas', null, function(){ return true; }));
+        var fIdx = dfcReg('Fluxo Líquido (Entradas - Saídas)', function(){ return true; }, function(){ return true; });
 
         // ---- FLUXO LIQUIDO (footer) ----
         var fluxoCor = fluxoLiq >= 0 ? '#28a745' : '#dc3545';
@@ -7793,18 +8343,35 @@
             fluxoMeses = entM.map(function(e,i){
                 var liq = e - saiM[i];
                 var c   = liq >= 0 ? '#28a745' : '#dc3545';
-                return '<td style="text-align:right;padding:8px 8px;font-weight:700;color:' + c + ';">'
+                return '<td' + clicDFC(fIdx, i, (e>0||saiM[i]>0) ? 1 : 0) + ' style="text-align:right;padding:8px 8px;font-weight:700;color:' + c + ';">'
                     + (e>0||saiM[i]>0 ? fmtValFull(liq) : '<span style="color:#ccc;">\u2014</span>') + '</td>';
             }).join('');
         } else {
-            fluxoMeses = '<td style="text-align:right;padding:8px;font-weight:700;color:' + fluxoCor + ';">' + fmtValFull(fluxoLiq) + '</td>';
+            fluxoMeses = '<td' + clicDFC(fIdx, -1, (totalEntradas||totalSaidas) ? 1 : 0) + ' style="text-align:right;padding:8px;font-weight:700;color:' + fluxoCor + ';">' + fmtValFull(fluxoLiq) + '</td>';
         }
 
         tfoot.innerHTML = '<tr style="background:' + fluxoBg + ';border-top:3px solid ' + fluxoCor + ';">'
             + '<td style="font-weight:800;font-size:13px;padding:9px 10px;color:' + fluxoCor + ';position:sticky;left:0;background:' + fluxoBg + ';">(=) FLUXO LIQUIDO</td>'
             + fluxoMeses
-            + '<td style="text-align:right;padding:9px 10px;font-weight:800;font-size:13px;color:' + fluxoCor + ';">' + fmtValFull(fluxoLiq) + '</td>'
+            + '<td' + clicDFC(fIdx, -1, (totalEntradas||totalSaidas) ? 1 : 0) + ' style="text-align:right;padding:9px 10px;font-weight:800;font-size:13px;color:' + fluxoCor + ';">' + fmtValFull(fluxoLiq) + '</td>'
             + '</tr>';
+    }
+
+    // Detalhamento do DFC: abre o painel de lançamentos (fluxo real: recebidos/pagos)
+    let _dfcDrill = [];
+    function abrirDetalheDFC(idx, mes) {
+        const l = _dfcDrill[idx];
+        if (!l) return;
+        const ano = l.ano || '';
+        const mm = mes >= 0 ? String(mes + 1).padStart(2, '0') : null;
+        const ok = d => !!d && (!ano || d.startsWith(ano)) && (!mm || d.substring(5, 7) === mm);
+        abrirPainelLancamentos({
+            titulo: l.titulo,
+            subtitulo: 'DFC · ' + (mes >= 0 ? _PL_MESES[mes] + (ano ? '/' + ano : ' (todos os anos)') : (ano ? 'Ano ' + ano : 'Todos os anos')) + ' · fluxo realizado',
+            filtroRec: l.rec ? (c => c.status === 'recebido' && ok(c.data_recebimento) && l.rec(c)) : null,
+            filtroPag: l.pag ? (c => c.status === 'pago' && ok(c.data_pagamento) && l.pag(c)) : null,
+            recarregar: carregarDFC
+        });
     }
 
     function exportarDFCCatXLSX() {
@@ -8143,20 +8710,28 @@
         const fmtV = v => v !== 0 ? 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
         const cor  = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#ccc;';
 
+        // ── Detalhamento (clique nos valores abre os lançamentos) ──
+        _fcpDrill = [];
+        const _catNomeRec = c => { const cat = dadosCache.categorias.find(x => x.id === c.categoria_id); return cat ? cat.nome : 'Receita'; };
+        const _catNomePag = c => { const cat = dadosCache.categorias.find(x => x.id === c.categoria_id); return cat ? cat.nome : 'Pagamento'; };
+        const _drillDe = (nome, rec, pag) => { _fcpDrill.push({ nome: nome, rec: rec, pag: pag, ano: anoSel }); return _fcpDrill.length - 1; };
+
         const tbody = document.getElementById('fcpCorpoMensal');
         if (!tbody) return;
         tbody.innerHTML = '';
 
         // ── Função auxiliar para uma linha ──
         function linhaTabela(label, vals, opts = {}) {
-            const { bg = '', fc = '', bold = false, indent = false } = opts;
+            const { bg = '', fc = '', bold = false, indent = false, drill = null } = opts;
+            const clic = (v, m) => (drill !== null && v !== 0)
+                ? ' class="fcp-clic" onclick="abrirDetalheFCP(' + drill + ',' + m + ')" title="Ver lançamentos"' : '';
             const total = vals.reduce((s,v) => s + v, 0);
             const rowStyle = (bg ? 'background:' + bg + ';' : '') + (fc ? 'color:' + fc + ';' : '') + (bold ? 'font-weight:700;' : '');
             const lbl = (indent ? '&nbsp;&nbsp;&nbsp;↳ ' : '') + label;
             return '<tr style="' + rowStyle + '">' +
                 '<td style="padding:5px 8px;' + (bold ? 'font-weight:700;' : '') + (indent ? 'color:#555;' : '') + '">' + lbl + '</td>' +
-                vals.map(v => '<td style="text-align:right;padding:5px 8px;' + (fc ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
-                '<td style="text-align:right;padding:5px 8px;font-weight:700;' + (fc ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
+                vals.map((v, m) => '<td' + clic(v, m) + ' style="text-align:right;padding:5px 8px;' + (fc ? '' : cor(v)) + '">' + fmtV(v) + '</td>').join('') +
+                '<td' + clic(total, -1) + ' style="text-align:right;padding:5px 8px;font-weight:700;' + (fc ? '' : cor(total)) + '">' + fmtV(total) + '</td>' +
                 '</tr>';
         }
 
@@ -8170,10 +8745,10 @@
             tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>';
         } else {
             Object.entries(catRec).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
-                tbody.innerHTML += linhaTabela(cat, arr, { indent: true });
+                tbody.innerHTML += linhaTabela(cat, arr, { indent: true, drill: _drillDe(cat, c => _catNomeRec(c) === cat, null) });
             });
         }
-        tbody.innerHTML += linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true });
+        tbody.innerHTML += linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true, drill: _drillDe('Total Entradas', () => true, null) });
 
         // ── Seção SAÍDAS ──
         tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
@@ -8182,14 +8757,15 @@
         } else {
             Object.entries(catPag).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
                 const negArr = arr.map(v => -v);
-                tbody.innerHTML += linhaTabela(cat, negArr, { indent: true });
+                tbody.innerHTML += linhaTabela(cat, negArr, { indent: true, drill: _drillDe(cat, null, c => _catNomePag(c) === cat) });
             });
         }
-        tbody.innerHTML += linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true });
+        tbody.innerHTML += linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true, drill: _drillDe('Total Saídas', null, () => true) });
 
         // ── Saldo mensal e acumulado ──
         tbody.innerHTML += linhaSeparador('SALDO');
-        tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true });
+        const _idxSaldo = _drillDe('Saldo Mensal (Entradas - Saídas)', () => true, () => true);
+        tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true, drill: _idxSaldo });
 
         // Saldo Acumulado: cada célula tem fundo e cor próprios (verde/vermelho)
         const labelAcum = usarSaldoReal && saldoRealCaixa !== 0
@@ -8244,6 +8820,22 @@
                 }
             });
         }
+    }
+
+    // Detalhamento do Fluxo de Caixa Projetado (clique nos valores da tabela mensal)
+    let _fcpDrill = [];
+    function abrirDetalheFCP(idx, mes) {
+        const l = _fcpDrill[idx];
+        if (!l) return;
+        const mm = mes >= 0 ? String(mes + 1).padStart(2, '0') : null;
+        const ok = c => c.status === 'pendente' && !!c.data_vencimento && c.data_vencimento.startsWith(l.ano) && (!mm || c.data_vencimento.substring(5, 7) === mm);
+        abrirPainelLancamentos({
+            titulo: l.nome,
+            subtitulo: 'Fluxo Projetado · ' + (mes >= 0 ? _PL_MESES[mes] + '/' + l.ano : 'Ano ' + l.ano) + ' · lançamentos pendentes por vencimento',
+            filtroRec: l.rec ? (c => ok(c) && l.rec(c)) : null,
+            filtroPag: l.pag ? (c => ok(c) && l.pag(c)) : null,
+            recarregar: carregarFCP
+        });
     }
 
     function gerarPDFFCP() {
@@ -8678,7 +9270,11 @@
 
     // Renderiza as linhas da tabela de detalhe do DRE (usado tanto pela visão anual quanto mensal).
     // Cada item pode ser de 3 fontes: 'dre' (lançamento direto), 'receber' ou 'pagar' — todos editáveis.
+    let _detalheColunaData = null; // título da 1ª coluna (padrão "Competência")
     function _renderLinhasDetalheDRE(itens) {
+        const thData = document.getElementById('thDetalheDREData');
+        if (thData) thData.textContent = _detalheColunaData || 'Competência';
+        _detalheColunaData = null;
         const tbody = document.querySelector('#tabelaDetalheDRE tbody');
         if (!tbody) return;
         tbody.innerHTML = '';
@@ -10640,6 +11236,7 @@
         }
         const totRes = totRec - totDesp;
         _fdDadosDias = { ano, mes, dias, totRec, totDesp, totRes };
+        _fdCtx = { ano, mes, prefixo, base, contaSel };
 
         // Cards
         document.getElementById('fdReceitaMes').textContent = fmtBRL(totRec);
@@ -10669,6 +11266,26 @@
         _fdRenderizarTabelas(dias, diasNoMes, ano, mes, { totRec, totDesp, totRes });
     }
 
+    // Detalhamento do Fluxo de Caixa Diário
+    let _fdCtx = null;
+    function abrirDetalheFluxoDiario(tipo, dia) {
+        if (!_fdCtx) return;
+        const { ano, mes, prefixo, base, contaSel } = _fdCtx;
+        const alvo = dia ? prefixo + '-' + String(dia).padStart(2, '0') : prefixo;
+        const conta = c => !contaSel || String(c.banco_id) === String(contaSel);
+        const refRec = c => base === 'previsto' ? c.data_vencimento : (c.status === 'recebido' ? c.data_recebimento : null);
+        const refPag = c => base === 'previsto' ? c.data_vencimento : (c.status === 'pago' ? c.data_pagamento : null);
+        const nomes = { rec: 'Receitas', desp: 'Despesas', res: 'Receitas e Despesas' };
+        const quando = dia ? String(dia).padStart(2, '0') + '/' + String(mes).padStart(2, '0') + '/' + ano : _PL_MESES[mes - 1] + '/' + ano;
+        abrirPainelLancamentos({
+            titulo: nomes[tipo] + ' — ' + quando,
+            subtitulo: 'Fluxo de Caixa Diário · base ' + (base === 'previsto' ? 'prevista (vencimento)' : 'realizada (pagamento/recebimento)'),
+            filtroRec: tipo !== 'desp' ? (c => conta(c) && (refRec(c) || '').startsWith(alvo)) : null,
+            filtroPag: tipo !== 'rec'  ? (c => conta(c) && (refPag(c) || '').startsWith(alvo)) : null,
+            recarregar: carregarFluxoDiario
+        });
+    }
+
     function _fdRenderizarTabelas(dias, diasNoMes, ano, mes, totais) {
         const cont = document.getElementById('fdTabelasContainer');
         if (!cont) return;
@@ -10693,12 +11310,12 @@
                 } else {
                     const pos = info.res >= 0;
                     const txt = pos ? fmtBRL(info.res) : '(' + fmtBRL(info.res) + ')';
-                    resCel = '<td style="text-align:right;font-weight:700;color:#fff;background:' + (pos ? '#28a745' : '#dc3545') + ';padding:7px 10px;' + destaqueHoje + '">' + txt + '</td>';
+                    resCel = '<td class="fd-clic" onclick="abrirDetalheFluxoDiario(\'res\',' + d + ')" title="Ver lançamentos do dia" style="text-align:right;font-weight:700;color:#fff;background:' + (pos ? '#28a745' : '#dc3545') + ';padding:7px 10px;' + destaqueHoje + '">' + txt + '</td>';
                 }
                 linhas += '<tr style="' + (d % 2 === 0 ? 'background:#fafafa;' : '') + '">' +
                     '<td style="padding:7px 10px;color:#666;font-weight:600;">' + d + '</td>' +
-                    '<td style="text-align:right;padding:7px 10px;color:' + (info.rec ? '#28a745' : '#ccc') + ';">' + fmtCel(info.rec) + '</td>' +
-                    '<td style="text-align:right;padding:7px 10px;color:' + (info.desp ? '#dc3545' : '#ccc') + ';">' + fmtCel(info.desp) + '</td>' +
+                    '<td' + (info.rec ? ' class="fd-clic" onclick="abrirDetalheFluxoDiario(\'rec\',' + d + ')" title="Ver receitas do dia"' : '') + ' style="text-align:right;padding:7px 10px;color:' + (info.rec ? '#28a745' : '#ccc') + ';">' + fmtCel(info.rec) + '</td>' +
+                    '<td' + (info.desp ? ' class="fd-clic" onclick="abrirDetalheFluxoDiario(\'desp\',' + d + ')" title="Ver despesas do dia"' : '') + ' style="text-align:right;padding:7px 10px;color:' + (info.desp ? '#dc3545' : '#ccc') + ';">' + fmtCel(info.desp) + '</td>' +
                     resCel +
                     '</tr>';
             }
@@ -10707,9 +11324,9 @@
                 const pos = totais.totRes >= 0;
                 tfoot = '<tfoot><tr style="font-weight:700;background:#f0f0f0;">' +
                     '<td style="padding:8px 10px;">Total</td>' +
-                    '<td style="text-align:right;padding:8px 10px;color:#28a745;">' + fmtBRL(totais.totRec) + '</td>' +
-                    '<td style="text-align:right;padding:8px 10px;color:#dc3545;">' + fmtBRL(totais.totDesp) + '</td>' +
-                    '<td style="text-align:right;padding:8px 10px;color:' + (pos ? '#28a745' : '#dc3545') + ';">' + (pos ? fmtBRL(totais.totRes) : '(' + fmtBRL(totais.totRes) + ')') + '</td>' +
+                    '<td' + (totais.totRec ? ' class="fd-clic" onclick="abrirDetalheFluxoDiario(\'rec\',0)" title="Ver receitas do mês"' : '') + ' style="text-align:right;padding:8px 10px;color:#28a745;">' + fmtBRL(totais.totRec) + '</td>' +
+                    '<td' + (totais.totDesp ? ' class="fd-clic" onclick="abrirDetalheFluxoDiario(\'desp\',0)" title="Ver despesas do mês"' : '') + ' style="text-align:right;padding:8px 10px;color:#dc3545;">' + fmtBRL(totais.totDesp) + '</td>' +
+                    '<td' + ((totais.totRec || totais.totDesp) ? ' class="fd-clic" onclick="abrirDetalheFluxoDiario(\'res\',0)" title="Ver lançamentos do mês"' : '') + ' style="text-align:right;padding:8px 10px;color:' + (pos ? '#28a745' : '#dc3545') + ';">' + (pos ? fmtBRL(totais.totRes) : '(' + fmtBRL(totais.totRes) + ')') + '</td>' +
                     '</tr></tfoot>';
             }
             html += '<div class="card" style="padding:0;overflow:hidden;">' +
@@ -11081,7 +11698,7 @@
             <table id="tabelaDetalheDRE" style="font-size:14px;">
                 <thead style="position:sticky;top:0;z-index:2;">
                     <tr>
-                        <th style="min-width:90px;">Competência</th>
+                        <th style="min-width:90px;" id="thDetalheDREData">Competência</th>
                         <th style="min-width:200px;">Descrição</th>
                         <th style="min-width:140px;">Categoria</th>
                         <th style="min-width:140px;">Fornecedor/Cliente</th>
@@ -11281,5 +11898,1727 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
     </div>
 </div>
 
+
+<!-- PAINEL PROFISSIONAL DE LANÇAMENTOS (detalhamento de DFC, Fluxo Diário e Fluxo Projetado) -->
+<div class="modal" id="modalPainelLanc">
+    <div class="modal-content pl-box">
+        <div class="pl-head">
+            <div>
+                <div class="pl-kicker">Lançamentos</div>
+                <div class="pl-title" id="plTitulo">Detalhes</div>
+                <div class="pl-sub" id="plSubtitulo"></div>
+            </div>
+            <button class="pl-x" onclick="fecharPainelLancamentos()" title="Fechar">&times;</button>
+        </div>
+        <div class="pl-kpis" id="plKpis"></div>
+        <div class="pl-toolbar">
+            <input type="text" class="pl-busca" id="plBusca" placeholder="Buscar por descrição, categoria, cliente/fornecedor ou banco..." oninput="_plRender()">
+            <div class="pl-seg" id="plSegStatus">
+                <button data-v="todos" class="on" onclick="_plSetStatus('todos')">Todos</button>
+                <button data-v="pend" onclick="_plSetStatus('pend')">Pendentes</button>
+                <button data-v="ok" onclick="_plSetStatus('ok')">Quitados</button>
+            </div>
+            <div class="pl-seg" id="plSegTipo">
+                <button data-v="todos" class="on" onclick="_plSetTipo('todos')">Entradas e saídas</button>
+                <button data-v="receber" onclick="_plSetTipo('receber')">Entradas</button>
+                <button data-v="pagar" onclick="_plSetTipo('pagar')">Saídas</button>
+            </div>
+        </div>
+        <div class="pl-wrap">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>Vencimento</th>
+                        <th>Pago / Recebido</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Banco</th>
+                        <th>Status</th>
+                        <th class="r">Valor</th>
+                        <th class="r">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="plCorpo"></tbody>
+            </table>
+        </div>
+        <div class="pl-foot">
+            <div class="info" id="plInfo"></div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary" onclick="_plExportar()" style="background:#217346;color:white;">📊 Exportar Excel</button>
+                <button class="btn btn-secondary" onclick="fecharPainelLancamentos()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // ================= PAINEL PROFISSIONAL DE LANÇAMENTOS =================
+    const _PL_MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    let _pl = null; // { titulo, subtitulo, filtroRec, filtroPag, recarregar, itens, status, tipo }
+
+    function _plEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+    function _plData(d) { return d ? d.substring(8,10) + '/' + d.substring(5,7) + '/' + d.substring(0,4) : '—'; }
+    function _plMoeda(v) { return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function _plHoje() { const h = new Date(); return h.getFullYear() + '-' + String(h.getMonth()+1).padStart(2,'0') + '-' + String(h.getDate()).padStart(2,'0'); }
+
+    async function abrirPainelLancamentos(cfg) {
+        _pl = Object.assign({ status: 'todos', tipo: 'todos', itens: [] }, cfg);
+        document.getElementById('plTitulo').textContent = cfg.titulo || 'Lançamentos';
+        document.getElementById('plSubtitulo').textContent = cfg.subtitulo || '';
+        document.getElementById('plBusca').value = '';
+        _plMarcarSeg('plSegStatus', 'todos');
+        _plMarcarSeg('plSegTipo', 'todos');
+        document.getElementById('plSegTipo').style.display = (cfg.filtroRec && cfg.filtroPag) ? '' : 'none';
+        document.getElementById('plCorpo').innerHTML = '<tr><td colspan="8" class="pl-carregando">Carregando lançamentos...</td></tr>';
+        document.getElementById('modalPainelLanc').classList.add('active');
+        await _plCarregar();
+    }
+
+    function fecharPainelLancamentos() {
+        document.getElementById('modalPainelLanc').classList.remove('active');
+        _pl = null;
+    }
+
+    async function _plCarregar() {
+        if (!_pl) return;
+        const [rec, pag] = await Promise.all([
+            _pl.filtroRec ? fetchSupabase('contas_a_receber', 'GET') : Promise.resolve([]),
+            _pl.filtroPag ? fetchSupabase('contas_a_pagar', 'GET') : Promise.resolve([])
+        ]);
+        if (!_pl) return;
+        const itens = [];
+        (rec || []).filter(c => _pl.filtroRec(c)).forEach(c => itens.push(_plItem(c, 'receber')));
+        (pag || []).filter(c => _pl.filtroPag(c)).forEach(c => itens.push(_plItem(c, 'pagar')));
+        itens.sort((a, b) => (a.ordem || '').localeCompare(b.ordem || '') || a.descricao.localeCompare(b.descricao));
+        _pl.itens = itens;
+        _plRender();
+    }
+
+    function _plItem(c, fonte) {
+        const cat = (dadosCache.categorias || []).find(x => x.id === c.categoria_id);
+        const parte = fonte === 'receber'
+            ? ((dadosCache.clientes || []).find(x => x.id === c.cliente_id) || {}).nome
+            : ((dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id) || {}).nome;
+        const banco = ((dadosCache.bancos || []).find(x => String(x.id) === String(c.banco_id)) || {}).nome;
+        const quitado = fonte === 'receber' ? c.status === 'recebido' : c.status === 'pago';
+        const dataQuit = fonte === 'receber' ? c.data_recebimento : c.data_pagamento;
+        const atrasado = !quitado && c.data_vencimento && c.data_vencimento < _plHoje();
+        return {
+            conta: c, id: c.id, fonte: fonte,
+            descricao: c.descricao || '(sem descrição)',
+            categoria: cat ? cat.nome : '—',
+            parte: parte || '—', banco: banco || '—',
+            vencimento: c.data_vencimento || '', quitacao: quitado ? (dataQuit || '') : '',
+            ordem: (quitado ? dataQuit : c.data_vencimento) || c.data_vencimento || '',
+            quitado: quitado, atrasado: atrasado,
+            valor: parseFloat(c.valor || 0) * (fonte === 'receber' ? 1 : -1),
+            parcela: c.total_parcelas > 1 ? (c.parcela_atual + '/' + c.total_parcelas) : ''
+        };
+    }
+
+    function _plMarcarSeg(id, v) {
+        document.querySelectorAll('#' + id + ' button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+    }
+    function _plSetStatus(v) { if (!_pl) return; _pl.status = v; _plMarcarSeg('plSegStatus', v); _plRender(); }
+    function _plSetTipo(v) { if (!_pl) return; _pl.tipo = v; _plMarcarSeg('plSegTipo', v); _plRender(); }
+
+    function _plFiltrados() {
+        if (!_pl) return [];
+        const q = (document.getElementById('plBusca').value || '').trim().toLowerCase();
+        return _pl.itens.filter(i =>
+            (_pl.status === 'todos' || (_pl.status === 'ok' ? i.quitado : !i.quitado)) &&
+            (_pl.tipo === 'todos' || i.fonte === _pl.tipo) &&
+            (!q || [i.descricao, i.categoria, i.parte, i.banco].join(' ').toLowerCase().includes(q))
+        );
+    }
+
+    function _plRender() {
+        if (!_pl) return;
+        const lista = _plFiltrados();
+        const ent = lista.filter(i => i.valor > 0).reduce((s, i) => s + i.valor, 0);
+        const sai = lista.filter(i => i.valor < 0).reduce((s, i) => s - i.valor, 0);
+        const saldo = ent - sai;
+        const pend = lista.filter(i => !i.quitado);
+        const pendVal = pend.reduce((s, i) => s + Math.abs(i.valor), 0);
+        document.getElementById('plKpis').innerHTML =
+            '<div class="pl-kpi"><div class="k">Lançamentos</div><div class="v">' + lista.length + '</div></div>' +
+            '<div class="pl-kpi ent"><div class="k">Entradas</div><div class="v">' + _plMoeda(ent) + '</div></div>' +
+            '<div class="pl-kpi sai"><div class="k">Saídas</div><div class="v">' + _plMoeda(sai) + '</div></div>' +
+            '<div class="pl-kpi sal"><div class="k">Saldo</div><div class="v" style="color:' + (saldo >= 0 ? '#28a745' : '#dc3545') + ';">' + (saldo < 0 ? '-' : '') + _plMoeda(saldo) + '</div></div>' +
+            '<div class="pl-kpi pen"><div class="k">Pendentes</div><div class="v">' + pend.length + ' · ' + _plMoeda(pendVal) + '</div></div>';
+
+        const corpo = document.getElementById('plCorpo');
+        if (!lista.length) {
+            corpo.innerHTML = '<tr><td colspan="8" class="pl-vazio">Nenhum lançamento encontrado' + (_pl.itens.length ? ' com os filtros aplicados.' : '.') + '</td></tr>';
+        } else {
+            corpo.innerHTML = lista.map(i => {
+                const ehRec = i.fonte === 'receber';
+                const badge = i.quitado
+                    ? '<span class="pl-badge ok">' + (ehRec ? 'Recebido' : 'Pago') + '</span>'
+                    : (i.atrasado ? '<span class="pl-badge atr">Atrasado</span>' : '<span class="pl-badge pend">Pendente</span>');
+                const acaoBaixa = i.quitado
+                    ? '<button class="pl-btn rev" onclick="_plAcao(\'estornar\',' + i.id + ',\'' + i.fonte + '\')" title="Voltar para pendente">↩ Estornar</button>'
+                    : '<button class="pl-btn pay" onclick="_plAcao(\'baixar\',' + i.id + ',\'' + i.fonte + '\')" title="' + (ehRec ? 'Confirmar recebimento' : 'Confirmar pagamento') + '">' + (ehRec ? '✅ Receber' : '💳 Pagar') + '</button>';
+                return '<tr>' +
+                    '<td style="white-space:nowrap;">' + _plData(i.vencimento) + '</td>' +
+                    '<td style="white-space:nowrap;">' + (i.quitacao ? _plData(i.quitacao) : '<span style="color:#aaa;">—</span>') + '</td>' +
+                    '<td><div class="pl-desc"><span class="pl-tipo" style="background:' + (ehRec ? '#28a745' : '#dc3545') + ';" title="' + (ehRec ? 'Entrada' : 'Saída') + '"></span>' + _plEsc(i.descricao) +
+                        (i.parcela ? '<span class="pl-parc">' + i.parcela + '</span>' : '') + '</div>' +
+                        '<div class="pl-meta">' + (ehRec ? 'Cliente: ' : 'Fornecedor: ') + _plEsc(i.parte) + '</div></td>' +
+                    '<td>' + _plEsc(i.categoria) + '</td>' +
+                    '<td>' + _plEsc(i.banco) + '</td>' +
+                    '<td>' + badge + '</td>' +
+                    '<td class="r pl-val" style="color:' + (ehRec ? '#28a745' : '#dc3545') + ';">' + (ehRec ? '' : '-') + _plMoeda(i.valor) + '</td>' +
+                    '<td class="r"><div class="pl-acts">' +
+                        '<button class="pl-btn" onclick="_plAcao(\'editar\',' + i.id + ',\'' + i.fonte + '\')" title="Editar lançamento">✏️ Editar</button>' +
+                        acaoBaixa +
+                        '<button class="pl-btn del" onclick="_plAcao(\'excluir\',' + i.id + ',\'' + i.fonte + '\')" title="Excluir lançamento">🗑️</button>' +
+                    '</div></td>' +
+                '</tr>';
+            }).join('');
+        }
+        document.getElementById('plInfo').textContent = 'Mostrando ' + lista.length + ' de ' + _pl.itens.length + ' lançamento(s)';
+    }
+
+    // Garante que o lançamento esteja no cache usado pelas telas de edição/baixa
+    function _plGarantirCache(item) {
+        const c = item.conta;
+        const listas = item.fonte === 'receber' ? ['contasReceber', 'contasRecebidas'] : ['contasPagar', 'contasPagas'];
+        listas.forEach(k => { if (!Array.isArray(dadosCache[k])) dadosCache[k] = []; });
+        const existe = listas.some(k => dadosCache[k].some(x => x.id === c.id));
+        if (!existe) dadosCache[item.quitado ? listas[1] : listas[0]].push(c);
+        // Mantém o cache atualizado com a versão mais recente
+        listas.forEach(k => { const i = dadosCache[k].findIndex(x => x.id === c.id); if (i >= 0) dadosCache[k][i] = c; });
+    }
+
+    // Após editar/baixar/estornar/excluir: atualiza a tela de origem e o painel
+    async function _plPosAcao() {
+        if (!_pl) return;
+        const cfg = _pl;
+        try { if (typeof cfg.recarregar === 'function') await cfg.recarregar(); } catch (e) { console.error(e); }
+        if (_pl === cfg) await _plCarregar();
+    }
+
+    function _plAcao(acao, id, fonte) {
+        if (!_pl) return;
+        const item = _pl.itens.find(i => i.id === id && i.fonte === fonte);
+        if (!item) return;
+        _plGarantirCache(item);
+        const ehRec = fonte === 'receber';
+        if (acao === 'editar') {
+            _detalheAnaliseReload = _plPosAcao;
+            editarLancamento(id, fonte);
+        } else if (acao === 'baixar') {
+            ehRec ? receberConta(id) : pagarConta(id);
+        } else if (acao === 'estornar') {
+            ehRec ? reverterRecebimento(id) : reverterPagamento(id);
+        } else if (acao === 'excluir') {
+            _detalheAnaliseReload = _plPosAcao;
+            deletarConta(id, ehRec ? 'contas_a_receber' : 'contas_a_pagar');
+        }
+    }
+
+    // Recarrega o painel depois de confirmar/estornar pagamento ou recebimento
+    (function () {
+        ['confirmarRecebimento', 'confirmarPagamento', 'reverterRecebimento', 'reverterPagamento'].forEach(nome => {
+            const orig = window[nome];
+            if (typeof orig !== 'function') return;
+            window[nome] = async function () {
+                const r = await orig.apply(this, arguments);
+                if (_pl && document.getElementById('modalPainelLanc').classList.contains('active')) await _plPosAcao();
+                return r;
+            };
+        });
+    })();
+
+    function _plExportar() {
+        const lista = _plFiltrados();
+        if (!lista.length) { alert('Não há lançamentos para exportar.'); return; }
+        const linhas = [['Tipo', 'Vencimento', 'Pago/Recebido em', 'Descrição', 'Parcela', 'Cliente/Fornecedor', 'Categoria', 'Banco', 'Status', 'Valor']];
+        lista.forEach(i => linhas.push([
+            i.fonte === 'receber' ? 'Entrada' : 'Saída', _plData(i.vencimento), i.quitacao ? _plData(i.quitacao) : '',
+            i.descricao, i.parcela, i.parte, i.categoria, i.banco,
+            i.quitado ? (i.fonte === 'receber' ? 'Recebido' : 'Pago') : (i.atrasado ? 'Atrasado' : 'Pendente'),
+            Math.round(i.valor * 100) / 100
+        ]));
+        const nome = 'Lancamentos_' + (_pl.titulo || 'detalhe').replace(/[^\w\-]+/g, '_').substring(0, 40);
+        if (window.XLSX) {
+            const ws = XLSX.utils.aoa_to_sheet(linhas);
+            ws['!cols'] = [{wch:8},{wch:12},{wch:16},{wch:40},{wch:8},{wch:28},{wch:26},{wch:18},{wch:11},{wch:14}];
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Lançamentos');
+            XLSX.writeFile(wb, nome + '.xlsx');
+        } else {
+            const csv = linhas.map(r => r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(';')).join('\n');
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv);
+            a.download = nome + '.csv';
+            a.click();
+        }
+    }
+</script>
+
+<!-- PAINEL DE ANÁLISE DE CHEQUES -->
+<div class="modal" id="modalPainelCheques">
+    <div class="modal-content pl-box">
+        <div class="pl-head">
+            <div>
+                <div class="pl-kicker">Análise de cheques</div>
+                <div class="pl-title" id="pcTitulo">Cheques</div>
+                <div class="pl-sub" id="pcSubtitulo"></div>
+            </div>
+            <button class="pl-x" onclick="fecharPainelCheques()" title="Fechar">&times;</button>
+        </div>
+        <div class="pl-kpis" id="pcKpis"></div>
+        <div class="pl-toolbar">
+            <input type="text" class="pl-busca" id="pcBusca" placeholder="Buscar por número, fornecedor, banco ou observação..." oninput="_pcRender()">
+            <div class="pl-seg" id="pcSegStatus">
+                <button data-v="todos" class="on" onclick="_pcSetStatus('todos')">Todos</button>
+                <button data-v="aberto" onclick="_pcSetStatus('aberto')">A vencer</button>
+                <button data-v="atrasado" onclick="_pcSetStatus('atrasado')">Atrasados</button>
+                <button data-v="compensado" onclick="_pcSetStatus('compensado')">Compensados</button>
+            </div>
+        </div>
+        <div class="pl-wrap">
+            <table class="pl-table">
+                <thead>
+                    <tr>
+                        <th>Bom para</th>
+                        <th>Nº</th>
+                        <th>Fornecedor</th>
+                        <th>Banco</th>
+                        <th>Entrada</th>
+                        <th>Compensação</th>
+                        <th>Status</th>
+                        <th class="r">Valor</th>
+                        <th class="r">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="pcCorpo"></tbody>
+            </table>
+        </div>
+        <div class="pl-foot">
+            <div class="info" id="pcInfo"></div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary" onclick="_pcExportar()" style="background:#217346;color:white;">📊 Exportar Excel</button>
+                <button class="btn btn-secondary" onclick="fecharPainelCheques()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRMAR COMPENSAÇÃO (a partir do painel) -->
+<div class="modal" id="modalCompensarChequePc">
+    <div class="modal-content" style="max-width:420px;">
+        <div class="modal-header">
+            <span>✔ Compensar Cheque</span>
+            <button class="modal-close" onclick="closeModal('modalCompensarChequePc')">&times;</button>
+        </div>
+        <div id="pcCompInfo" style="background:#f8f9fa;border-radius:6px;padding:12px;margin-bottom:16px;font-size:13px;"></div>
+        <div class="form-group">
+            <label>Data da compensação*</label>
+            <input type="date" id="pcCompData">
+        </div>
+        <input type="hidden" id="pcCompId">
+        <div class="form-actions">
+            <button class="btn btn-success" onclick="_pcConfirmarCompensacao()">✔ Confirmar</button>
+            <button class="btn btn-secondary" onclick="closeModal('modalCompensarChequePc')">Cancelar</button>
+        </div>
+    </div>
+</div>
+<script>
+    // ================= DASHBOARD DE CHEQUES =================
+    const _CHQ_MES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const _CHQ_MES_LONGO = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const _CHQ_COR = { compensado: '#28a745', aberto: '#e6a817', atrasado: '#dc3545' };
+    const _CHQ_ROT = { compensado: 'Compensados', aberto: 'A vencer', atrasado: 'Atrasados' };
+    let _chqRankModo = 'forn';
+    let _chqDashCtx = null;
+
+    function _chqHoje() { return _hojeStrCheque(); }
+    function _chqStatus(c) { return c.status === 'compensado' ? 'compensado' : ((c.bom_para || '') < _chqHoje() ? 'atrasado' : 'aberto'); }
+    function _chqDias(a, b) { if (!a || !b) return 0; return Math.round((Date.parse(a + 'T12:00:00') - Date.parse(b + 'T12:00:00')) / 86400000); }
+    function _chqSomaDias(base, n) { const d = new Date(base + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+    function _chqForn(c) { return ((dadosCache.fornecedores || []).find(f => f.id === c.fornecedor_id) || {}).nome || 'Sem fornecedor'; }
+    function _chqBanco(c) { return ((dadosCache.bancos || []).find(b => b.id === c.banco_id) || {}).nome || 'Sem banco'; }
+    function _chqSoma(arr) { return arr.reduce((s, c) => s + parseFloat(c.valor || 0), 0); }
+    function _chqMoeda(v) { return 'R$ ' + (v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+    function _chqEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+
+    // Plugin de rótulos (sem dependências): valor dentro de cada barra e total acima da pilha
+    const _rotulosBarrasPlugin = {
+        id: 'rotulosBarras',
+        afterDatasetsDraw(chart, args, opts) {
+            if (!opts || opts.ativo === false) return;
+            const fmt = opts.fmt || (v => String(v));
+            const ctx = chart.ctx;
+            const horiz = chart.options.indexAxis === 'y';
+            const vis = chart.data.datasets.map((d, i) => chart.isDatasetVisible(i) && (chart.getDatasetMeta(i).type === 'bar'));
+            ctx.save();
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            // valores dentro dos segmentos / acima das barras
+            chart.data.datasets.forEach((ds, i) => {
+                if (!vis[i]) return;
+                chart.getDatasetMeta(i).data.forEach((el, j) => {
+                    const v = ds.data[j];
+                    if (!v) return;
+                    const p = el.getProps(['x', 'y', 'base', 'width', 'height'], true);
+                    const tam = horiz ? Math.abs(p.x - p.base) : Math.abs(p.base - p.y);
+                    const larg = horiz ? Math.abs(p.height || 0) : Math.abs(p.width || 0);
+                    const txt = fmt(v);
+                    ctx.font = '600 ' + (opts.tamanho || 11) + 'px "Segoe UI", Arial, sans-serif';
+                    const tw = ctx.measureText(txt).width;
+                    if (opts.empilhado) {
+                        if (horiz ? (tam < tw + 6) : (tam < 15 || larg < tw + 2)) return;
+                        ctx.fillStyle = opts.corInterna || '#ffffff';
+                        if (horiz) ctx.fillText(txt, (p.x + p.base) / 2, p.y); else ctx.fillText(txt, p.x, (p.y + p.base) / 2);
+                    } else {
+                        ctx.fillStyle = opts.corExterna || '#374151';
+                        if (horiz) { ctx.textAlign = 'left'; ctx.fillText(txt, p.x + 4, p.y); ctx.textAlign = 'center'; }
+                        else ctx.fillText(txt, p.x, p.y - 9);
+                    }
+                });
+            });
+            // total acima da pilha
+            if (opts.empilhado && opts.total !== false && !horiz) {
+                const n = chart.data.labels.length;
+                for (let j = 0; j < n; j++) {
+                    let tot = 0, topo = null, x = null;
+                    chart.data.datasets.forEach((ds, i) => {
+                        if (!vis[i]) return;
+                        const v = ds.data[j] || 0; tot += v;
+                        const el = chart.getDatasetMeta(i).data[j];
+                        if (el && v) { const p = el.getProps(['x', 'y'], true); x = p.x; topo = topo == null ? p.y : Math.min(topo, p.y); }
+                    });
+                    if (!tot || topo == null) continue;
+                    ctx.font = '700 ' + ((opts.tamanho || 11) + 1) + 'px "Segoe UI", Arial, sans-serif';
+                    ctx.fillStyle = opts.corTotal || (document.documentElement.getAttribute('data-tema') === 'escuro' ? '#e3e5e8' : '#1f2937');
+                    ctx.fillText(fmt(tot), x, topo - 10);
+                }
+            }
+            ctx.restore();
+        }
+    };
+    function _fmtCompacto(v, moeda) {
+        const a = Math.abs(v), s = v < 0 ? '-' : '', p = moeda === false ? '' : 'R$ ';
+        if (a >= 1e6) return s + p + (a / 1e6).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' mi';
+        if (a >= 1e3) return s + p + (a / 1e3).toLocaleString('pt-BR', {maximumFractionDigits: 1}) + ' mil';
+        return s + p + a.toLocaleString('pt-BR', {maximumFractionDigits: 0});
+    }
+
+    async function carregarDashboardCheques() {
+        await carregarCheques();          // atualiza dadosCache.cheques (e redesenha o dashboard)
+        renderizarDashboardCheques();
+    }
+
+    function _chqPreencherFiltros() {
+        const lista = dadosCache.cheques || [];
+        const anoEl = document.getElementById('chqDashAno');
+        if (anoEl) {
+            const atual = anoEl.value;
+            const anos = new Set([String(new Date().getFullYear())]);
+            lista.forEach(c => { if (c.bom_para) anos.add(c.bom_para.slice(0, 4)); if (c.data_compensacao) anos.add(c.data_compensacao.slice(0, 4)); });
+            const ord = [...anos].sort().reverse();
+            anoEl.innerHTML = ord.map(a => '<option value="' + a + '">' + a + '</option>').join('');
+            anoEl.value = ord.includes(atual) ? atual : String(new Date().getFullYear());
+        }
+        const preencher = (id, itens) => {
+            const el = document.getElementById(id); if (!el) return;
+            const atual = el.value;
+            el.innerHTML = '<option value="">Todos</option>' + itens.map(([v, t]) => '<option value="' + v + '">' + _chqEsc(t) + '</option>').join('');
+            if (itens.some(([v]) => String(v) === atual)) el.value = atual;
+        };
+        const fornIds = [...new Set(lista.map(c => c.fornecedor_id).filter(x => x != null))];
+        preencher('chqDashFornecedor', fornIds.map(id => [id, ((dadosCache.fornecedores || []).find(f => f.id === id) || {}).nome || ('#' + id)]).sort((a, b) => a[1].localeCompare(b[1])));
+        const bancoIds = [...new Set(lista.map(c => c.banco_id).filter(x => x != null))];
+        preencher('chqDashBanco', bancoIds.map(id => [id, ((dadosCache.bancos || []).find(b => b.id === id) || {}).nome || ('#' + id)]).sort((a, b) => a[1].localeCompare(b[1])));
+    }
+
+    function _chqBase() {
+        const forn = (document.getElementById('chqDashFornecedor') || {}).value || '';
+        const banco = (document.getElementById('chqDashBanco') || {}).value || '';
+        return (dadosCache.cheques || []).filter(c => (!forn || String(c.fornecedor_id) === forn) && (!banco || String(c.banco_id) === banco));
+    }
+    function _chqFiltroBase() {
+        const forn = (document.getElementById('chqDashFornecedor') || {}).value || '';
+        const banco = (document.getElementById('chqDashBanco') || {}).value || '';
+        return c => (!forn || String(c.fornecedor_id) === forn) && (!banco || String(c.banco_id) === banco);
+    }
+    function _chqDescFiltros() {
+        const f = document.getElementById('chqDashFornecedor'), b = document.getElementById('chqDashBanco');
+        const p = [];
+        if (f && f.value) p.push('Fornecedor: ' + f.options[f.selectedIndex].text);
+        if (b && b.value) p.push('Banco: ' + b.options[b.selectedIndex].text);
+        return p.length ? ' · ' + p.join(' · ') : '';
+    }
+
+    function renderizarDashboardCheques() {
+        if (!document.getElementById('chequesDashboard')) return;
+        _chqPreencherFiltros();
+        const ano = (document.getElementById('chqDashAno') || {}).value || String(new Date().getFullYear());
+        const metrica = (document.getElementById('chqDashMetrica') || {}).value || 'valor';
+        const hoje = _chqHoje();
+        const lista = _chqBase();
+        const fb = _chqFiltroBase();
+        const desc = _chqDescFiltros();
+
+        const aVencer = lista.filter(c => _chqStatus(c) === 'aberto');
+        const atrasados = lista.filter(c => _chqStatus(c) === 'atrasado');
+        const abertosTodos = aVencer.concat(atrasados);
+        const compAno = lista.filter(c => c.status === 'compensado' && (c.data_compensacao || c.bom_para || '').startsWith(ano));
+        const lim7 = _chqSomaDias(hoje, 7), lim30 = _chqSomaDias(hoje, 30);
+        const v7 = aVencer.filter(c => c.bom_para <= lim7);
+        const v30 = aVencer.filter(c => c.bom_para <= lim30);
+        const atrasoMedio = atrasados.length ? Math.round(atrasados.reduce((s, c) => s + _chqDias(hoje, c.bom_para), 0) / atrasados.length) : 0;
+        const prazos = abertosTodos.filter(c => c.data_entrada && c.bom_para).map(c => _chqDias(c.bom_para, c.data_entrada));
+        const prazoMedio = prazos.length ? Math.round(prazos.reduce((s, v) => s + v, 0) / prazos.length) : 0;
+        const ticket = abertosTodos.length ? _chqSoma(abertosTodos) / abertosTodos.length : 0;
+
+        // ---- KPIs (clicáveis) ----
+        const kpi = (cls, k, v, s, acao) => '<div class="chq-kpi ' + cls + '"' + (acao ? ' onclick="' + acao + '" title="Ver cheques"' : '') + '><div class="k">' + k + '</div><div class="v">' + v + '</div><div class="s">' + s + '</div></div>';
+        document.getElementById('chqDashKpis').innerHTML =
+            kpi('aberto', '🟡 Em aberto (a vencer)', _chqMoeda(_chqSoma(aVencer)), aVencer.length + ' cheque(s)', "_chqAbrir('kpi','aberto')") +
+            kpi('atr', '🔴 Atrasados', _chqMoeda(_chqSoma(atrasados)), atrasados.length + ' cheque(s)' + (atrasados.length ? ' · atraso médio ' + atrasoMedio + ' dia(s)' : ''), "_chqAbrir('kpi','atrasado')") +
+            kpi('comp', '🟢 Compensados em ' + ano, _chqMoeda(_chqSoma(compAno)), compAno.length + ' cheque(s)', "_chqAbrir('kpi','compAno')") +
+            kpi('prox', '⏰ Vencem em 7 dias', _chqMoeda(_chqSoma(v7)), v7.length + ' cheque(s)', "_chqAbrir('kpi','v7')") +
+            kpi('prox', '📆 Vencem em 30 dias', _chqMoeda(_chqSoma(v30)), v30.length + ' cheque(s)', "_chqAbrir('kpi','v30')") +
+            kpi('info', '📐 Prazo médio / ticket', prazoMedio + ' dias', 'Ticket médio em aberto: ' + _chqMoeda(ticket), '');
+
+        // ---- Mensal (por "bom para" no ano) ----
+        const mens = { compensado: Array(12).fill(0), aberto: Array(12).fill(0), atrasado: Array(12).fill(0) };
+        const mensQ = { compensado: Array(12).fill(0), aberto: Array(12).fill(0), atrasado: Array(12).fill(0) };
+        lista.forEach(c => {
+            if (!c.bom_para || !c.bom_para.startsWith(ano)) return;
+            const m = parseInt(c.bom_para.slice(5, 7), 10) - 1; if (m < 0 || m > 11) return;
+            const st = _chqStatus(c);
+            mens[st][m] += parseFloat(c.valor || 0); mensQ[st][m] += 1;
+        });
+        _chqDashCtx = { ano, fb };
+
+        // ---- Insight ----
+        const totalComprometido = _chqSoma(abertosTodos);
+        const insights = [];
+        if (abertosTodos.length) {
+            insights.push('<b>' + _chqMoeda(totalComprometido) + '</b> comprometidos em ' + abertosTodos.length + ' cheque(s) não compensado(s)' +
+                (atrasados.length ? ', dos quais <b style="color:#dc3545;">' + Math.round(_chqSoma(atrasados) / totalComprometido * 100) + '% estão atrasados</b>' : ' — nenhum atrasado') + '.');
+            const porForn = {};
+            abertosTodos.forEach(c => { const n = _chqForn(c); porForn[n] = (porForn[n] || 0) + parseFloat(c.valor || 0); });
+            const top = Object.entries(porForn).sort((a, b) => b[1] - a[1])[0];
+            if (top) insights.push('Maior concentração: <b>' + _chqEsc(top[0]) + '</b> com ' + Math.round(top[1] / totalComprometido * 100) + '% do valor em aberto.');
+        } else {
+            insights.push('Nenhum cheque em aberto' + (desc ? ' para os filtros selecionados' : '') + '.');
+        }
+        const totMes = mens.compensado.map((v, i) => v + mens.aberto[i] + mens.atrasado[i]);
+        const mMax = totMes.indexOf(Math.max(...totMes));
+        if (totMes[mMax] > 0) insights.push('Mês com maior volume em ' + ano + ': <b>' + _CHQ_MES_LONGO[mMax] + '</b> (' + _chqMoeda(totMes[mMax]) + ').');
+        if (v7.length) insights.push('<b>' + v7.length + ' cheque(s)</b> vencem nos próximos 7 dias (' + _chqMoeda(_chqSoma(v7)) + ').');
+        document.getElementById('chqDashInsight').innerHTML = '💡 ' + insights.join(' &nbsp;·&nbsp; ');
+
+        // ---- Gráfico ----
+        document.getElementById('chqDashTituloGrafico').textContent = '📅 Cheques por mês — Jan a Dez ' + ano + (metrica === 'qtd' ? ' (quantidade)' : ' (valor)');
+        const serie = metrica === 'qtd' ? mensQ : mens;
+        const ctx = document.getElementById('chartChequesMensal');
+        if (ctx && window.Chart && typeof Chart === 'function') {
+            if (charts.chequesMensal) { try { charts.chequesMensal.destroy(); } catch (e) {} }
+            const ordem = ['compensado', 'aberto', 'atrasado'];
+            charts.chequesMensal = new Chart(ctx, {
+                type: 'bar',
+                plugins: [_rotulosBarrasPlugin],
+                data: {
+                    labels: _CHQ_MES.map(m => m + '/' + ano.slice(2)),
+                    datasets: ordem.map(st => ({ label: _CHQ_ROT[st], _st: st, data: serie[st], backgroundColor: _CHQ_COR[st], borderRadius: 4, maxBarThickness: 46 }))
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    interaction: { mode: 'nearest', intersect: true },
+                    layout: { padding: { top: 22 } },
+                    plugins: {
+                        rotulosBarras: { empilhado: true, tamanho: 10, fmt: v => metrica === 'qtd' ? String(v) : _fmtCompacto(v, false) },
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: {
+                            label: c => c.dataset.label + ': ' + (metrica === 'qtd' ? c.parsed.y + ' cheque(s)' : _chqMoeda(c.parsed.y)),
+                            footer: () => 'Clique para ver os cheques'
+                        } }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, ticks: { precision: 0, callback: v => metrica === 'qtd' ? v : 'R$ ' + Number(v).toLocaleString('pt-BR', {maximumFractionDigits:0}) } }
+                    },
+                    onHover: (e, els) => { const t = e.native && e.native.target; if (t) t.style.cursor = els.length ? 'pointer' : 'default'; },
+                    onClick: (e, els, chart) => {
+                        let hit = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
+                        if (hit.length) { _chqAbrir('mes', chart.data.datasets[hit[0].datasetIndex]._st, hit[0].index); return; }
+                        hit = chart.getElementsAtEventForMode(e, 'index', { intersect: false }, true);
+                        if (hit.length) _chqAbrir('mes', 'todos', hit[0].index);
+                    }
+                }
+            });
+        }
+
+        // ---- Tabela mensal (clicável) ----
+        const fmtCel = (v, q) => metrica === 'qtd' ? (q ? q : '—') : (v ? _chqMoeda(v) : '—');
+        let tab = '<thead><tr><th>Situação</th>' + _CHQ_MES.map(m => '<th>' + m + '</th>').join('') + '<th>Total</th></tr></thead><tbody>';
+        ['aberto', 'atrasado', 'compensado'].forEach(st => {
+            const tv = mens[st].reduce((s, v) => s + v, 0), tq = mensQ[st].reduce((s, v) => s + v, 0);
+            tab += '<tr><td><span class="pl-tipo" style="background:' + _CHQ_COR[st] + ';"></span>' + _CHQ_ROT[st] + '</td>' +
+                mens[st].map((v, m) => '<td' + (mensQ[st][m] ? ' class="clic" onclick="_chqAbrir(\'mes\',\'' + st + '\',' + m + ')"' : ' style="color:#bbb;"') + ' >' + fmtCel(v, mensQ[st][m]) + '</td>').join('') +
+                '<td' + (tq ? ' class="clic" onclick="_chqAbrir(\'mes\',\'' + st + '\',-1)"' : '') + ' style="font-weight:700;">' + fmtCel(tv, tq) + '</td></tr>';
+        });
+        const totQ = mensQ.compensado.map((v, i) => v + mensQ.aberto[i] + mensQ.atrasado[i]);
+        tab += '<tr style="font-weight:700;"><td>Total</td>' + totMes.map((v, m) => '<td' + (totQ[m] ? ' class="clic" onclick="_chqAbrir(\'mes\',\'todos\',' + m + ')"' : ' style="color:#bbb;"') + '>' + fmtCel(v, totQ[m]) + '</td>').join('') +
+            '<td class="clic" onclick="_chqAbrir(\'mes\',\'todos\',-1)">' + fmtCel(totMes.reduce((s, v) => s + v, 0), totQ.reduce((s, v) => s + v, 0)) + '</td></tr></tbody>';
+        document.getElementById('chqDashTabelaMensal').innerHTML = tab;
+
+        // ---- Ranking ----
+        _chqRenderRank(abertosTodos);
+
+        // ---- Próximos vencimentos ----
+        const prox = v30.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+        document.getElementById('chqDashProximos').innerHTML = prox.length ? prox.slice(0, 8).map(c => {
+            const d = _chqDias(c.bom_para, hoje);
+            return '<div class="chq-prox-row" onclick="_chqAbrir(\'cheque\',' + c.id + ')">' +
+                '<div><span class="chq-dias' + (d === 0 ? ' hoje' : '') + '">' + (d === 0 ? 'hoje' : 'em ' + d + ' dia' + (d > 1 ? 's' : '')) + '</span> ' +
+                '<b style="margin-left:6px;">' + _dataFmtCheque(c.bom_para) + '</b> · ' + _chqEsc(_chqForn(c)) + (c.numero ? ' <small style="color:#999;">Nº ' + _chqEsc(c.numero) + '</small>' : '') + '</div>' +
+                '<div style="font-weight:700;white-space:nowrap;">' + _chqMoeda(parseFloat(c.valor || 0)) + '</div></div>';
+        }).join('') + (prox.length > 8 ? '<div style="text-align:center;padding-top:8px;"><a href="javascript:void(0)" onclick="_chqAbrir(\'kpi\',\'v30\')" style="color:var(--cor-primaria);font-size:13px;font-weight:600;">Ver todos os ' + prox.length + ' cheques →</a></div>' : '')
+            : '<div class="chq-vazio">Nenhum cheque vence nos próximos 30 dias.</div>';
+
+        // ---- Por banco ----
+        const porBanco = {};
+        abertosTodos.forEach(c => { const k = c.banco_id == null ? 'x' : c.banco_id; if (!porBanco[k]) porBanco[k] = { nome: _chqBanco(c), id: c.banco_id, v: 0, q: 0 }; porBanco[k].v += parseFloat(c.valor || 0); porBanco[k].q++; });
+        const bancos = Object.values(porBanco).sort((a, b) => b.v - a.v);
+        const maxB = bancos.length ? bancos[0].v : 1;
+        document.getElementById('chqDashBancos').innerHTML = bancos.length ? bancos.map(b =>
+            '<div class="chq-prox-row" onclick="_chqAbrir(\'banco\',' + (b.id == null ? 'null' : b.id) + ')" style="display:block;">' +
+            '<div style="display:flex;justify-content:space-between;gap:8px;"><span><b>' + _chqEsc(b.nome) + '</b> <small style="color:#999;">' + b.q + ' cheque(s)</small></span><b>' + _chqMoeda(b.v) + '</b></div>' +
+            '<div class="chq-rank-bar"><span style="width:' + Math.max(3, b.v / maxB * 100) + '%;background:#FF7A42;"></span></div></div>').join('')
+            : '<div class="chq-vazio">Sem cheques em aberto.</div>';
+    }
+
+    function _chqSetRank(m) {
+        _chqRankModo = m;
+        document.querySelectorAll('#chqRankSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === m));
+        _chqRenderRank(_chqBase().filter(c => c.status !== 'compensado'));
+    }
+
+    function _chqRenderRank(abertos) {
+        const el = document.getElementById('chqDashRank'); if (!el) return;
+        if (!abertos.length) { el.innerHTML = '<div class="chq-vazio">Nenhum cheque em aberto.</div>'; return; }
+        const hoje = _chqHoje();
+        if (_chqRankModo === 'cheque') {
+            const top = abertos.slice().sort((a, b) => parseFloat(b.valor || 0) - parseFloat(a.valor || 0)).slice(0, 10);
+            const max = parseFloat(top[0].valor || 0) || 1;
+            el.innerHTML = top.map((c, i) => {
+                const st = _chqStatus(c), v = parseFloat(c.valor || 0);
+                return '<div class="chq-rank-row" onclick="_chqAbrir(\'cheque\',' + c.id + ')"><div class="chq-rank-pos">' + (i + 1) + '</div>' +
+                    '<div style="min-width:0;"><div class="chq-rank-nome">' + _chqEsc(_chqForn(c)) + (c.numero ? ' · Nº ' + _chqEsc(c.numero) : '') + '</div>' +
+                    '<div class="chq-rank-meta">Bom para ' + _dataFmtCheque(c.bom_para) + ' · ' + _chqEsc(_chqBanco(c)) + (st === 'atrasado' ? ' · <span style="color:#dc3545;font-weight:600;">' + _chqDias(hoje, c.bom_para) + ' dia(s) de atraso</span>' : '') + '</div>' +
+                    '<div class="chq-rank-bar"><span style="width:' + Math.max(3, v / max * 100) + '%;background:' + _CHQ_COR[st] + ';"></span></div></div>' +
+                    '<div class="chq-rank-val">' + _chqMoeda(v) + '<small>' + _CHQ_ROT[st].replace(/s$/, '') + '</small></div></div>';
+            }).join('');
+            return;
+        }
+        const g = {};
+        abertos.forEach(c => {
+            const k = c.fornecedor_id == null ? 'x' : c.fornecedor_id;
+            if (!g[k]) g[k] = { id: c.fornecedor_id, nome: _chqForn(c), v: 0, va: 0, vt: 0, q: 0, prox: null };
+            const v = parseFloat(c.valor || 0); g[k].v += v; g[k].q++;
+            if (_chqStatus(c) === 'atrasado') g[k].vt += v; else { g[k].va += v; if (!g[k].prox || c.bom_para < g[k].prox) g[k].prox = c.bom_para; }
+        });
+        const lista = Object.values(g).sort((a, b) => b.v - a.v).slice(0, 10);
+        const total = abertos.reduce((s, c) => s + parseFloat(c.valor || 0), 0) || 1;
+        const max = lista[0].v || 1;
+        el.innerHTML = lista.map((f, i) =>
+            '<div class="chq-rank-row" onclick="_chqAbrir(\'forn\',' + (f.id == null ? 'null' : f.id) + ')"><div class="chq-rank-pos">' + (i + 1) + '</div>' +
+            '<div style="min-width:0;"><div class="chq-rank-nome">' + _chqEsc(f.nome) + '</div>' +
+            '<div class="chq-rank-meta">' + f.q + ' cheque(s) · ' + Math.round(f.v / total * 100) + '% do total' +
+                (f.prox ? ' · próximo: ' + _dataFmtCheque(f.prox) : '') + (f.vt ? ' · <span style="color:#dc3545;font-weight:600;">' + _chqMoeda(f.vt) + ' atrasado</span>' : '') + '</div>' +
+            '<div class="chq-rank-bar" style="width:' + Math.max(4, f.v / max * 100) + '%;">' +
+                '<span style="width:' + (f.va / f.v * 100) + '%;background:#e6a817;"></span><span style="width:' + (f.vt / f.v * 100) + '%;background:#dc3545;"></span></div></div>' +
+            '<div class="chq-rank-val">' + _chqMoeda(f.v) + '<small>em aberto</small></div></div>'
+        ).join('');
+    }
+
+    // Abre o painel de análise conforme o ponto clicado
+    function _chqAbrir(tipo, a, b) {
+        const ctx = _chqDashCtx || { ano: String(new Date().getFullYear()), fb: () => true };
+        const fb = _chqFiltroBase();
+        const desc = _chqDescFiltros();
+        const hoje = _chqHoje();
+        let titulo = 'Cheques', sub = '', filtro = () => false, status = 'todos';
+        if (tipo === 'mes') {
+            const st = a, m = b;
+            const pref = m >= 0 ? ctx.ano + '-' + String(m + 1).padStart(2, '0') : ctx.ano;
+            titulo = (st === 'todos' ? 'Cheques' : _CHQ_ROT[st]) + ' — ' + (m >= 0 ? _CHQ_MES_LONGO[m] + '/' + ctx.ano : 'Ano ' + ctx.ano);
+            sub = 'Por data "bom para"' + desc;
+            filtro = c => fb(c) && (c.bom_para || '').startsWith(pref);
+            status = st;
+        } else if (tipo === 'kpi') {
+            const lim7 = _chqSomaDias(hoje, 7), lim30 = _chqSomaDias(hoje, 30);
+            const mapa = {
+                aberto:   ['Cheques em aberto (a vencer)', c => _chqStatus(c) === 'aberto'],
+                atrasado: ['Cheques atrasados', c => _chqStatus(c) === 'atrasado'],
+                compAno:  ['Compensados em ' + ctx.ano, c => c.status === 'compensado' && (c.data_compensacao || c.bom_para || '').startsWith(ctx.ano)],
+                v7:       ['Vencem nos próximos 7 dias', c => _chqStatus(c) === 'aberto' && c.bom_para <= lim7],
+                v30:      ['Vencem nos próximos 30 dias', c => _chqStatus(c) === 'aberto' && c.bom_para <= lim30]
+            };
+            const [t, f] = mapa[a]; titulo = t; sub = 'Situação atual' + desc; filtro = c => fb(c) && f(c);
+        } else if (tipo === 'forn') {
+            const nome = ((dadosCache.fornecedores || []).find(f => f.id === a) || {}).nome || 'Sem fornecedor';
+            titulo = nome; sub = 'Cheques não compensados do fornecedor' + desc;
+            filtro = c => fb(c) && (a == null ? c.fornecedor_id == null : c.fornecedor_id === a) && c.status !== 'compensado';
+        } else if (tipo === 'banco') {
+            const nome = ((dadosCache.bancos || []).find(x => x.id === a) || {}).nome || 'Sem banco';
+            titulo = 'Banco ' + nome; sub = 'Cheques não compensados' + desc;
+            filtro = c => fb(c) && (a == null ? c.banco_id == null : c.banco_id === a) && c.status !== 'compensado';
+        } else if (tipo === 'cheque') {
+            const c0 = (dadosCache.cheques || []).find(c => c.id === a);
+            titulo = 'Cheque' + (c0 && c0.numero ? ' Nº ' + c0.numero : '') + (c0 ? ' — ' + _chqForn(c0) : '');
+            sub = 'Detalhe do cheque';
+            filtro = c => c.id === a;
+        }
+        abrirPainelCheques({ titulo, subtitulo: sub, filtro, status });
+    }
+
+    // ================= PAINEL DE ANÁLISE DE CHEQUES =================
+    let _pc = null;
+    function abrirPainelCheques(cfg) {
+        _pc = Object.assign({ status: 'todos' }, cfg);
+        document.getElementById('pcTitulo').textContent = cfg.titulo;
+        document.getElementById('pcSubtitulo').textContent = cfg.subtitulo || '';
+        document.getElementById('pcBusca').value = '';
+        _pcMarcar(_pc.status);
+        document.getElementById('modalPainelCheques').classList.add('active');
+        _pcRender();
+    }
+    function fecharPainelCheques() { document.getElementById('modalPainelCheques').classList.remove('active'); _pc = null; }
+    function _pcMarcar(v) { document.querySelectorAll('#pcSegStatus button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+    function _pcSetStatus(v) { if (!_pc) return; _pc.status = v; _pcMarcar(v); _pcRender(); }
+
+    function _pcItens() {
+        if (!_pc) return { todos: [], lista: [] };
+        const todos = (dadosCache.cheques || []).filter(_pc.filtro);
+        const q = (document.getElementById('pcBusca').value || '').trim().toLowerCase();
+        const lista = todos.filter(c => (_pc.status === 'todos' || _chqStatus(c) === _pc.status) &&
+            (!q || [c.numero, _chqForn(c), _chqBanco(c), c.observacao].join(' ').toLowerCase().includes(q)))
+            .sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
+        return { todos, lista };
+    }
+
+    function _pcRender() {
+        if (!_pc) return;
+        const { todos, lista } = _pcItens();
+        const hoje = _chqHoje();
+        const por = st => lista.filter(c => _chqStatus(c) === st);
+        const ab = por('aberto'), at = por('atrasado'), co = por('compensado');
+        document.getElementById('pcKpis').innerHTML =
+            '<div class="pl-kpi"><div class="k">Cheques</div><div class="v">' + lista.length + '</div></div>' +
+            '<div class="pl-kpi sal"><div class="k">Valor total</div><div class="v">' + _chqMoeda(_chqSoma(lista)) + '</div></div>' +
+            '<div class="pl-kpi pen"><div class="k">A vencer</div><div class="v">' + ab.length + ' · ' + _chqMoeda(_chqSoma(ab)) + '</div></div>' +
+            '<div class="pl-kpi sai"><div class="k">Atrasados</div><div class="v">' + at.length + ' · ' + _chqMoeda(_chqSoma(at)) + '</div></div>' +
+            '<div class="pl-kpi ent"><div class="k">Compensados</div><div class="v">' + co.length + ' · ' + _chqMoeda(_chqSoma(co)) + '</div></div>';
+        const corpo = document.getElementById('pcCorpo');
+        if (!lista.length) {
+            corpo.innerHTML = '<tr><td colspan="9" class="pl-vazio">Nenhum cheque encontrado' + (todos.length ? ' com os filtros aplicados.' : '.') + '</td></tr>';
+        } else {
+            corpo.innerHTML = lista.map(c => {
+                const st = _chqStatus(c);
+                const badge = st === 'compensado' ? '<span class="pl-badge ok">Compensado</span>'
+                    : st === 'atrasado' ? '<span class="pl-badge atr">Atrasado · ' + _chqDias(hoje, c.bom_para) + 'd</span>'
+                    : '<span class="pl-badge pend">A vencer' + (_chqDias(c.bom_para, hoje) <= 7 ? ' · ' + _chqDias(c.bom_para, hoje) + 'd' : '') + '</span>';
+                const acaoMeio = st === 'compensado'
+                    ? '<button class="pl-btn rev" onclick="_pcAcao(\'reabrir\',' + c.id + ')" title="Voltar para em aberto">↩ Reabrir</button>'
+                    : '<button class="pl-btn pay" onclick="_pcAcao(\'compensar\',' + c.id + ')" title="Marcar como compensado">✔ Compensar</button>';
+                return '<tr>' +
+                    '<td style="white-space:nowrap;font-weight:600;">' + _dataFmtCheque(c.bom_para) + '</td>' +
+                    '<td>' + (c.numero ? _chqEsc(c.numero) : '<span style="color:#aaa;">—</span>') + '</td>' +
+                    '<td><div class="pl-desc">' + _chqEsc(_chqForn(c)) + '</div>' + (c.observacao ? '<div class="pl-meta">' + _chqEsc(c.observacao) + '</div>' : '') + '</td>' +
+                    '<td>' + _chqEsc(_chqBanco(c)) + '</td>' +
+                    '<td style="white-space:nowrap;">' + _dataFmtCheque(c.data_entrada) + '</td>' +
+                    '<td style="white-space:nowrap;">' + (c.data_compensacao ? _dataFmtCheque(c.data_compensacao) : '<span style="color:#aaa;">—</span>') + '</td>' +
+                    '<td>' + badge + '</td>' +
+                    '<td class="r pl-val">' + _chqMoeda(parseFloat(c.valor || 0)) + '</td>' +
+                    '<td class="r"><div class="pl-acts">' +
+                        '<button class="pl-btn" onclick="_pcAcao(\'editar\',' + c.id + ')" title="Editar cheque">✏️ Editar</button>' + acaoMeio +
+                        '<button class="pl-btn del" onclick="_pcAcao(\'excluir\',' + c.id + ')" title="Excluir cheque">🗑️</button>' +
+                    '</div></td></tr>';
+            }).join('');
+        }
+        document.getElementById('pcInfo').textContent = 'Mostrando ' + lista.length + ' de ' + todos.length + ' cheque(s)';
+    }
+
+    async function _pcAcao(acao, id) {
+        const c = (dadosCache.cheques || []).find(x => x.id === id);
+        if (!c) return;
+        if (acao === 'editar') {
+            editarCheque(id);
+        } else if (acao === 'compensar') {
+            document.getElementById('pcCompId').value = id;
+            document.getElementById('pcCompData').value = _chqHoje();
+            document.getElementById('pcCompInfo').innerHTML =
+                '<b>Fornecedor:</b> ' + _chqEsc(_chqForn(c)) + '<br>' + (c.numero ? '<b>Nº:</b> ' + _chqEsc(c.numero) + '<br>' : '') +
+                '<b>Banco:</b> ' + _chqEsc(_chqBanco(c)) + '<br><b>Bom para:</b> ' + _dataFmtCheque(c.bom_para) + '<br><b>Valor:</b> ' + _chqMoeda(parseFloat(c.valor || 0));
+            document.getElementById('modalCompensarChequePc').classList.add('active');
+        } else if (acao === 'reabrir') {
+            if (!confirm('Reabrir este cheque? Ele voltará para "Em aberto".')) return;
+            const r = await fetchSupabase('cheques', 'PATCH', { status: 'aberto', data_compensacao: null }, 'id=eq.' + id);
+            if (r !== null) await carregarCheques();
+        } else if (acao === 'excluir') {
+            if (!confirm('Tem certeza que deseja excluir este cheque? Esta ação não pode ser desfeita.')) return;
+            const r = await fetchSupabase('cheques', 'DELETE', null, 'id=eq.' + id);
+            if (r !== null) await carregarCheques();
+        }
+    }
+
+    async function _pcConfirmarCompensacao() {
+        const id = parseInt(document.getElementById('pcCompId').value);
+        const data = document.getElementById('pcCompData').value;
+        if (!data) { alert('Informe a data da compensação.'); return; }
+        const r = await fetchSupabase('cheques', 'PATCH', { status: 'compensado', data_compensacao: data }, 'id=eq.' + id);
+        if (r !== null) { closeModal('modalCompensarChequePc'); await carregarCheques(); }
+    }
+
+    function _pcExportar() {
+        const { lista } = _pcItens();
+        if (!lista.length) { alert('Não há cheques para exportar.'); return; }
+        const linhas = [['Bom para', 'Nº', 'Fornecedor', 'Banco', 'Entrada', 'Compensação', 'Status', 'Valor', 'Observação']];
+        lista.forEach(c => linhas.push([_dataFmtCheque(c.bom_para), c.numero || '', _chqForn(c), _chqBanco(c), _dataFmtCheque(c.data_entrada),
+            c.data_compensacao ? _dataFmtCheque(c.data_compensacao) : '', _CHQ_ROT[_chqStatus(c)].replace(/s$/, ''), parseFloat(c.valor || 0), c.observacao || '']));
+        const nome = 'Cheques_' + (_pc.titulo || 'analise').replace(/[^\w\-]+/g, '_').substring(0, 40);
+        if (window.XLSX) {
+            const ws = XLSX.utils.aoa_to_sheet(linhas);
+            ws['!cols'] = [{wch:11},{wch:10},{wch:30},{wch:18},{wch:11},{wch:12},{wch:12},{wch:14},{wch:30}];
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Cheques'); XLSX.writeFile(wb, nome + '.xlsx');
+        } else {
+            const csv = linhas.map(r => r.map(x => '"' + String(x).replace(/"/g, '""') + '"').join(';')).join('\n');
+            const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,﻿' + encodeURIComponent(csv); a.download = nome + '.csv'; a.click();
+        }
+    }
+
+    // Sempre que os cheques forem recarregados, atualiza o dashboard e o painel abertos
+    (function () {
+        const orig = window.carregarCheques;
+        if (typeof orig !== 'function') return;
+        window.carregarCheques = async function () {
+            const r = await orig.apply(this, arguments);
+            const pg = document.getElementById('chequesDashboard');
+            if (pg && pg.classList.contains('active')) renderizarDashboardCheques();
+            if (_pc && document.getElementById('modalPainelCheques').classList.contains('active')) _pcRender();
+            return r;
+        };
+    })();
+</script>
+
+<script>
+
+    // =====================================================================
+    // APRESENTAÇÃO MENSAL — MOTOR DE ANÁLISE
+    // =====================================================================
+    const AP_MES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const AP_MES_C = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+    function apMk(a, m) { return a + '-' + String(m).padStart(2, '0'); }          // m = 1..12
+    function apMkDesloca(k, n) { let a = +k.slice(0, 4), m = +k.slice(5, 7) + n; while (m < 1) { m += 12; a--; } while (m > 12) { m -= 12; a++; } return apMk(a, m); }
+    function apRotMes(k, curto) { const m = +k.slice(5, 7) - 1; return curto ? AP_MES_C[m] + '/' + k.slice(2, 4) : AP_MES[m] + '/' + k.slice(0, 4); }
+    function apHoje() { const h = new Date(); return h.getFullYear() + '-' + String(h.getMonth() + 1).padStart(2, '0') + '-' + String(h.getDate()).padStart(2, '0'); }
+    function apDias(a, b) { if (!a || !b) return 0; return Math.round((Date.parse(a + 'T12:00:00') - Date.parse(b + 'T12:00:00')) / 86400000); }
+    function apSomaDias(base, n) { const d = new Date(base + 'T12:00:00'); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function apV(c) { return parseFloat(c.valor || 0) || 0; }
+    function apR(v) { return 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function apR0(v) { return (v < 0 ? '-' : '') + 'R$ ' + Math.abs(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 }); }
+    function apK(v) { return _fmtCompacto(v || 0, true); }
+    function apVar(a, b) { if (!b) return a ? null : 0; return (a - b) / Math.abs(b) * 100; }
+    function apPct(p, casas) { if (p == null || !isFinite(p)) return 'n/d'; return (p > 0 ? '+' : '') + p.toLocaleString('pt-BR', { maximumFractionDigits: casas == null ? 1 : casas }) + '%'; }
+    function apSeta(p) { return p == null ? '' : (p > 0.05 ? '▲ ' : (p < -0.05 ? '▼ ' : '■ ')); }
+    function apData(d) { return d ? d.slice(8, 10) + '/' + d.slice(5, 7) + '/' + d.slice(0, 4) : '—'; }
+    function apMediana(arr) { if (!arr.length) return 0; const s = arr.slice().sort((a, b) => a - b), m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+    // DRE de um mês (mesma regra da tela DRE: competência + lançamentos diretos da DRE)
+    function apDREMes(rec, pag, lancs, k) {
+        const g = {}; DRE_GRUPOS.forEach(x => { g[x.id] = 0; });
+        const empVenc = (typeof _dreEmprestimoBase !== 'undefined' && _dreEmprestimoBase === 'vencimento');
+        (lancs || []).forEach(l => { if (l.competencia && l.competencia.slice(0, 7) === k && g[l.grupo] != null) g[l.grupo] += apV(l); });
+        rec.forEach(c => {
+            if (!c.data_competencia || c.data_competencia.slice(0, 7) !== k) return;
+            const cat = (dadosCache.categorias || []).find(x => x.id === c.categoria_id);
+            const gr = (cat && cat.grupo_dre) ? cat.grupo_dre : 'RECEITA_BRUTA';
+            if (g[gr] != null) g[gr] += apV(c);
+        });
+        pag.forEach(c => {
+            const cat = (dadosCache.categorias || []).find(x => x.id === c.categoria_id);
+            const gr = (cat && cat.grupo_dre) ? cat.grupo_dre : 'DESP_ADMIN';
+            const ref = (gr === 'EMPRESTIMO' && empVenc) ? c.data_vencimento : c.data_competencia;
+            if (!ref || ref.slice(0, 7) !== k) return;
+            if (g[gr] != null) g[gr] += apV(c);
+        });
+        const t = Object.assign({}, g);
+        t.RECEITA_LIQUIDA = g.RECEITA_BRUTA - g.DEDUCOES;
+        t.LUCRO_BRUTO = t.RECEITA_LIQUIDA - g.CPV;
+        t.EBITDA = t.LUCRO_BRUTO - g.DESP_COMERCIAL - g.DESP_ADMIN;
+        t.RESULTADO_FINANCEIRO = g.RECEITA_FINANCEIRA - g.DESP_FINANCEIRA;
+        t.LAJIR = t.EBITDA + t.RESULTADO_FINANCEIRO;
+        t.RESULTADO_LIQUIDO = t.LAJIR - g.EMPRESTIMO - g.INVESTIMENTO + g.OUTRAS_RECEITAS - g.OUTRAS_DESPESAS;
+        return t;
+    }
+    // Estrutura da DRE: [id, tipo] tipo: 'r' receita, 'd' dedução/despesa, 's' subtotal
+    const AP_DRE_LINHAS = [['RECEITA_BRUTA','r'],['DEDUCOES','d'],['RECEITA_LIQUIDA','s'],['CPV','d'],['LUCRO_BRUTO','s'],['DESP_COMERCIAL','d'],['DESP_ADMIN','d'],
+        ['EBITDA','s'],['RECEITA_FINANCEIRA','r'],['DESP_FINANCEIRA','d'],['RESULTADO_FINANCEIRO','s'],['LAJIR','s'],['EMPRESTIMO','d'],['INVESTIMENTO','d'],
+        ['OUTRAS_RECEITAS','r'],['OUTRAS_DESPESAS','d'],['RESULTADO_LIQUIDO','s']];
+
+    // Fluxo de caixa realizado de um mês (mesma regra da tela DFC)
+    function apDFCMes(rec, pag, k) {
+        const ent = {}, sai = {};
+        const nomeCat = (c, pad) => ((dadosCache.categorias || []).find(x => x.id === c.categoria_id) || {}).nome || pad;
+        rec.forEach(c => { if (c.status === 'recebido' && (c.data_recebimento || '').slice(0, 7) === k) { const n = nomeCat(c, 'Receitas de Clientes'); ent[n] = (ent[n] || 0) + apV(c); } });
+        pag.forEach(c => { if (c.status === 'pago' && (c.data_pagamento || '').slice(0, 7) === k) { const n = getCatPrefixo(nomeCat(c, 'Sem Categoria')); sai[n] = (sai[n] || 0) + apV(c); } });
+        return { ent, sai, totEnt: Object.values(ent).reduce((s, v) => s + v, 0), totSai: Object.values(sai).reduce((s, v) => s + v, 0) };
+    }
+
+    function apAnalisar(rec, pag, cheques, ano, mes, base, lancsDRE) {
+        const hoje = apHoje();
+        const sel = apMk(ano, mes);
+        const prev = apMkDesloca(sel, -1);
+        const yoy = apMkDesloca(sel, -12);
+        const meses12 = []; for (let i = 11; i >= 0; i--) meses12.push(apMkDesloca(sel, -i));
+        const tres = [apMkDesloca(sel, -1), apMkDesloca(sel, -2), apMkDesloca(sel, -3)];
+        const catNome = c => ((dadosCache.categorias || []).find(x => x.id === c.categoria_id) || {}).nome || 'Sem categoria';
+        const cliNome = c => ((dadosCache.clientes || []).find(x => x.id === c.cliente_id) || {}).nome || 'Sem cliente';
+        const forNome = c => ((dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id) || {}).nome || 'Sem fornecedor';
+
+        // Data de referência conforme a base escolhida
+        const refRec = c => base === 'caixa' ? (c.status === 'recebido' ? c.data_recebimento : null) : (c.data_competencia || c.data_vencimento);
+        const refPag = c => base === 'caixa' ? (c.status === 'pago' ? c.data_pagamento : null) : (c.data_competencia || c.data_vencimento);
+
+        const recMes = {}, despMes = {};
+        const recCat = {}, despCat = {}, recCli = {}, despFor = {};   // por mês: { k: { nome: valor } }
+        const add = (o, k, n, v) => { if (!o[k]) o[k] = {}; o[k][n] = (o[k][n] || 0) + v; };
+        rec.forEach(c => { const d = refRec(c); if (!d) return; const k = d.slice(0, 7), v = apV(c); recMes[k] = (recMes[k] || 0) + v; add(recCat, k, catNome(c), v); add(recCli, k, cliNome(c), v); });
+        pag.forEach(c => { const d = refPag(c); if (!d) return; const k = d.slice(0, 7), v = apV(c); despMes[k] = (despMes[k] || 0) + v; add(despCat, k, catNome(c), v); add(despFor, k, forNome(c), v); });
+
+        const R = k => recMes[k] || 0, D = k => despMes[k] || 0;
+        const receita = R(sel), despesa = D(sel), resultado = receita - despesa;
+        const margem = receita ? resultado / receita * 100 : null;
+        const serieRec = meses12.map(R), serieDesp = meses12.map(D), serieRes = meses12.map(k => R(k) - D(k));
+        const mediaRec12 = serieRec.reduce((s, v) => s + v, 0) / 12, mediaDesp12 = serieDesp.reduce((s, v) => s + v, 0) / 12;
+        const mediaRec3 = tres.reduce((s, k) => s + R(k), 0) / 3, mediaDesp3 = tres.reduce((s, k) => s + D(k), 0) / 3;
+        const idxMax = arr => arr.indexOf(Math.max(...arr)), idxMin = arr => arr.indexOf(Math.min(...arr));
+
+        // Categorias de despesa: mês x média dos 3 meses anteriores
+        const nomesDesp = new Set(Object.keys(despCat[sel] || {})); tres.forEach(k => Object.keys(despCat[k] || {}).forEach(n => nomesDesp.add(n)));
+        const despCatComp = [...nomesDesp].map(n => {
+            const atual = (despCat[sel] || {})[n] || 0;
+            const media = tres.reduce((s, k) => s + ((despCat[k] || {})[n] || 0), 0) / 3;
+            return { nome: n, atual, media, dif: atual - media, var: apVar(atual, media), part: despesa ? atual / despesa * 100 : 0 };
+        });
+        const despCatTop = despCatComp.filter(x => x.atual > 0).sort((a, b) => b.atual - a.atual);
+        const aumentos = despCatComp.filter(x => x.dif > 0).sort((a, b) => b.dif - a.dif);
+        const reducoes = despCatComp.filter(x => x.dif < 0).sort((a, b) => a.dif - b.dif);
+        const recCatTop = Object.entries(recCat[sel] || {}).map(([nome, v]) => ({ nome, v })).sort((a, b) => b.v - a.v);
+        const cliTop = Object.entries(recCli[sel] || {}).map(([nome, v]) => ({ nome, v, part: receita ? v / receita * 100 : 0 })).sort((a, b) => b.v - a.v);
+        const forTop = Object.entries(despFor[sel] || {}).map(([nome, v]) => {
+            const media = tres.reduce((s, k) => s + ((despFor[k] || {})[nome] || 0), 0) / 3;
+            return { nome, v, part: despesa ? v / despesa * 100 : 0, media, var: apVar(v, media) };
+        }).sort((a, b) => b.v - a.v);
+
+        // Posição em aberto (hoje)
+        const pendRec = rec.filter(c => c.status === 'pendente'), pendPag = pag.filter(c => c.status === 'pendente');
+        const soma = arr => arr.reduce((s, c) => s + apV(c), 0);
+        const atrRec = pendRec.filter(c => (c.data_vencimento || '') < hoje), atrPag = pendPag.filter(c => (c.data_vencimento || '') < hoje);
+        const faixas = ['A vencer', '1–30 dias', '31–60 dias', '61–90 dias', '+90 dias'];
+        const faixa = c => { const d = apDias(hoje, c.data_vencimento); return !c.data_vencimento || d <= 0 ? 0 : d <= 30 ? 1 : d <= 60 ? 2 : d <= 90 ? 3 : 4; };
+        const agingRec = [0, 0, 0, 0, 0], agingPag = [0, 0, 0, 0, 0];
+        pendRec.forEach(c => agingRec[faixa(c)] += apV(c)); pendPag.forEach(c => agingPag[faixa(c)] += apV(c));
+        const lim30 = apSomaDias(hoje, 30);
+        const em30 = c => c.data_vencimento >= hoje && c.data_vencimento <= lim30;
+        const chqAb = cheques.filter(c => c.status !== 'compensado');
+        const proxRec = soma(pendRec.filter(em30)), proxPag = soma(pendPag.filter(em30));
+        const proxChq = chqAb.filter(c => c.bom_para >= hoje && c.bom_para <= lim30).reduce((s, c) => s + apV(c), 0);
+
+        // Cheques (Jan–Dez do ano selecionado, por "bom para")
+        const stChq = c => c.status === 'compensado' ? 'compensado' : ((c.bom_para || '') < hoje ? 'atrasado' : 'aberto');
+        const chqMes = { compensado: Array(12).fill(0), aberto: Array(12).fill(0), atrasado: Array(12).fill(0) };
+        cheques.forEach(c => { if (!c.bom_para || !c.bom_para.startsWith(String(ano))) return; const m = +c.bom_para.slice(5, 7) - 1; chqMes[stChq(c)][m] += apV(c); });
+        const chqAtr = cheques.filter(c => stChq(c) === 'atrasado'), chqAVencer = cheques.filter(c => stChq(c) === 'aberto');
+        const chqCompMes = cheques.filter(c => c.status === 'compensado' && (c.data_compensacao || '').startsWith(sel));
+        const chqForn = {};
+        chqAb.forEach(c => { const n = forNome(c); if (!chqForn[n]) chqForn[n] = { nome: n, v: 0, q: 0, atr: 0 }; chqForn[n].v += apV(c); chqForn[n].q++; if (stChq(c) === 'atrasado') chqForn[n].atr += apV(c); });
+        const chqFornTop = Object.values(chqForn).sort((a, b) => b.v - a.v);
+
+        // ---------------- Lançamentos duvidosos ----------------
+        const escopo = new Set([sel, prev, apMkDesloca(sel, -2)]);
+        const noEscopo = c => escopo.has((c.data_vencimento || '').slice(0, 7)) || escopo.has((c.data_competencia || '').slice(0, 7));
+        const todos = rec.map(c => ({ c, tipo: 'receber', parte: cliNome(c), parteId: c.cliente_id, quit: c.status === 'recebido', dq: c.data_recebimento }))
+            .concat(pag.map(c => ({ c, tipo: 'pagar', parte: forNome(c), parteId: c.fornecedor_id, quit: c.status === 'pago', dq: c.data_pagamento })));
+        const flags = {};  // chave tipo:id -> { item, motivos:[], grav }
+        const peso = { alta: 3, media: 2, baixa: 1 };
+        const marcar = (it, motivo, grav) => {
+            const k = it.tipo + ':' + it.c.id;
+            if (!flags[k]) flags[k] = { it, motivos: [], grav: 'baixa' };
+            if (!flags[k].motivos.includes(motivo)) flags[k].motivos.push(motivo);
+            if (peso[grav] > peso[flags[k].grav]) flags[k].grav = grav;
+        };
+        // 1) Possível duplicidade: mesmo tipo, mesmo cliente/fornecedor, mesmo valor, vencimentos até 5 dias
+        const grupos = {};
+        todos.forEach(it => { const v = apV(it.c); if (!v) return; const k = it.tipo + '|' + (it.parteId == null ? '-' : it.parteId) + '|' + v.toFixed(2); (grupos[k] = grupos[k] || []).push(it); });
+        Object.values(grupos).forEach(g => {
+            if (g.length < 2) return;
+            for (let i = 0; i < g.length; i++) for (let j = i + 1; j < g.length; j++) {
+                const a = g[i], b = g[j];
+                if (!(noEscopo(a.c) || noEscopo(b.c))) continue;
+                if (a.c.total_parcelas > 1 && b.c.total_parcelas > 1 && a.c.parcela_atual !== b.c.parcela_atual) continue;
+                if (Math.abs(apDias(a.c.data_vencimento, b.c.data_vencimento)) <= 5) {
+                    marcar(a, 'Possível duplicidade (mesmo valor e ' + (a.tipo === 'receber' ? 'cliente' : 'fornecedor') + ')', 'alta');
+                    marcar(b, 'Possível duplicidade (mesmo valor e ' + (b.tipo === 'receber' ? 'cliente' : 'fornecedor') + ')', 'alta');
+                }
+            }
+        });
+        // 2) Valor atípico na categoria (> 3x a mediana dos últimos 12 meses)
+        const ini12 = meses12[0];
+        const porCat = {};
+        todos.forEach(it => { const k0 = (it.c.data_vencimento || '').slice(0, 7); if (k0 < ini12 || k0 > sel) return; const k = it.tipo + '|' + (it.c.categoria_id == null ? '-' : it.c.categoria_id); (porCat[k] = porCat[k] || []).push(apV(it.c)); });
+        todos.forEach(it => {
+            if (!noEscopo(it.c)) return;
+            const vals = porCat[it.tipo + '|' + (it.c.categoria_id == null ? '-' : it.c.categoria_id)] || [];
+            if (vals.length < 4) return;
+            const med = apMediana(vals), v = apV(it.c);
+            if (med > 0 && v > med * 3 && v - med > 1000) marcar(it, 'Valor atípico: ' + (v / med).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + 'x a mediana da categoria (' + apR0(med) + ')', 'media');
+        });
+        // 3) Cadastro incompleto / inconsistências
+        todos.forEach(it => {
+            const c = it.c, v = apV(c);
+            if (!noEscopo(c)) return;
+            if (v <= 0) marcar(it, 'Valor zerado ou negativo', 'alta');
+            if (it.quit && it.dq && it.dq > hoje) marcar(it, 'Baixado com data futura (' + apData(it.dq) + ')', 'alta');
+            if (it.quit && !it.dq) marcar(it, 'Baixado sem data de ' + (it.tipo === 'receber' ? 'recebimento' : 'pagamento'), 'media');
+            if (c.categoria_id == null) marcar(it, 'Sem categoria', 'media');
+            if (it.parteId == null) marcar(it, 'Sem ' + (it.tipo === 'receber' ? 'cliente' : 'fornecedor'), 'baixa');
+            if (!c.descricao || String(c.descricao).trim().length < 3) marcar(it, 'Descrição vazia ou muito curta', 'baixa');
+            if (c.data_competencia && c.data_vencimento && Math.abs(apDias(c.data_competencia, c.data_vencimento)) > 90) marcar(it, 'Competência e vencimento distantes (' + Math.abs(apDias(c.data_competencia, c.data_vencimento)) + ' dias)', 'baixa');
+        });
+        // 4) Pendências muito antigas (podem já ter sido pagas/recebidas sem baixa)
+        todos.forEach(it => {
+            if (it.quit || !it.c.data_vencimento) return;
+            const d = apDias(hoje, it.c.data_vencimento);
+            if (d > 90) marcar(it, 'Pendente há ' + d + ' dias — confirmar se já foi ' + (it.tipo === 'receber' ? 'recebido' : 'pago'), 'media');
+        });
+        const duvidosos = Object.values(flags).map(f => ({
+            id: f.it.c.id, tipo: f.it.tipo, venc: f.it.c.data_vencimento, desc: f.it.c.descricao || '(sem descrição)', parte: f.it.parte,
+            valor: apV(f.it.c), motivos: f.motivos, grav: f.grav, status: f.it.c.status
+        })).sort((a, b) => peso[b.grav] - peso[a.grav] || b.valor - a.valor);
+        const contaMotivo = {};
+        duvidosos.forEach(d => d.motivos.forEach(m => { const k = m.replace(/\s*[:(].*$/, '').replace(/Pendente há .*/, 'Pendência antiga').replace(/Baixado com data futura.*/, 'Baixa com data futura'); contaMotivo[k] = (contaMotivo[k] || 0) + 1; }));
+
+        // ---------------- Pontos de atenção ----------------
+        const vRecMoM = apVar(receita, R(prev)), vRecYoY = apVar(receita, R(yoy)), vDespMoM = apVar(despesa, D(prev)), vDesp3 = apVar(despesa, mediaDesp3);
+        const alertas = [];
+        const al = (nivel, titulo, texto, rec) => alertas.push({ nivel, titulo, texto, rec });
+        if (resultado < 0) al('alta', 'Resultado negativo no mês', 'As despesas superaram as receitas em ' + apR0(-resultado) + '.', 'Revisar despesas não essenciais e antecipar recebíveis para recompor o caixa.');
+        if (vRecMoM != null && vRecMoM <= -10) al(vRecMoM <= -20 ? 'alta' : 'media', 'Queda de receita', 'Receita ' + apPct(vRecMoM) + ' em relação a ' + apRotMes(prev) + ' (' + apR0(R(prev)) + ' → ' + apR0(receita) + ').', 'Investigar a queda por cliente e categoria; avaliar ações comerciais para o próximo mês.');
+        if (vRecYoY != null && vRecYoY <= -10 && R(yoy) > 0) al('media', 'Receita abaixo do mesmo mês do ano anterior', apPct(vRecYoY) + ' contra ' + apRotMes(yoy) + ' (' + apR0(R(yoy)) + ').', 'Comparar sazonalidade e carteira de clientes com o ano anterior.');
+        if (vDespMoM != null && vDespMoM >= 10) al(vDespMoM >= 25 ? 'alta' : 'media', 'Aumento de despesas', 'Despesas ' + apPct(vDespMoM) + ' em relação a ' + apRotMes(prev) + ' e ' + apPct(vDesp3) + ' sobre a média dos 3 meses anteriores.', 'Validar os aumentos com os responsáveis de cada categoria antes do próximo fechamento.');
+        const aumFortes = aumentos.filter(x => x.dif > 1000 && (x.var == null || x.var >= 30)).slice(0, 3);
+        if (aumFortes.length) al('media', 'Categorias com alta relevante', aumFortes.map(x => x.nome + ' (' + (x.var == null ? 'nova' : apPct(x.var, 0)) + ', +' + apR0(x.dif) + ')').join('; ') + '.', 'Solicitar justificativa das variações e renegociar contratos quando possível.');
+        if (margem != null && margem >= 0 && margem < 10) al('media', 'Margem apertada', 'Margem de ' + apPct(margem).replace('+', '') + ' no mês.', 'Acompanhar preço de venda e custo das principais categorias.');
+        if (atrPag.length) al('alta', 'Contas a pagar em atraso', atrPag.length + ' conta(s) vencida(s) somando ' + apR0(soma(atrPag)) + ' — risco de juros, multas e restrição com fornecedores.', 'Priorizar a quitação ou renegociação dos atrasados a pagar.');
+        if (atrRec.length) al(soma(atrRec) > mediaRec3 * 0.1 ? 'alta' : 'media', 'Recebíveis em atraso', atrRec.length + ' título(s) vencido(s) somando ' + apR0(soma(atrRec)) + (agingRec[4] ? ', sendo ' + apR0(agingRec[4]) + ' há mais de 90 dias' : '') + '.', 'Intensificar a cobrança, começando pelos maiores valores e títulos mais antigos.');
+        if (cliTop.length && cliTop[0].part >= 30) al('media', 'Concentração de receita', cliTop[0].nome + ' representa ' + cliTop[0].part.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + '% da receita do mês.', 'Reduzir a dependência de um único cliente ampliando a carteira.');
+        const saldo30 = proxRec - proxPag - proxChq;
+        if (saldo30 < 0) al('alta', 'Caixa projetado negativo (30 dias)', 'Entradas previstas de ' + apR0(proxRec) + ' contra saídas de ' + apR0(proxPag + proxChq) + ' (incluindo cheques): déficit de ' + apR0(-saldo30) + '.', 'Planejar o caixa: postergar saídas não críticas ou buscar capital de giro.');
+        if (chqAtr.length) al('alta', 'Cheques vencidos não compensados', chqAtr.length + ' cheque(s) somando ' + apR0(soma(chqAtr)) + '.', 'Conferir saldo bancário e confirmar a compensação ou a devolução dos cheques.');
+        if (duvidosos.length) al(duvidosos.some(d => d.grav === 'alta') ? 'alta' : 'media', 'Lançamentos a revisar', duvidosos.length + ' lançamento(s) com indício de erro ou inconsistência (' + duvidosos.filter(d => d.grav === 'alta').length + ' de prioridade alta).', 'Revisar os lançamentos duvidosos antes de fechar o mês.');
+        const pesoAl = { alta: 3, media: 2, info: 1 };
+        alertas.sort((a, b) => pesoAl[b.nivel] - pesoAl[a.nivel]);
+        if (!alertas.length) al('info', 'Nenhum ponto crítico identificado', 'Os indicadores do mês estão dentro dos parâmetros de atenção.', 'Manter o acompanhamento mensal dos indicadores.');
+
+        const dreAtual = apDREMes(rec, pag, lancsDRE, sel), drePrev = apDREMes(rec, pag, lancsDRE, prev);
+        const dfcAtual = apDFCMes(rec, pag, sel), dfcPrev = apDFCMes(rec, pag, prev);
+        return {
+            dreAtual, drePrev, dfcAtual, dfcPrev,
+            ano, mes, sel, prev, yoy, base, hoje, meses12,
+            receita, despesa, resultado, margem, recPrev: R(prev), despPrev: D(prev), recYoY: R(yoy), despYoY: D(yoy),
+            vRecMoM, vRecYoY, vDespMoM, vDesp3, mediaRec12, mediaDesp12, mediaRec3, mediaDesp3,
+            serieRec, serieDesp, serieRes, maxRecIdx: idxMax(serieRec), minRecIdx: idxMin(serieRec), maxDespIdx: idxMax(serieDesp),
+            recCatTop, cliTop, despCatTop, aumentos, reducoes, forTop,
+            pendRec, pendPag, atrRec, atrPag, totPendRec: soma(pendRec), totPendPag: soma(pendPag), totAtrRec: soma(atrRec), totAtrPag: soma(atrPag),
+            faixas, agingRec, agingPag, proxRec, proxPag, proxChq, saldo30,
+            chqMes, chqAb, chqAtr, chqAVencer, chqCompMes, chqFornTop, totChqAb: soma(chqAb), totChqAtr: soma(chqAtr), totChqAVencer: soma(chqAVencer),
+            duvidosos, contaMotivo, alertas
+        };
+    }
+
+    // =====================================================================
+    // APRESENTAÇÃO MENSAL — MONTAGEM DOS SLIDES (modelo único p/ tela, PDF e PowerPoint)
+    // Coordenadas em polegadas, slide 16:9 = 10 x 5,625 pol.
+    // =====================================================================
+    const APC = { navy: '1F2A37', laranja: 'FF7A42', laranjaClaro: 'FFB08C', verde: '16A34A', vermelho: 'DC2626', ambar: 'D97706',
+        azul: '2563EB', cinza: '6B7280', cinzaEsc: '374151', claro: 'F8FAFC', borda: 'E5E7EB', texto: '111827', branco: 'FFFFFF' };
+    let _apA = null, _apSlides = null, _apAcoes = [];
+
+    function apMontarSlides(A, empresa, logo) {
+        const S = [];
+        const mesTxt = AP_MES[A.mes - 1] + ' de ' + A.ano;
+        const baseTxt = A.base === 'caixa' ? 'Regime de caixa (valores efetivamente recebidos e pagos)' : 'Regime de competência (lançamentos pela data de competência)';
+        const rect = (x, y, w, h, fill, extra) => Object.assign({ tp: 'rect', x, y, w, h, fill }, extra || {});
+        const txt = (x, y, w, h, t, s, c, extra) => Object.assign({ tp: 'text', x, y, w, h, paras: [{ runs: [{ t, s, c }] }] }, extra || {});
+        const corVar = (p, inverso) => p == null || Math.abs(p) < 0.05 ? APC.cinza : ((p > 0) !== !!inverso ? APC.verde : APC.vermelho);
+        const novo = (titulo, sub) => {
+            const els = [
+                rect(0, 0.3, 0.1, 0.5, APC.laranja),
+                txt(0.38, 0.2, 9.2, 0.5, titulo, 22, APC.navy, { b: true }),
+                txt(0.38, 0.68, 9.2, 0.3, sub || '', 10.5, APC.cinza)
+            ];
+            els[1].paras[0].runs[0].b = true;
+            const sl = { els, titulo }; S.push(sl); return sl;
+        };
+        const kpi = (sl, x, y, w, h, rot, val, sub, subC, acc) => {
+            sl.els.push(rect(x, y, w, h, APC.claro, { line: APC.borda, raio: 0.06 }));
+            sl.els.push(rect(x, y, w, 0.055, acc || APC.laranja));
+            sl.els.push(txt(x + 0.14, y + 0.13, w - 0.28, 0.24, rot.toUpperCase(), 8, APC.cinza, { b: true }));
+            sl.els[sl.els.length - 1].paras[0].runs[0].b = true;
+            const v = txt(x + 0.14, y + 0.36, w - 0.28, 0.42, val, h > 1.1 ? 18 : 16, APC.texto); v.paras[0].runs[0].b = true; sl.els.push(v);
+            if (sub) sl.els.push(txt(x + 0.14, y + h - 0.36, w - 0.28, 0.28, sub, 8.5, subC || APC.cinza));
+        };
+        const bullets = (sl, x, y, w, h, itens, s, titulo) => {
+            const paras = [];
+            if (titulo) paras.push({ runs: [{ t: titulo, s: 12, c: APC.navy, b: true }], depois: 6 });
+            itens.forEach(it => paras.push({ runs: [{ t: '●  ', s: s - 2, c: it.cor || APC.laranja }].concat(it.b ? [{ t: it.b, s, c: APC.texto, b: true }] : []).concat([{ t: it.t, s, c: APC.cinzaEsc }]), depois: 5 }));
+            sl.els.push({ tp: 'text', x, y, w, h, paras, valign: 'top' });
+        };
+        const painel = (sl, x, y, w, h) => sl.els.push(rect(x, y, w, h, APC.claro, { line: APC.borda, raio: 0.06 }));
+        const legenda = (sl, x, y, w, t) => sl.els.push(txt(x, y, w, 0.25, t, 9.5, APC.cinzaEsc, { b: true }));
+        const escalaMil = vals => Math.max(...vals.map(Math.abs), 0) >= 10000;
+        const serieEsc = (vals, mil) => vals.map(v => mil ? Math.round(v / 100) / 10 : Math.round(v));
+        const un = mil => mil ? 'R$ mil' : 'R$';
+        const rotulos12 = A.meses12.map(k => apRotMes(k, true));
+        const sinalCor = v => v < 0 ? APC.vermelho : APC.verde;
+
+        // ---------- 1. CAPA ----------
+        {
+            const els = [rect(0, 0, 10, 5.625, APC.navy), rect(0, 5.1, 10, 0.525, '17202B'), rect(0.6, 1.55, 0.1, 1.75, APC.laranja)];
+            els.push(txt(0.9, 1.45, 6.5, 0.3, 'APRESENTAÇÃO À DIRETORIA', 11, APC.laranja));
+            els[els.length - 1].paras[0].runs[0].b = true;
+            const t = txt(0.9, 1.78, 7, 0.75, 'Relatório Gerencial Mensal', 34, APC.branco); t.paras[0].runs[0].b = true; els.push(t);
+            els.push(txt(0.9, 2.55, 7, 0.5, mesTxt, 24, APC.laranjaClaro));
+            els.push(txt(0.9, 3.1, 7, 0.35, empresa || 'Gestão Financeira', 14, 'CBD5E1'));
+            els.push(txt(0.6, 5.18, 8.8, 0.35, 'Base: ' + baseTxt + '  ·  Posição de contas em aberto em ' + apData(A.hoje) + '  ·  Gerado em ' + apData(A.hoje), 8.5, '94A3B8', { valign: 'middle' }));
+            if (logo) { els.push(rect(7.35, 0.55, 2.15, 1.5, APC.branco, { raio: 0.1 })); els.push({ tp: 'img', x: 7.47, y: 0.63, w: 1.91, h: 1.29, data: logo }); }
+            S.push({ els, capa: true, titulo: 'Capa' });
+        }
+
+        // ---------- 2. SUMÁRIO EXECUTIVO ----------
+        {
+            const sl = novo('Sumário executivo', mesTxt + ' · ' + (A.base === 'caixa' ? 'regime de caixa' : 'regime de competência'));
+            const W = 1.78, G = 0.09, X0 = 0.38, H = 1.18;
+            const xs = [X0, X0 + W + G, X0 + 2 * (W + G)], ys = [1.12, 2.4, 3.68];
+            kpi(sl, xs[0], ys[0], W, H, 'Receita do mês', apR0(A.receita), apSeta(A.vRecMoM) + apPct(A.vRecMoM) + ' vs mês anterior', corVar(A.vRecMoM), APC.verde);
+            kpi(sl, xs[1], ys[0], W, H, 'Despesas do mês', apR0(A.despesa), apSeta(A.vDespMoM) + apPct(A.vDespMoM) + ' vs mês anterior', corVar(A.vDespMoM, true), APC.vermelho);
+            kpi(sl, xs[2], ys[0], W, H, 'Resultado', apR0(A.resultado), 'Margem ' + (A.margem == null ? 'n/d' : apPct(A.margem).replace('+', '')), sinalCor(A.resultado), A.resultado < 0 ? APC.vermelho : APC.verde);
+            kpi(sl, xs[0], ys[1], W, H, 'A receber em aberto', apR0(A.totPendRec), apR0(A.totAtrRec) + ' em atraso', A.totAtrRec ? APC.vermelho : APC.cinza, APC.azul);
+            kpi(sl, xs[1], ys[1], W, H, 'A pagar em aberto', apR0(A.totPendPag), apR0(A.totAtrPag) + ' em atraso', A.totAtrPag ? APC.vermelho : APC.cinza, APC.ambar);
+            kpi(sl, xs[2], ys[1], W, H, 'Cheques em aberto', apR0(A.totChqAb), apR0(A.totChqAtr) + ' vencidos', A.totChqAtr ? APC.vermelho : APC.cinza, APC.ambar);
+            kpi(sl, xs[0], ys[2], W, H, 'Receita vs ano anterior', apPct(A.vRecYoY), apRotMes(A.yoy, true) + ': ' + apR0(A.recYoY), APC.cinza, corVar(A.vRecYoY) === APC.cinza ? APC.cinza : corVar(A.vRecYoY));
+            kpi(sl, xs[1], ys[2], W, H, 'Resultado médio 12m', apR0(A.mediaRec12 - A.mediaDesp12), 'Receita média ' + apK(A.mediaRec12), APC.cinza, APC.navy);
+            kpi(sl, xs[2], ys[2], W, H, 'Saldo projetado 30 dias', apR0(A.saldo30), 'Próximos 30 dias', sinalCor(A.saldo30), A.saldo30 < 0 ? APC.vermelho : APC.verde);
+            painel(sl, 6.05, 1.12, 3.57, 3.74);
+            const d = [];
+            d.push({ b: 'Receita: ', t: apR0(A.receita) + (A.vRecMoM != null ? ' (' + apPct(A.vRecMoM) + ' no mês' + (A.vRecYoY != null ? '; ' + apPct(A.vRecYoY) + ' no ano' : '') + ').' : '.'), cor: corVar(A.vRecMoM) });
+            d.push({ b: 'Despesas: ', t: apR0(A.despesa) + (A.vDespMoM != null ? ' (' + apPct(A.vDespMoM) + ' no mês).' : '.') + (A.despCatTop[0] ? ' Maior: ' + A.despCatTop[0].nome + '.' : ''), cor: corVar(A.vDespMoM, true) });
+            d.push({ b: 'Resultado: ', t: (A.resultado >= 0 ? 'lucro de ' : 'prejuízo de ') + apR0(Math.abs(A.resultado)) + (A.margem != null ? ', margem de ' + apPct(A.margem).replace('+', '') + '.' : '.'), cor: sinalCor(A.resultado) });
+            if (A.aumentos[0] && A.aumentos[0].dif > 0) d.push({ b: 'Maior alta: ', t: A.aumentos[0].nome + ' (+' + apR0(A.aumentos[0].dif) + ' sobre a média de 3 meses).', cor: APC.vermelho });
+            if (A.totAtrRec || A.totAtrPag) d.push({ b: 'Atrasos: ', t: apR0(A.totAtrRec) + ' a receber e ' + apR0(A.totAtrPag) + ' a pagar.', cor: APC.ambar });
+            const nAlta = A.alertas.filter(a => a.nivel === 'alta').length;
+            d.push({ b: 'Atenção: ', t: nAlta + ' ponto(s) crítico(s) e ' + A.duvidosos.length + ' lançamento(s) a revisar.', cor: nAlta ? APC.vermelho : APC.verde });
+            bullets(sl, 6.22, 1.25, 3.25, 3.5, d, 9.5, 'Destaques do mês');
+        }
+
+        // ---------- 3. RECEITAS — EVOLUÇÃO ----------
+        {
+            const sl = novo('Receitas — evolução mensal', 'Últimos 12 meses até ' + apRotMes(A.sel));
+            const mil = escalaMil(A.serieRec);
+            legenda(sl, 0.38, 1.08, 6, 'Receita por mês (' + un(mil) + ')');
+            sl.els.push({ tp: 'chart', x: 0.3, y: 1.35, w: 6.35, h: 3.75, tipo: 'col', rotulos: rotulos12, series: [{ nome: 'Receita', valores: serieEsc(A.serieRec, mil), cor: APC.verde }], casas: mil ? 1 : 0, destaque: 11 });
+            painel(sl, 6.85, 1.12, 2.77, 3.98);
+            const ult3 = A.serieRec.slice(9).reduce((s, v) => s + v, 0) / 3, ant3 = A.serieRec.slice(6, 9).reduce((s, v) => s + v, 0) / 3;
+            const tend = apVar(ult3, ant3);
+            bullets(sl, 7.0, 1.25, 2.5, 3.8, [
+                { b: 'No mês: ', t: apR0(A.receita), cor: APC.verde },
+                { b: 'Vs mês anterior: ', t: apPct(A.vRecMoM) + ' (' + apR0(A.recPrev) + ')', cor: corVar(A.vRecMoM) },
+                { b: 'Vs ' + apRotMes(A.yoy, true) + ': ', t: apPct(A.vRecYoY), cor: corVar(A.vRecYoY) },
+                { b: 'Média 12 meses: ', t: apR0(A.mediaRec12), cor: APC.cinza },
+                { b: 'Melhor mês: ', t: apRotMes(A.meses12[A.maxRecIdx], true) + ' (' + apK(A.serieRec[A.maxRecIdx]) + ')', cor: APC.verde },
+                { b: 'Menor mês: ', t: apRotMes(A.meses12[A.minRecIdx], true) + ' (' + apK(A.serieRec[A.minRecIdx]) + ')', cor: APC.vermelho },
+                { b: 'Tendência (trimestre): ', t: tend == null ? 'sem base' : (tend > 3 ? 'crescimento ' : tend < -3 ? 'queda ' : 'estável ') + '(' + apPct(tend) + ')', cor: corVar(tend) }
+            ], 9.5, 'Leitura');
+        }
+
+        // ---------- 4. RECEITAS — COMPOSIÇÃO ----------
+        {
+            const sl = novo('Receitas — composição', 'Categorias e principais clientes em ' + apRotMes(A.sel));
+            const cats = A.recCatTop.slice(0, 8);
+            const mil = escalaMil(cats.map(c => c.v));
+            legenda(sl, 0.38, 1.08, 4.6, 'Receita por categoria (' + un(mil) + ')');
+            if (cats.length) sl.els.push({ tp: 'chart', x: 0.3, y: 1.35, w: 4.75, h: 3.75, tipo: 'bar', rotulos: cats.map(c => c.nome), series: [{ nome: 'Receita', valores: serieEsc(cats.map(c => c.v), mil), cor: APC.verde }], casas: mil ? 1 : 0 });
+            else sl.els.push(txt(0.38, 2.5, 4.6, 0.4, 'Sem receitas no mês.', 11, APC.cinza));
+            legenda(sl, 5.3, 1.08, 4.3, 'Principais clientes');
+            const cl = A.cliTop.slice(0, 9);
+            sl.els.push({ tp: 'table', x: 5.3, y: 1.35, w: 4.32, rowH: 0.32, s: 9,
+                cols: [{ t: 'Cliente', w: 2.35 }, { t: 'Valor', w: 1.22, al: 'right' }, { t: '% receita', w: 0.75, al: 'right' }],
+                rows: cl.map(c => [c.nome, apR0(c.v), { t: c.part.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%', c: c.part >= 30 ? APC.vermelho : APC.cinzaEsc, b: c.part >= 30 }]) });
+            if (cl.length) {
+                const top3 = cl.slice(0, 3).reduce((s, c) => s + c.part, 0);
+                sl.els.push(txt(5.3, 1.35 + 0.32 * (cl.length + 1) + 0.12, 4.32, 0.5, 'Os 3 maiores clientes concentram ' + top3.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) + '% da receita do mês' + (top3 >= 60 ? ' — concentração elevada.' : '.'), 9, top3 >= 60 ? APC.vermelho : APC.cinzaEsc));
+            }
+        }
+
+        // ---------- 5. DESPESAS — EVOLUÇÃO ----------
+        {
+            const sl = novo('Despesas — evolução mensal', 'Últimos 12 meses até ' + apRotMes(A.sel));
+            const mil = escalaMil(A.serieDesp);
+            legenda(sl, 0.38, 1.08, 6, 'Despesas por mês (' + un(mil) + ')');
+            sl.els.push({ tp: 'chart', x: 0.3, y: 1.35, w: 6.35, h: 3.75, tipo: 'col', rotulos: rotulos12, series: [{ nome: 'Despesas', valores: serieEsc(A.serieDesp, mil), cor: APC.vermelho }], casas: mil ? 1 : 0, destaque: 11 });
+            painel(sl, 6.85, 1.12, 2.77, 3.98);
+            const pesoDesp = A.receita ? A.despesa / A.receita * 100 : null;
+            bullets(sl, 7.0, 1.25, 2.5, 3.8, [
+                { b: 'No mês: ', t: apR0(A.despesa), cor: APC.vermelho },
+                { b: 'Vs mês anterior: ', t: apPct(A.vDespMoM) + ' (' + apR0(A.despPrev) + ')', cor: corVar(A.vDespMoM, true) },
+                { b: 'Vs média 3 meses: ', t: apPct(A.vDesp3) + ' (' + apR0(A.mediaDesp3) + ')', cor: corVar(A.vDesp3, true) },
+                { b: 'Vs ' + apRotMes(A.yoy, true) + ': ', t: apPct(apVar(A.despesa, A.despYoY)), cor: corVar(apVar(A.despesa, A.despYoY), true) },
+                { b: 'Média 12 meses: ', t: apR0(A.mediaDesp12), cor: APC.cinza },
+                { b: 'Maior mês: ', t: apRotMes(A.meses12[A.maxDespIdx], true) + ' (' + apK(A.serieDesp[A.maxDespIdx]) + ')', cor: APC.vermelho },
+                { b: 'Despesa / receita: ', t: pesoDesp == null ? 'n/d' : pesoDesp.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%', cor: pesoDesp != null && pesoDesp > 90 ? APC.vermelho : APC.cinza }
+            ], 9.5, 'Leitura');
+        }
+
+        // ---------- 6. DESPESAS POR CATEGORIA ----------
+        {
+            const sl = novo('Despesas por categoria', apRotMes(A.sel) + ' comparado à média dos 3 meses anteriores');
+            const linhas = A.despCatTop.slice(0, 11);
+            sl.els.push({ tp: 'table', x: 0.38, y: 1.12, w: 9.24, rowH: 0.31, s: 9,
+                cols: [{ t: 'Categoria', w: 3.2 }, { t: 'No mês', w: 1.25, al: 'right' }, { t: 'Média 3 meses', w: 1.35, al: 'right' }, { t: 'Variação R$', w: 1.3, al: 'right' }, { t: 'Variação %', w: 1.1, al: 'right' }, { t: '% do total', w: 1.04, al: 'right' }],
+                rows: linhas.map(c => {
+                    const alta = c.dif > 0 && (c.var == null || c.var > 10), baixa = c.dif < 0 && c.var != null && c.var < -10;
+                    const cor = alta ? APC.vermelho : baixa ? APC.verde : APC.cinzaEsc;
+                    return [{ t: c.nome, b: true }, apR0(c.atual), apR0(c.media), { t: (c.dif > 0 ? '+' : '') + apR0(c.dif), c: cor, b: alta }, { t: c.var == null ? 'nova' : apPct(c.var, 0), c: cor, b: alta }, c.part.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%'];
+                }) });
+            const resto = A.despCatTop.slice(11);
+            if (resto.length) sl.els.push(txt(0.38, 1.12 + 0.31 * (linhas.length + 1) + 0.08, 9.2, 0.3, '+ ' + resto.length + ' outra(s) categoria(s) somando ' + apR0(resto.reduce((s, c) => s + c.atual, 0)) + '.', 8.5, APC.cinza));
+            if (!linhas.length) sl.els.push(txt(0.38, 2.4, 9, 0.4, 'Sem despesas no mês.', 11, APC.cinza));
+        }
+
+        // ---------- 7. AUMENTOS + FORNECEDORES ----------
+        {
+            const sl = novo('Onde as despesas mais cresceram', 'Variação sobre a média dos 3 meses anteriores e principais fornecedores');
+            legenda(sl, 0.38, 1.08, 4.5, 'Maiores aumentos por categoria');
+            const au = A.aumentos.slice(0, 8);
+            sl.els.push({ tp: 'table', x: 0.38, y: 1.35, w: 4.5, rowH: 0.32, s: 9,
+                cols: [{ t: 'Categoria', w: 1.85 }, { t: 'No mês', w: 0.95, al: 'right' }, { t: 'Aumento', w: 0.95, al: 'right' }, { t: '%', w: 0.75, al: 'right' }],
+                rows: au.map(c => [c.nome, apR0(c.atual), { t: '+' + apR0(c.dif), c: APC.vermelho, b: true }, { t: c.var == null ? 'nova' : apPct(c.var, 0), c: APC.vermelho }]) });
+            if (!au.length) sl.els.push(txt(0.38, 1.8, 4.5, 0.4, 'Nenhuma categoria teve aumento no mês.', 10, APC.verde));
+            legenda(sl, 5.12, 1.08, 4.5, 'Principais fornecedores do mês');
+            const fo = A.forTop.slice(0, 8);
+            sl.els.push({ tp: 'table', x: 5.12, y: 1.35, w: 4.5, rowH: 0.32, s: 9,
+                cols: [{ t: 'Fornecedor', w: 2.05 }, { t: 'Valor', w: 1.0, al: 'right' }, { t: '% desp.', w: 0.7, al: 'right' }, { t: 'vs média', w: 0.75, al: 'right' }],
+                rows: fo.map(f => [f.nome, apR0(f.v), f.part.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%', { t: f.var == null ? 'novo' : apPct(f.var, 0), c: f.var == null || f.var > 10 ? APC.vermelho : f.var < -10 ? APC.verde : APC.cinzaEsc }]) });
+            const red = A.reducoes.slice(0, 3);
+            if (red.length) sl.els.push(txt(0.38, 4.6, 9.2, 0.45, 'Reduções no mês: ' + red.map(r => r.nome + ' (' + apR0(r.dif) + ')').join('; ') + '.', 9, APC.verde));
+        }
+
+        // ---------- 8. RESULTADO ----------
+        {
+            const sl = novo('Resultado e margem', 'Receitas x despesas — últimos 12 meses');
+            const mil = escalaMil(A.serieRec.concat(A.serieDesp));
+            legenda(sl, 0.38, 1.08, 6, 'Receitas x despesas (' + un(mil) + ')');
+            sl.els.push({ tp: 'chart', x: 0.3, y: 1.35, w: 6.1, h: 3.75, tipo: 'col', rotulos: rotulos12, legenda: true, rotuloTam: 7,
+                series: [{ nome: 'Receitas', valores: serieEsc(A.serieRec, mil), cor: APC.verde }, { nome: 'Despesas', valores: serieEsc(A.serieDesp, mil), cor: APC.vermelho }], casas: mil ? 1 : 0 });
+            legenda(sl, 6.6, 1.08, 3, 'Últimos 6 meses');
+            const ult = A.meses12.slice(6);
+            sl.els.push({ tp: 'table', x: 6.6, y: 1.35, w: 3.02, rowH: 0.33, s: 9,
+                cols: [{ t: 'Mês', w: 0.8 }, { t: 'Resultado', w: 1.32, al: 'right' }, { t: 'Margem', w: 0.9, al: 'right' }],
+                rows: ult.map((k, i) => { const r = A.serieRes[6 + i], rc = A.serieRec[6 + i]; return [{ t: apRotMes(k, true), b: k === A.sel }, { t: apR0(r), c: sinalCor(r), b: true }, rc ? (r / rc * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : 'n/d']; }) });
+            const acum = A.serieRes.reduce((s, v) => s + v, 0), mesesNeg = A.serieRes.filter(v => v < 0).length;
+            painel(sl, 6.6, 3.85, 3.02, 1.25);
+            bullets(sl, 6.72, 3.93, 2.85, 1.15, [
+                { b: 'Acumulado 12 meses: ', t: apR0(acum), cor: sinalCor(acum) },
+                { b: 'Meses negativos: ', t: mesesNeg + ' de 12', cor: mesesNeg ? APC.vermelho : APC.verde }
+            ], 9);
+        }
+
+
+        // ---------- DRE — COMPARATIVO COM O MÊS ANTERIOR ----------
+        {
+            const sl = novo('DRE — comparativo com o mês anterior', apRotMes(A.sel) + ' x ' + apRotMes(A.prev) + ' · regime de competência (mesma regra da tela DRE) · n.s. = variação não significativa (troca de sinal)');
+            const at = A.dreAtual, pv = A.drePrev, rb = at.RECEITA_BRUTA;
+            const lab = id => (typeof legDRE === 'function' ? legDRE(id) : id).trim();
+            const linhas = AP_DRE_LINHAS.filter(([id, tp]) => tp === 's' || at[id] || pv[id]);
+            const rh = linhas.length > 14 ? 0.225 : 0.255;
+            const fmtL = (v, tp) => v === 0 ? '—' : (tp === 'd' ? apR0(-v) : apR0(v));
+            sl.els.push({ tp: 'table', x: 0.38, y: 1.08, w: 9.24, rowH: rh, s: linhas.length > 14 ? 8 : 8.5,
+                cols: [{ t: 'Linha da DRE', w: 3.2 }, { t: apRotMes(A.prev, true), w: 1.2, al: 'right' }, { t: apRotMes(A.sel, true), w: 1.2, al: 'right' }, { t: 'Variação R$', w: 1.25, al: 'right' }, { t: 'Variação %', w: 1.0, al: 'right' }, { t: 'AV % (s/ rec. bruta)', w: 1.39, al: 'right' }],
+                rows: linhas.map(([id, tp]) => {
+                    const a = at[id] || 0, b = pv[id] || 0, dif = a - b, vp = (b < 0 || (a < 0) !== (b < 0)) ? 'ns' : apVar(a, b);
+                    // aumento é bom para receitas e subtotais; ruim para deduções/despesas
+                    const bom = tp === 'd' ? dif < 0 : dif > 0;
+                    const cor = Math.abs(dif) < 0.005 ? APC.cinza : (bom ? APC.verde : APC.vermelho);
+                    const sub = tp === 's', neg = sub && a < 0;
+                    const cells = [{ t: lab(id), b: sub, c: sub ? APC.texto : APC.cinzaEsc },
+                        { t: fmtL(b, tp), b: sub, c: sub && b < 0 ? APC.vermelho : (sub ? APC.texto : APC.cinzaEsc) },
+                        { t: fmtL(a, tp), b: true, c: neg ? APC.vermelho : APC.texto },
+                        { t: Math.abs(dif) < 0.005 ? '—' : (dif > 0 ? '+' : '') + apR0(tp === 'd' ? dif : dif).replace('R$ -', '-R$ '), c: cor, b: sub },
+                        { t: vp === 'ns' ? 'n.s.' : vp == null ? (a ? 'novo' : '—') : apPct(vp, 1), c: cor, b: sub },
+                        { t: rb ? (a / rb * 100 * (tp === 'd' ? -1 : 1)).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '—', c: APC.cinza }];
+                    return sub ? { cells, fill: id === 'RESULTADO_LIQUIDO' ? (a < 0 ? 'FEE2E2' : 'DCFCE7') : 'EEF2F6' } : cells;
+                }) });
+            const yFim = 1.08 + rh * (linhas.length + 1) + 0.08;
+            if (yFim < 4.95) {
+                const varz = AP_DRE_LINHAS.filter(([id, tp]) => tp !== 's').map(([id, tp]) => ({ id, tp, dif: (at[id] || 0) - (pv[id] || 0) })).filter(x => Math.abs(x.dif) >= 1).sort((x, y) => Math.abs(y.dif) - Math.abs(x.dif)).slice(0, 3);
+                if (varz.length) sl.els.push(txt(0.38, yFim, 9.24, 0.3, 'Maiores variações: ' + varz.map(x => lab(x.id).replace(/^[0-9.()+\-\s]+/, '') + ' ' + (x.dif > 0 ? '+' : '') + apR0(x.dif).replace('R$ -', '-R$ ')).join('  ·  '), 8.5, APC.cinzaEsc));
+            }
+        }
+
+        // ---------- FLUXO DE CAIXA — COMPARATIVO COM O MÊS ANTERIOR ----------
+        {
+            const sl = novo('Fluxo de caixa — comparativo com o mês anterior', apRotMes(A.sel) + ' x ' + apRotMes(A.prev) + ' · regime de caixa: valores efetivamente recebidos e pagos (mesma regra da tela DFC)');
+            const at = A.dfcAtual, pv = A.dfcPrev;
+            const montar = (oa, ob, max) => {
+                const nomes = [...new Set(Object.keys(oa).concat(Object.keys(ob)))].sort((x, y) => Math.max(oa[y] || 0, ob[y] || 0) - Math.max(oa[x] || 0, ob[x] || 0));
+                const top = nomes.slice(0, max).map(n => ({ n, a: oa[n] || 0, b: ob[n] || 0 }));
+                const resto = nomes.slice(max);
+                if (resto.length) top.push({ n: 'Outras (' + resto.length + ')', a: resto.reduce((s, n) => s + (oa[n] || 0), 0), b: resto.reduce((s, n) => s + (ob[n] || 0), 0) });
+                return top;
+            };
+            const ent = montar(at.ent, pv.ent, 4), sai = montar(at.sai, pv.sai, 9);
+            const liqA = at.totEnt - at.totSai, liqB = pv.totEnt - pv.totSai;
+            const linha = (nome, a, b, tipo, estilo) => {
+                const dif = a - b, vp = (b < 0 || (a < 0) !== (b < 0)) ? 'ns' : apVar(a, b);
+                const bom = tipo === 'sai' ? dif < 0 : dif > 0;
+                const cor = Math.abs(dif) < 0.005 ? APC.cinza : (bom ? APC.verde : APC.vermelho);
+                const forte = !!estilo;
+                const totRef = tipo === 'sai' ? at.totSai : tipo === 'ent' ? at.totEnt : null;
+                const cells = [{ t: nome, b: forte, c: forte ? APC.texto : APC.cinzaEsc }, { t: b ? apR0(b) : '—', b: forte, c: b < 0 ? APC.vermelho : (forte ? APC.texto : APC.cinzaEsc) },
+                    { t: a ? apR0(a) : '—', b: true, c: a < 0 ? APC.vermelho : APC.texto }, { t: Math.abs(dif) < 0.005 ? '—' : (dif > 0 ? '+' : '') + apR0(dif).replace('R$ -', '-R$ '), c: cor, b: forte },
+                    { t: vp === 'ns' ? 'n.s.' : vp == null ? (a ? 'novo' : '—') : apPct(vp, 1), c: cor, b: forte }, { t: totRef ? (a / totRef * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%' : '', c: APC.cinza }];
+                return estilo ? { cells, fill: estilo } : cells;
+            };
+            const rows = [];
+            rows.push({ cells: [{ t: '(+) ENTRADAS DE CAIXA', b: true, c: APC.verde }, '', '', '', '', ''], fill: 'F0FDF4' });
+            ent.forEach(x => rows.push(linha(x.n, x.a, x.b, 'ent')));
+            rows.push(linha('= Total de entradas', at.totEnt, pv.totEnt, 'ent', 'DCFCE7'));
+            rows.push({ cells: [{ t: '(−) SAÍDAS DE CAIXA', b: true, c: APC.vermelho }, '', '', '', '', ''], fill: 'FEF2F2' });
+            sai.forEach(x => rows.push(linha(x.n, x.a, x.b, 'sai')));
+            rows.push(linha('= Total de saídas', at.totSai, pv.totSai, 'sai', 'FEE2E2'));
+            rows.push(linha('= FLUXO LÍQUIDO DO MÊS', liqA, liqB, 'liq', liqA < 0 ? 'FEE2E2' : 'DCFCE7'));
+            const rh = rows.length > 15 ? 0.222 : 0.25;
+            sl.els.push({ tp: 'table', x: 0.38, y: 1.08, w: 9.24, rowH: rh, s: rows.length > 15 ? 8 : 8.5,
+                cols: [{ t: 'Linha do fluxo de caixa', w: 3.2 }, { t: apRotMes(A.prev, true), w: 1.2, al: 'right' }, { t: apRotMes(A.sel, true), w: 1.2, al: 'right' }, { t: 'Variação R$', w: 1.25, al: 'right' }, { t: 'Variação %', w: 1.0, al: 'right' }, { t: '% do total', w: 1.39, al: 'right' }],
+                rows });
+            const yFim = 1.08 + rh * (rows.length + 1) + 0.08;
+            if (yFim < 4.95) sl.els.push(txt(0.38, yFim, 9.24, 0.3, 'Fluxo líquido ' + (liqA >= 0 ? 'positivo' : 'negativo') + ' de ' + apR0(Math.abs(liqA)) + ' no mês, ' + (liqA - liqB >= 0 ? 'melhora' : 'piora') + ' de ' + apR0(Math.abs(liqA - liqB)) + ' em relação a ' + apRotMes(A.prev, true) + '.', 8.5, liqA < 0 ? APC.vermelho : APC.cinzaEsc));
+        }
+
+        // ---------- 9. CONTAS EM ABERTO ----------
+        {
+            const sl = novo('Contas em aberto e atrasos', 'Posição em ' + apData(A.hoje) + ' · todos os lançamentos pendentes');
+            const W = 2.22, G = 0.12;
+            kpi(sl, 0.38, 1.1, W, 1.02, 'A receber em aberto', apR0(A.totPendRec), A.pendRec.length + ' título(s)', APC.cinza, APC.azul);
+            kpi(sl, 0.38 + (W + G), 1.1, W, 1.02, 'A receber atrasado', apR0(A.totAtrRec), A.atrRec.length + ' título(s)', A.totAtrRec ? APC.vermelho : APC.cinza, APC.vermelho);
+            kpi(sl, 0.38 + 2 * (W + G), 1.1, W, 1.02, 'A pagar em aberto', apR0(A.totPendPag), A.pendPag.length + ' conta(s)', APC.cinza, APC.ambar);
+            kpi(sl, 0.38 + 3 * (W + G), 1.1, W, 1.02, 'A pagar atrasado', apR0(A.totAtrPag), A.atrPag.length + ' conta(s)', A.totAtrPag ? APC.vermelho : APC.cinza, APC.vermelho);
+            const mil = escalaMil(A.agingRec.concat(A.agingPag));
+            legenda(sl, 0.38, 2.3, 5.5, 'Prazo dos valores em aberto (' + un(mil) + ')');
+            sl.els.push({ tp: 'chart', x: 0.3, y: 2.55, w: 5.75, h: 2.55, tipo: 'col', rotulos: A.faixas, legenda: true, rotuloTam: 8,
+                series: [{ nome: 'A receber', valores: serieEsc(A.agingRec, mil), cor: APC.azul }, { nome: 'A pagar', valores: serieEsc(A.agingPag, mil), cor: APC.ambar }], casas: mil ? 1 : 0 });
+            painel(sl, 6.25, 2.3, 3.37, 2.8);
+            bullets(sl, 6.4, 2.4, 3.15, 2.65, [
+                { b: 'Entradas previstas: ', t: apR0(A.proxRec), cor: APC.verde },
+                { b: 'Contas a pagar: ', t: apR0(A.proxPag), cor: APC.vermelho },
+                { b: 'Cheques a compensar: ', t: apR0(A.proxChq), cor: APC.ambar },
+                { b: 'Saldo projetado: ', t: apR0(A.saldo30), cor: sinalCor(A.saldo30) }
+            ], 10, 'Próximos 30 dias');
+        }
+
+        // ---------- 10. CHEQUES ----------
+        {
+            const sl = novo('Cheques', 'Situação atual e distribuição por mês (data "bom para") em ' + A.ano);
+            const W = 2.22, G = 0.12;
+            kpi(sl, 0.38, 1.1, W, 1.02, 'A vencer', apR0(A.totChqAVencer), A.chqAVencer.length + ' cheque(s)', APC.cinza, APC.ambar);
+            kpi(sl, 0.38 + (W + G), 1.1, W, 1.02, 'Vencidos não compensados', apR0(A.totChqAtr), A.chqAtr.length + ' cheque(s)', A.chqAtr.length ? APC.vermelho : APC.cinza, APC.vermelho);
+            kpi(sl, 0.38 + 2 * (W + G), 1.1, W, 1.02, 'Compensados no mês', apR0(A.chqCompMes.reduce((s, c) => s + apV(c), 0)), A.chqCompMes.length + ' cheque(s)', APC.cinza, APC.verde);
+            kpi(sl, 0.38 + 3 * (W + G), 1.1, W, 1.02, 'Total comprometido', apR0(A.totChqAb), A.chqAb.length + ' cheque(s) não compensados', APC.cinza, APC.navy);
+            const todos = A.chqMes.compensado.concat(A.chqMes.aberto, A.chqMes.atrasado);
+            const tot = A.chqMes.compensado.map((v, i) => v + A.chqMes.aberto[i] + A.chqMes.atrasado[i]);
+            const mil = escalaMil(tot);
+            legenda(sl, 0.38, 2.3, 6, 'Cheques por mês — Jan a Dez ' + A.ano + ' (' + un(mil) + ')');
+            if (todos.some(v => v)) sl.els.push({ tp: 'chart', x: 0.3, y: 2.55, w: 6.0, h: 2.6, tipo: 'colStacked', rotulos: AP_MES_C, legenda: true, rotuloTam: 7, casas: mil ? 1 : 0,
+                series: [{ nome: 'Compensados', valores: serieEsc(A.chqMes.compensado, mil), cor: APC.verde }, { nome: 'A vencer', valores: serieEsc(A.chqMes.aberto, mil), cor: 'E6A817' }, { nome: 'Atrasados', valores: serieEsc(A.chqMes.atrasado, mil), cor: APC.vermelho }] });
+            else sl.els.push(txt(0.38, 3.4, 6, 0.4, 'Sem cheques com vencimento em ' + A.ano + '.', 10, APC.cinza));
+            legenda(sl, 6.5, 2.3, 3.1, 'Maiores fornecedores em aberto');
+            const fo = A.chqFornTop.slice(0, 7);
+            sl.els.push({ tp: 'table', x: 6.5, y: 2.55, w: 3.12, rowH: 0.31, s: 8.5,
+                cols: [{ t: 'Fornecedor', w: 1.3 }, { t: 'Em aberto', w: 0.9, al: 'right' }, { t: 'Vencido', w: 0.92, al: 'right' }],
+                rows: fo.map(f => [f.nome, apK(f.v), { t: f.atr ? apK(f.atr) : '—', c: f.atr ? APC.vermelho : APC.cinza, b: !!f.atr }]) });
+            if (!fo.length) sl.els.push(txt(6.5, 3.0, 3.1, 0.4, 'Nenhum cheque em aberto.', 10, APC.verde));
+        }
+
+        // ---------- 11. PONTOS DE ATENÇÃO ----------
+        {
+            const sl = novo('Pontos de atenção', 'O que a diretoria deve acompanhar de perto' + (A.alertas.length > 6 ? ' · ' + A.alertas.length + ' pontos identificados (6 principais abaixo; lista completa no sistema)' : ''));
+            const cores = { alta: APC.vermelho, media: APC.ambar, info: APC.azul }, rot = { alta: 'ALTA', media: 'MÉDIA', info: 'INFO' };
+            const lista = A.alertas.slice(0, 6);
+            const h = 0.6, g = 0.07;
+            lista.forEach((a, i) => {
+                const y = 1.1 + i * (h + g);
+                sl.els.push(rect(0.38, y, 9.24, h, APC.claro, { line: APC.borda, raio: 0.05 }));
+                sl.els.push(rect(0.38, y, 0.07, h, cores[a.nivel]));
+                const tag = txt(0.58, y + (h - 0.24) / 2, 0.72, 0.24, rot[a.nivel], 8, APC.branco, { fill: cores[a.nivel], align: 'center', valign: 'middle', raio: 0.05 });
+                tag.paras[0].runs[0].b = true; sl.els.push(tag);
+                sl.els.push({ tp: 'text', x: 1.45, y: y + 0.03, w: 8.05, h: h - 0.06, valign: 'middle',
+                    paras: [{ runs: [{ t: a.titulo, s: 10.5, c: APC.texto, b: true }], depois: 1 }, { runs: [{ t: a.texto, s: 9, c: APC.cinzaEsc }] }] });
+            });
+        }
+
+        // ---------- 12. LANÇAMENTOS DUVIDOSOS ----------
+        {
+            const sl = novo('Lançamentos a revisar', 'Indícios de erro ou inconsistência nos lançamentos de ' + apRotMes(apMkDesloca(A.sel, -2), true) + ' a ' + apRotMes(A.sel, true) + ' e pendências antigas');
+            const dv = A.duvidosos;
+            if (!dv.length) {
+                sl.els.push(rect(0.38, 1.3, 9.24, 1.2, 'ECFDF5', { line: 'A7F3D0', raio: 0.08 }));
+                sl.els.push(txt(0.6, 1.3, 8.8, 1.2, '✓  Nenhum lançamento duvidoso encontrado pelas verificações automáticas.', 13, '065F46', { valign: 'middle' }));
+            } else {
+                const resumo = Object.entries(A.contaMotivo).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([m, n]) => m + ': ' + n).join('  ·  ');
+                const corta = (t, n) => { t = String(t || ''); return t.length > n ? t.slice(0, n - 1) + '…' : t; };
+                sl.els.push(txt(0.38, 1.05, 9.24, 0.3, dv.length + ' lançamento(s) — ' + resumo, 8.5, APC.cinzaEsc));
+                const cg = { alta: APC.vermelho, media: APC.ambar, baixa: APC.cinza };
+                const lin = dv.slice(0, 10);
+                _apAcoes = lin.map(d => d);
+                sl.els.push({ tp: 'table', x: 0.38, y: 1.38, w: 9.24, rowH: 0.31, s: 8, acao: 'duvidoso',
+                    cols: [{ t: 'Tipo', w: 0.7 }, { t: 'Vencimento', w: 0.85 }, { t: 'Descrição', w: 2.25 }, { t: 'Cliente / Fornecedor', w: 1.6 }, { t: 'Valor', w: 1.0, al: 'right' }, { t: 'Motivo', w: 2.84 }],
+                    rows: lin.map(d => [{ t: d.tipo === 'receber' ? 'Receber' : 'Pagar', c: d.tipo === 'receber' ? APC.verde : APC.vermelho, b: true }, apData(d.venc), corta(d.desc, 34), corta(d.parte, 24), apR0(d.valor), { t: corta(d.motivos[0].replace(/\s*\(R\$[^)]*\)/, '') + (d.motivos.length > 1 ? ' (+' + (d.motivos.length - 1) + ')' : ''), 46), c: cg[d.grav], b: d.grav === 'alta' }]) });
+                if (dv.length > lin.length) sl.els.push(txt(0.38, 1.38 + 0.31 * (lin.length + 1) + 0.06, 9.2, 0.25, '+ ' + (dv.length - lin.length) + ' outro(s) na lista completa da tela "Apresentação Mensal" do sistema.', 8.5, APC.cinza));
+            }
+        }
+
+        // ---------- 13. RECOMENDAÇÕES ----------
+        {
+            const sl = novo('Recomendações e próximos passos', 'Ações sugeridas a partir da análise do mês');
+            const recs = [];
+            A.alertas.forEach(a => { if (a.rec && !recs.includes(a.rec)) recs.push(a.rec); });
+            ['Conciliar semanalmente os saldos bancários com os lançamentos do sistema.', 'Registrar a baixa de pagamentos e recebimentos no mesmo dia para manter o fluxo de caixa confiável.']
+                .forEach(r => { if (recs.length < 7 && !recs.includes(r)) recs.push(r); });
+            const paras = recs.slice(0, 7).map((r, i) => ({ runs: [{ t: (i + 1) + '.  ', s: 13, c: APC.laranja, b: true }, { t: r, s: 12, c: APC.texto }], depois: 9 }));
+            sl.els.push({ tp: 'text', x: 0.5, y: 1.2, w: 9.0, h: 3.9, paras, valign: 'top' });
+        }
+
+        // Rodapé e numeração
+        const N = S.length;
+        S.forEach((sl, i) => {
+            if (sl.capa) return;
+            sl.els.push(rect(0.38, 5.2, 9.24, 0.012, APC.borda));
+            sl.els.push(txt(0.38, 5.25, 7, 0.25, 'Relatório Gerencial · ' + mesTxt + (empresa ? ' · ' + empresa : ''), 8, '9CA3AF'));
+            sl.els.push(txt(8.4, 5.25, 1.22, 0.25, (i + 1) + ' / ' + N, 8, '9CA3AF', { align: 'right' }));
+        });
+        return S;
+    }
+
+    // =====================================================================
+    // APRESENTAÇÃO MENSAL — RENDERIZAÇÃO (tela/PDF) E EXPORTAÇÃO (PowerPoint/PDF)
+    // =====================================================================
+    const AP_PX = 96;                       // 1 pol = 96 px (slide 960 x 540)
+    const AP_FONTE = '"Segoe UI", Calibri, Arial, sans-serif';
+    let _apCharts = [];
+
+    function apCss(el, props) { Object.keys(props).forEach(k => { el.style[k] = props[k]; }); return el; }
+    function apHex(c) { return '#' + c; }
+
+    function apRenderSlideHTML(sl) {
+        const box = apCss(document.createElement('div'), { position: 'relative', width: '960px', height: '540px', overflow: 'hidden',
+            backgroundColor: '#ffffff', fontFamily: AP_FONTE, colorScheme: 'light', flexShrink: '0' });
+        box.className = 'ap-slide';
+        sl.els.forEach(e => {
+            const pos = { position: 'absolute', left: (e.x * AP_PX) + 'px', top: (e.y * AP_PX) + 'px', width: (e.w * AP_PX) + 'px' };
+            if (e.tp === 'rect') {
+                const d = apCss(document.createElement('div'), Object.assign(pos, { height: (e.h * AP_PX) + 'px', backgroundColor: apHex(e.fill),
+                    border: e.line ? '1px solid ' + apHex(e.line) : 'none', borderRadius: e.raio ? (e.raio * AP_PX) + 'px' : '0', boxSizing: 'border-box' }));
+                box.appendChild(d);
+            } else if (e.tp === 'img') {
+                const im = apCss(document.createElement('img'), Object.assign(pos, { height: (e.h * AP_PX) + 'px', objectFit: 'contain' }));
+                im.src = e.data; box.appendChild(im);
+            } else if (e.tp === 'text') {
+                const d = apCss(document.createElement('div'), Object.assign(pos, { height: (e.h * AP_PX) + 'px', display: 'flex', flexDirection: 'column', overflow: 'hidden',
+                    justifyContent: e.valign === 'middle' ? 'center' : e.valign === 'bottom' ? 'flex-end' : 'flex-start', textAlign: e.align || 'left',
+                    lineHeight: '1.25', backgroundColor: e.fill ? apHex(e.fill) : 'transparent', borderRadius: e.raio ? (e.raio * AP_PX) + 'px' : '0' }));
+                e.paras.forEach(p => {
+                    const pd = apCss(document.createElement('div'), { marginBottom: ((p.depois || 0) * 1.333) + 'px' });
+                    p.runs.forEach(r => {
+                        const sp = apCss(document.createElement('span'), { fontSize: ((r.s || 10) * 1.333) + 'px', color: apHex(r.c || APC.texto), fontWeight: r.b ? '700' : '400', fontStyle: r.i ? 'italic' : 'normal' });
+                        sp.textContent = r.t; pd.appendChild(sp);
+                    });
+                    d.appendChild(pd);
+                });
+                box.appendChild(d);
+            } else if (e.tp === 'table') {
+                const d = apCss(document.createElement('div'), Object.assign(pos, { fontSize: ((e.s || 9) * 1.333) + 'px' }));
+                const linha = (cells, cab, idx, fill) => {
+                    const r = apCss(document.createElement('div'), { display: 'flex', height: (e.rowH * AP_PX) + 'px', alignItems: 'stretch',
+                        backgroundColor: cab ? apHex(APC.navy) : (fill ? apHex(fill) : (idx % 2 ? '#f9fafb' : '#ffffff')), borderBottom: cab ? 'none' : '1px solid ' + apHex(APC.borda), boxSizing: 'border-box' });
+                    cells.forEach((c, j) => {
+                        const cel = typeof c === 'object' ? c : { t: c };
+                        const col = e.cols[j];
+                        const cd = apCss(document.createElement('div'), { width: (col.w * AP_PX) + 'px', padding: '0 6px', display: 'flex', alignItems: 'center',
+                            justifyContent: col.al === 'right' ? 'flex-end' : col.al === 'center' ? 'center' : 'flex-start', boxSizing: 'border-box', overflow: 'hidden',
+                            color: cab ? '#ffffff' : apHex(cel.c || APC.cinzaEsc), fontWeight: cab || cel.b ? '700' : '400', whiteSpace: 'nowrap',
+                            fontSize: cab ? (((e.s || 9) - 0.5) * 1.333) + 'px' : 'inherit' });
+                        const sp = apCss(document.createElement('span'), { overflow: 'hidden', textOverflow: 'ellipsis' });
+                        sp.textContent = cel.t == null ? '' : String(cel.t); sp.title = sp.textContent;
+                        cd.appendChild(sp); r.appendChild(cd);
+                    });
+                    return r;
+                };
+                d.appendChild(linha(e.cols.map(c => c.t), true, 0));
+                e.rows.forEach((row, i) => {
+                    const r = linha(Array.isArray(row) ? row : row.cells, false, i, Array.isArray(row) ? null : row.fill);
+                    if (e.acao === 'duvidoso' && _apAcoes[i]) { r.style.cursor = 'pointer'; r.title = 'Clique para abrir o lançamento'; const it = _apAcoes[i]; r.addEventListener('click', () => apAbrirDuvidoso(it)); }
+                    d.appendChild(r);
+                });
+                box.appendChild(d);
+            } else if (e.tp === 'chart') {
+                const d = apCss(document.createElement('div'), Object.assign(pos, { height: (e.h * AP_PX) + 'px' }));
+                const cv = document.createElement('canvas'); d.appendChild(cv); box.appendChild(d);
+                sl._charts = sl._charts || []; sl._charts.push({ cv, e });
+            }
+        });
+        return box;
+    }
+
+    function apCriarChart(cv, e) {
+        if (!window.Chart || typeof Chart !== 'function') return;
+        const horiz = e.tipo === 'bar', emp = e.tipo === 'colStacked';
+        const fmt = v => Number(v).toLocaleString('pt-BR', { minimumFractionDigits: e.casas || 0, maximumFractionDigits: e.casas || 0 });
+        const n = e.rotulos.length;
+        const ch = new Chart(cv, {
+            type: e.tipo === 'line' ? 'line' : 'bar',
+            plugins: [_rotulosBarrasPlugin],
+            data: { labels: e.rotulos, datasets: e.series.map(s => ({
+                label: s.nome, data: s.valores, borderRadius: 3, maxBarThickness: horiz ? 26 : 42,
+                backgroundColor: e.destaque != null && e.series.length === 1 ? s.valores.map((v, i) => i === e.destaque ? apHex(s.cor) : apHex(s.cor) + 'A6') : apHex(s.cor),
+                borderColor: apHex(s.cor) })) },
+            options: {
+                indexAxis: horiz ? 'y' : 'x', responsive: true, maintainAspectRatio: false, animation: false, devicePixelRatio: 2,
+                layout: { padding: { top: horiz ? 4 : 18, right: horiz ? 46 : 6 } },
+                plugins: {
+                    legend: { display: !!e.legenda, position: 'bottom', labels: { color: '#374151', boxWidth: 12, font: { size: 11, family: AP_FONTE } } },
+                    tooltip: { enabled: true },
+                    rotulosBarras: { empilhado: emp, total: emp, tamanho: e.rotuloTam || (n > 8 ? 9 : 10), fmt, corExterna: '#374151', corTotal: '#111827' }
+                },
+                scales: {
+                    x: { stacked: emp, grid: { display: horiz, color: '#eef0f3' }, ticks: Object.assign({ color: '#4b5563', font: { size: 10, family: AP_FONTE } }, horiz ? { callback: v => fmt(v) } : {}), border: { display: false } },
+                    y: { stacked: emp, beginAtZero: true, grid: { display: !horiz, color: '#eef0f3' }, ticks: { color: '#4b5563', font: { size: 10, family: AP_FONTE }, callback: horiz ? function (v) { const l = this.getLabelForValue(v); return l.length > 24 ? l.slice(0, 23) + '…' : l; } : (v => fmt(v)) }, border: { display: false } }
+                }
+            }
+        });
+        _apCharts.push(ch);
+    }
+
+    function apRenderPrevia(slides) {
+        const cont = document.getElementById('apPrevia');
+        _apCharts.forEach(c => { try { c.destroy(); } catch (e) {} }); _apCharts = [];
+        cont.innerHTML = '';
+        slides.forEach((sl, i) => {
+            const wrap = document.createElement('div'); wrap.className = 'ap-slide-wrap';
+            const rot = document.createElement('div'); rot.className = 'ap-slide-rot'; rot.textContent = 'Slide ' + (i + 1) + ' · ' + sl.titulo;
+            wrap.appendChild(rot);
+            const el = apRenderSlideHTML(sl); wrap.appendChild(el); cont.appendChild(wrap);
+            (sl._charts || []).forEach(c => apCriarChart(c.cv, c.e)); sl._charts = [];
+        });
+    }
+
+    function apAbrirDuvidoso(d) {
+        if (typeof abrirPainelLancamentos !== 'function') return;
+        abrirPainelLancamentos({
+            titulo: d.desc, subtitulo: 'Lançamento a revisar · ' + d.motivos.join('; '),
+            filtroRec: d.tipo === 'receber' ? (c => c.id === d.id) : null,
+            filtroPag: d.tipo === 'pagar' ? (c => c.id === d.id) : null,
+            recarregar: apGerar
+        });
+    }
+
+    function apRenderListaDuvidosos(A) {
+        const el = document.getElementById('apDuvidososLista'); if (!el) return;
+        const cg = { alta: '#dc3545', media: '#d97706', baixa: '#6b7280' }, rg = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
+        document.getElementById('apDuvidososTitulo').textContent = '🔎 Lançamentos a revisar (' + A.duvidosos.length + ')';
+        if (!A.duvidosos.length) { el.innerHTML = '<div class="chq-vazio">Nenhum lançamento duvidoso encontrado.</div>'; return; }
+        el.innerHTML = '<div class="pl-wrap" style="margin:0;max-height:420px;"><table class="pl-table"><thead><tr><th>Prioridade</th><th>Tipo</th><th>Vencimento</th><th>Descrição</th><th>Cliente/Fornecedor</th><th class="r">Valor</th><th>Motivo</th></tr></thead><tbody>' +
+            A.duvidosos.map((d, i) => '<tr style="cursor:pointer;" onclick="apAbrirDuvidoso(_apA.duvidosos[' + i + '])" title="Abrir lançamento">' +
+                '<td><span class="pl-badge" style="background:' + cg[d.grav] + ';color:#fff;">' + rg[d.grav] + '</span></td>' +
+                '<td>' + (d.tipo === 'receber' ? 'Receber' : 'Pagar') + '</td><td>' + apData(d.venc) + '</td>' +
+                '<td><b>' + _plEsc(d.desc) + '</b></td><td>' + _plEsc(d.parte) + '</td><td class="r pl-val">' + apR(d.valor) + '</td>' +
+                '<td style="font-size:12px;">' + _plEsc(d.motivos.join('; ')) + '</td></tr>').join('') + '</tbody></table></div>';
+    }
+
+    // ------------------ Página ------------------
+    let _apIniciado = false;
+    function apInit() {
+        if (!_apIniciado) {
+            const h = new Date(); let a = h.getFullYear(), m = h.getMonth();      // mês anterior (fechado)
+            if (m === 0) { m = 12; a--; }
+            const anoEl = document.getElementById('apAno');
+            anoEl.innerHTML = '';
+            for (let y = h.getFullYear(); y >= h.getFullYear() - 5; y--) anoEl.add(new Option(String(y), String(y)));
+            anoEl.value = String(a);
+            document.getElementById('apMes').value = String(m);
+            try { const e = localStorage.getItem('cap_ap_empresa'); if (e) document.getElementById('apEmpresa').value = e; } catch (e) {}
+            _apIniciado = true;
+        }
+        apGerar();
+    }
+
+    async function apGerar() {
+        const st = document.getElementById('apStatus');
+        st.textContent = 'Carregando lançamentos e analisando...';
+        const [rec, pag, chq, lancsDRE] = await Promise.all([fetchSupabase('contas_a_receber', 'GET'), fetchSupabase('contas_a_pagar', 'GET'), fetchSupabase('cheques', 'GET'), fetchSupabase('lancamentos_dre', 'GET')]);
+        if (!rec || !pag) { st.textContent = 'Não foi possível carregar os lançamentos.'; return; }
+        const ano = parseInt(document.getElementById('apAno').value), mes = parseInt(document.getElementById('apMes').value);
+        const base = document.getElementById('apBase').value;
+        const empresa = document.getElementById('apEmpresa').value.trim();
+        try { localStorage.setItem('cap_ap_empresa', empresa); } catch (e) {}
+        _apA = apAnalisar(rec, pag, chq || [], ano, mes, base, lancsDRE || []);
+        const logoEl = document.querySelector('.logo-sidebar img');
+        _apSlides = apMontarSlides(_apA, empresa, logoEl ? logoEl.src : null);
+        apRenderPrevia(_apSlides);
+        apRenderListaDuvidosos(_apA);
+        st.textContent = _apSlides.length + ' slides prontos · ' + apRotMes(_apA.sel) + ' · ' + _apA.alertas.filter(a => a.nivel === 'alta').length + ' ponto(s) crítico(s) · ' + _apA.duvidosos.length + ' lançamento(s) a revisar';
+    }
+
+    function apScript(urls) {
+        return new Promise((ok, falha) => {
+            let i = 0;
+            const tenta = () => {
+                if (i >= urls.length) { falha(new Error('Não foi possível carregar a biblioteca. Verifique a conexão com a internet.')); return; }
+                const s = document.createElement('script'); s.src = urls[i++]; s.onload = ok; s.onerror = () => { s.remove(); tenta(); };
+                document.head.appendChild(s);
+            };
+            tenta();
+        });
+    }
+    function apNomeArquivo(ext) { return 'Relatorio_Gerencial_' + AP_MES[_apA.mes - 1] + '_' + _apA.ano + '.' + ext; }
+
+    async function apBaixarPDF() {
+        if (!_apSlides) await apGerar();
+        const st = document.getElementById('apStatus');
+        try {
+            st.textContent = 'Gerando PDF...';
+            if (!window.html2canvas) await apScript(['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js', 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js', 'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js']);
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [960, 540], hotfixes: ['px_scaling'], compress: true });
+            const els = document.querySelectorAll('#apPrevia .ap-slide');
+            for (let i = 0; i < els.length; i++) {
+                st.textContent = 'Gerando PDF... slide ' + (i + 1) + ' de ' + els.length;
+                const cv = await html2canvas(els[i], { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+                if (i > 0) pdf.addPage([960, 540], 'landscape');
+                pdf.addImage(cv.toDataURL('image/jpeg', 0.93), 'JPEG', 0, 0, 960, 540);
+            }
+            pdf.save(apNomeArquivo('pdf'));
+            st.textContent = 'PDF gerado: ' + apNomeArquivo('pdf');
+        } catch (e) { console.error(e); st.textContent = 'Erro ao gerar o PDF: ' + e.message; alert('Erro ao gerar o PDF: ' + e.message); }
+    }
+
+    async function apBaixarPPTX() {
+        if (!_apSlides) await apGerar();
+        const st = document.getElementById('apStatus');
+        try {
+            st.textContent = 'Gerando PowerPoint...';
+            if (!window.PptxGenJS) await apScript(['https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundle.js', 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js', 'https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js']);
+            const pptx = apMontarPPTX(_apSlides);
+            await pptx.writeFile({ fileName: apNomeArquivo('pptx') });
+            st.textContent = 'PowerPoint gerado: ' + apNomeArquivo('pptx');
+        } catch (e) { console.error(e); st.textContent = 'Erro ao gerar o PowerPoint: ' + e.message; alert('Erro ao gerar o PowerPoint: ' + e.message); }
+    }
+
+    function apMontarPPTX(slides) {
+        const pptx = new PptxGenJS();
+        pptx.layout = 'LAYOUT_16x9';
+        pptx.title = 'Relatório Gerencial — ' + AP_MES[_apA.mes - 1] + '/' + _apA.ano;
+        pptx.company = document.getElementById('apEmpresa').value || 'Gestão Financeira';
+        const F = 'Segoe UI';
+        slides.forEach(sl => {
+            const s = pptx.addSlide();
+            s.background = { color: 'FFFFFF' };
+            sl.els.forEach(e => {
+                if (e.tp === 'rect') {
+                    s.addShape(e.raio ? pptx.ShapeType.roundRect : pptx.ShapeType.rect, { x: e.x, y: e.y, w: e.w, h: Math.max(e.h, 0.01), fill: { color: e.fill },
+                        line: e.line ? { color: e.line, width: 0.75 } : { type: 'none' }, rectRadius: e.raio ? Math.min(0.5, e.raio / Math.min(e.w, e.h)) : undefined });
+                } else if (e.tp === 'img') {
+                    s.addImage({ data: e.data, x: e.x, y: e.y, w: e.w, h: e.h });
+                } else if (e.tp === 'text') {
+                    const runs = [];
+                    e.paras.forEach((p, pi) => p.runs.forEach((r, ri) => runs.push({ text: r.t, options: { bold: !!r.b, italic: !!r.i, color: r.c || APC.texto, fontSize: r.s || 10,
+                        breakLine: ri === p.runs.length - 1 && pi < e.paras.length - 1, paraSpaceAfter: p.depois || 0 } })));
+                    const o = { x: e.x, y: e.y, w: e.w, h: e.h, fontFace: F, margin: 0, valign: e.valign || 'top', align: e.align || 'left', fit: 'shrink' };
+                    if (e.fill) { o.fill = { color: e.fill }; if (e.raio) { o.shape = pptx.ShapeType.roundRect; o.rectRadius = 0.25; } }
+                    s.addText(runs, o);
+                } else if (e.tp === 'table') {
+                    const fs = e.s || 9;
+                    const cab = e.cols.map(c => ({ text: c.t, options: { bold: true, color: 'FFFFFF', fill: { color: APC.navy }, align: c.al || 'left', fontSize: fs - 0.5 } }));
+                    const rows = [cab].concat(e.rows.map((row0, i) => { const row = Array.isArray(row0) ? row0 : row0.cells, rf = Array.isArray(row0) ? null : row0.fill; return row.map((c, j) => {
+                        const cel = typeof c === 'object' ? c : { t: c };
+                        let tx = cel.t == null ? '' : String(cel.t);
+                        const maxC = Math.max(4, Math.floor((e.cols[j].w - 0.14) * 150 / fs * (cel.b ? 0.92 : 1)));
+                        if (tx.length > maxC) tx = tx.slice(0, maxC - 1) + '…';
+                        return { text: tx, options: { color: cel.c || APC.cinzaEsc, bold: !!cel.b, align: e.cols[j].al || 'left', fill: { color: rf || (i % 2 ? 'F9FAFB' : 'FFFFFF') } } };
+                    }); }));
+                    s.addTable(rows, { x: e.x, y: e.y, w: e.w, colW: e.cols.map(c => c.w), rowH: e.rowH, fontFace: F, fontSize: fs, valign: 'middle',
+                        border: { type: 'solid', pt: 0.5, color: APC.borda }, margin: [0.02, 0.06, 0.02, 0.06], autoPage: false });
+                } else if (e.tp === 'chart') {
+                    const horiz = e.tipo === 'bar', emp = e.tipo === 'colStacked';
+                    let rot = e.rotulos.slice(), series = e.series;
+                    const dados = series.map(sr => ({ name: sr.nome, labels: rot, values: sr.valores }));
+                    const fc = e.casas ? '#,##0.0' : '#,##0';
+                    s.addChart(e.tipo === 'line' ? pptx.ChartType.line : pptx.ChartType.bar, dados, {
+                        x: e.x, y: e.y, w: e.w, h: e.h,
+                        barDir: horiz ? 'bar' : 'col', barGrouping: emp ? 'stacked' : 'clustered', barGapWidthPct: 55, overlap: emp ? 100 : undefined,
+                        chartColors: series.map(sr => sr.cor),
+                        showLegend: !!e.legenda, legendPos: 'b', legendFontSize: 9, legendFontFace: F, legendColor: '374151',
+                        showValue: true, dataLabelFormatCode: fc, dataLabelFontSize: e.rotuloTam || 8, dataLabelFontFace: F,
+                        dataLabelColor: emp ? 'FFFFFF' : '374151', dataLabelPosition: emp ? 'ctr' : 'outEnd',
+                        valAxisLabelFormatCode: fc, valAxisLabelFontSize: 8, valAxisLabelColor: '6B7280', valAxisLineShow: false,
+                        catAxisLabelFontSize: horiz ? 8 : 8, catAxisLabelColor: '4B5563', catAxisLabelFontFace: F, valAxisLabelFontFace: F,
+                        catAxisOrientation: horiz ? 'maxMin' : 'minMax', catAxisLineShow: true, catAxisLineColor: 'D1D5DB',
+                        valGridLine: { color: 'EEF0F3', style: 'solid', size: 0.5 }, catGridLine: { style: 'none' },
+                        showTitle: false
+                    });
+                }
+            });
+        });
+        return pptx;
+    }
+</script>
+
+<script>
+    // ================= TEMA CLARO / ESCURO =================
+    function temaAtual(){ return document.documentElement.getAttribute('data-tema')==='escuro' ? 'escuro' : 'claro'; }
+    function aplicarTema(t){
+        t = (t==='escuro') ? 'escuro' : 'claro';
+        document.documentElement.setAttribute('data-tema', t);
+        try { localStorage.setItem('cap_tema', t); } catch(e) {}
+        var rotulo = t==='escuro' ? '☀️ Tema claro' : '🌙 Tema escuro';
+        ['btnTema','btnTemaLogin'].forEach(function(id){ var b=document.getElementById(id); if(b) b.textContent=rotulo; });
+        if (window.Chart && Chart.defaults) {
+            Chart.defaults.color = t==='escuro' ? '#c3c8cf' : '#666';
+            Chart.defaults.borderColor = t==='escuro' ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.10)';
+            try {
+                if (typeof charts !== 'undefined' && charts) {
+                    Object.keys(charts).forEach(function(k){ var c=charts[k]; if (c && typeof c.update==='function') { try { c.update('none'); } catch(e){} } });
+                }
+            } catch(e) {}
+        }
+    }
+    function alternarTema(){ aplicarTema(temaAtual()==='escuro' ? 'claro' : 'escuro'); }
+    // Esconde o botão da tela de login quando o sistema está aberto
+    (function(){
+        aplicarTema(temaAtual());
+        var mc=document.getElementById('mainContainer'), bl=document.getElementById('btnTemaLogin');
+        function sync(){ if(mc&&bl) bl.style.display = mc.classList.contains('active') ? 'none' : ''; }
+        sync(); if (mc && window.MutationObserver) new MutationObserver(sync).observe(mc,{attributes:true,attributeFilter:['class']});
+    })();
+</script>
 </body>
 </html>
