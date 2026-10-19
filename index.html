@@ -722,7 +722,8 @@
         }
         .secao-oculta { display: none !important; }
 /* ================= PAINEL DE LANÇAMENTOS ================= */
-#modalPainelLanc { z-index: 999; }
+#modalPainelLanc, #modalDetalheDRE { z-index: 999; }
+#modalDetalheDRE .modal-content.pl-box { max-width: 1200px; width: 96%; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 92vh; border-radius: 12px; }
 #modalPainelLanc .modal-content.pl-box {
     max-width: 1200px; width: 96%; padding: 0; overflow: hidden;
     display: flex; flex-direction: column; max-height: 92vh; border-radius: 12px;
@@ -797,6 +798,135 @@ html[data-tema="escuro"] .pl-badge.pend { background: #3d3415; color: #ffd866; }
 html[data-tema="escuro"] .pl-badge.atr { background: #43191e; color: #ff8a95; }
 html[data-tema="escuro"] .pl-parc { background: #13303f; color: #7ab8ff; }
 html[data-tema="escuro"] .pl-kpi.pen .v { color: #ffd866; }
+/* ================= CADASTROS (janelas padronizadas) ================= */
+.modal-content.cad-box { max-width: 640px; width: 94%; padding: 0; overflow: hidden; border-radius: 12px; display: flex; flex-direction: column; max-height: 92vh; }
+.cad-head { display: flex; align-items: center; gap: 14px; padding: 18px 22px; color: #fff; background: linear-gradient(135deg, #FF7A42 0%, #e2581f 100%); }
+.cad-ico { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+.cad-tit { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.cad-sub { font-size: 12px; opacity: .9; margin-top: 2px; }
+.cad-head .pl-x { margin-left: auto; }
+.cad-body { padding: 18px 22px 6px; overflow-y: auto; }
+.cad-sec { font-size: 11px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: #8a8f98; margin: 4px 0 10px; display: flex; align-items: center; gap: 8px; }
+.cad-sec::after { content: ''; flex: 1; height: 1px; background: var(--cor-borda); }
+.cad-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; margin-bottom: 16px; }
+.cad-grid .full { grid-column: 1 / -1; }
+.cad-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.cad-field > label { font-size: 12.5px; font-weight: 600; color: #4b5563; }
+.cad-field > label .req { color: #dc3545; margin-left: 2px; }
+.cad-field input, .cad-field select, .cad-field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 14px; font-family: inherit;
+    background: #fff; color: var(--cor-texto); transition: border-color .15s, box-shadow .15s; box-sizing: border-box; }
+.cad-field textarea { resize: vertical; min-height: 64px; }
+.cad-field input:focus, .cad-field select:focus, .cad-field textarea:focus { outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 0 3px rgba(255,122,66,.15); }
+.cad-hint { font-size: 11.5px; color: #8a8f98; line-height: 1.4; }
+.cad-preview { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #f8fafc; border: 1px dashed var(--cor-borda); border-radius: 8px; padding: 9px 12px; font-size: 12.5px; color: #4b5563; }
+.cad-chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 700; }
+.cad-chip.pos { background: #dcfce7; color: #166534; } .cad-chip.neg { background: #fee2e2; color: #991b1b; } .cad-chip.neu { background: #e5e7eb; color: #374151; }
+.cad-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 22px; border-top: 1px solid var(--cor-borda); flex-wrap: wrap; }
+.cad-foot .btns { display: flex; gap: 8px; }
+.cad-foot .btn { min-width: 110px; padding: 10px 18px; }
+.cad-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; font-size: 13.5px; font-weight: 600; color: #374151; }
+.cad-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.cad-switch .trilho { width: 40px; height: 22px; border-radius: 22px; background: #cbd5e1; position: relative; transition: background .2s; flex-shrink: 0; }
+.cad-switch .trilho::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
+.cad-switch input:checked + .trilho { background: #28a745; }
+.cad-switch input:checked + .trilho::after { transform: translateX(18px); }
+.cad-switch input:focus-visible + .trilho { box-shadow: 0 0 0 3px rgba(40,167,69,.3); }
+.cad-switch .rot-off { display: none; color: #6b7280; } .cad-switch .rot-on { color: #166534; }
+.cad-switch input:not(:checked) ~ .rot-on { display: none; } .cad-switch input:not(:checked) ~ .rot-off { display: inline; }
+@media (max-width: 600px) { .cad-grid { grid-template-columns: 1fr; } .cad-foot { flex-direction: column; align-items: stretch; } .cad-foot .btns { justify-content: flex-end; } }
+html[data-tema="escuro"] .cad-field > label, html[data-tema="escuro"] .cad-switch { color: #cfd3d8; }
+html[data-tema="escuro"] .cad-preview { background: var(--esc-sup2); color: #cfd3d8; }
+html[data-tema="escuro"] .cad-switch .rot-on { color: #7ddc96; }
+html[data-tema="escuro"] .cad-chip.pos { background: #173a22; color: #7ddc96; } html[data-tema="escuro"] .cad-chip.neg { background: #43191e; color: #ff8a95; } html[data-tema="escuro"] .cad-chip.neu { background: #2c3138; color: #ccc; }
+/* ================= GRUPOS DA DRE ================= */
+.gd-intro { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; background: #fff8f3; border: 1px solid #ffd9c4; border-left: 4px solid #FF7A42; border-radius: 8px; padding: 12px 16px; margin-bottom: 14px; font-size: 13px; color: #444; line-height: 1.5; }
+.gd-intro > div:first-child { flex: 1; min-width: 260px; }
+.gd-leg { display: flex; gap: 6px; flex-wrap: wrap; }
+.gd-tag { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; white-space: nowrap; }
+.gd-tag.rec { background: #dcfce7; color: #166534; } .gd-tag.des { background: #fee2e2; color: #991b1b; } .gd-tag.sub { background: #e0e7ff; color: #3730a3; }
+.gd-aviso { background: #fff3cd; border: 1px solid #ffe08a; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; color: #6b4e00; line-height: 1.9; }
+.gd-lista { display: flex; flex-direction: column; }
+.gd-linha { display: grid; grid-template-columns: 46px minmax(0, 1fr) minmax(170px, 300px); gap: 14px; align-items: start; padding: 12px 18px 12px 0; border-bottom: 1px solid var(--cor-borda); border-left: 4px solid transparent; }
+.gd-linha:last-child { border-bottom: 0; }
+.gd-linha.rec { border-left-color: #22c55e; } .gd-linha.des { border-left-color: #ef4444; }
+.gd-linha.sub { border-left-color: #6366f1; background: #f5f7ff; }
+.gd-linha.sub:last-child { background: #eef2ff; }
+.gd-sinal { width: 30px; height: 30px; margin: 22px 0 0 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; }
+.gd-linha.rec .gd-sinal { background: #dcfce7; color: #166534; } .gd-linha.des .gd-sinal { background: #fee2e2; color: #991b1b; } .gd-linha.sub .gd-sinal { background: #e0e7ff; color: #3730a3; }
+.gd-main { min-width: 0; }
+.gd-campo { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.gd-rot { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #6b7280; }
+.gd-alt { font-size: 10.5px; background: #fff3cd; color: #856404; border-radius: 10px; padding: 1px 8px; font-weight: 600; cursor: help; }
+.gd-inp-wrap { display: flex; gap: 6px; }
+.gd-inp-wrap input { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--cor-borda); border-radius: 8px; font-size: 14px; background: #fff; color: var(--cor-texto); }
+.gd-linha.sub .gd-inp-wrap input { font-weight: 700; }
+.gd-inp-wrap input:focus { outline: none; border-color: var(--cor-primaria); box-shadow: 0 0 0 3px rgba(255,122,66,.15); }
+.gd-reset { border: 1px solid var(--cor-borda); background: transparent; color: inherit; border-radius: 8px; width: 38px; cursor: pointer; font-size: 16px; }
+.gd-lado { padding-top: 24px; display: flex; justify-content: flex-end; }
+.gd-count { border: 1px solid var(--cor-borda); background: transparent; color: inherit; border-radius: 20px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.gd-count:hover { border-color: var(--cor-primaria); color: var(--cor-primaria); }
+.gd-count.vazio { color: #b45309; border-style: dashed; }
+.gd-formula { font-size: 12px; color: #4f46e5; background: #eef2ff; border-radius: 8px; padding: 6px 10px; line-height: 1.4; font-style: italic; }
+.gd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.gd-chip { border: 1px solid var(--cor-borda); background: #fff; color: inherit; border-radius: 16px; padding: 4px 11px; font-size: 12px; cursor: pointer; margin: 2px 2px; }
+.gd-chip:hover { border-color: var(--cor-primaria); color: var(--cor-primaria); }
+.gd-chip.off { opacity: .55; text-decoration: line-through; }
+.gd-vazio { font-size: 12px; color: #92400e; }
+@media (max-width: 760px) { .gd-linha { grid-template-columns: 40px 1fr; } .gd-lado { grid-column: 2; padding-top: 0; justify-content: flex-start; } }
+html[data-tema="escuro"] .gd-intro { background: #2a1d16; border-color: #5a3420; color: #e3e5e8; }
+html[data-tema="escuro"] .gd-aviso { background: #3d3415; border-color: #5c4d1c; color: #ffd866; }
+html[data-tema="escuro"] .gd-linha.sub, html[data-tema="escuro"] .gd-linha.sub:last-child { background: #1f2333; }
+html[data-tema="escuro"] .gd-formula { background: #262b45; color: #a5b4fc; }
+html[data-tema="escuro"] .gd-chip { background: var(--esc-sup2); }
+html[data-tema="escuro"] .gd-rot { color: var(--esc-muted); }
+html[data-tema="escuro"] .gd-linha.rec .gd-sinal, html[data-tema="escuro"] .gd-tag.rec { background: #173a22; color: #7ddc96; }
+html[data-tema="escuro"] .gd-linha.des .gd-sinal, html[data-tema="escuro"] .gd-tag.des { background: #43191e; color: #ff8a95; }
+html[data-tema="escuro"] .gd-linha.sub .gd-sinal, html[data-tema="escuro"] .gd-tag.sub { background: #262b45; color: #a5b4fc; }
+/* ================= DASHBOARD EXECUTIVO ================= */
+.dx-periodo { font-size: 12.5px; color: #6b7280; margin: -4px 0 10px; }
+.dx-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.dx-kpi { background: white; border-radius: 12px; padding: 15px 17px 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.07); position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,0.04); }
+.dx-kpi.clic { cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.dx-kpi.clic:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,0.11); }
+.dx-kpi::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--dx-cor, #FF7A42); }
+.dx-kpi .k { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #6b7280; font-weight: 700; display: flex; justify-content: space-between; gap: 6px; }
+.dx-kpi .v { font-size: 23px; font-weight: 800; margin-top: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; letter-spacing: -.3px; }
+.dx-kpi .s { font-size: 12px; color: #6b7280; margin-top: 5px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.dx-delta { font-weight: 700; font-size: 11.5px; padding: 1px 7px; border-radius: 10px; }
+.dx-delta.bom { background: #dcfce7; color: #166534; } .dx-delta.ruim { background: #fee2e2; color: #991b1b; } .dx-delta.neu { background: #e5e7eb; color: #374151; }
+.dx-grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.dx-grid2 > .card { margin: 0 !important; }
+.dx-card { border-radius: 12px; }
+.dx-al { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px 6px; border-bottom: 1px solid var(--cor-borda); }
+.dx-al:last-child { border-bottom: 0; }
+.dx-al .tag { font-size: 10.5px; font-weight: 800; color: #fff; text-align: center; border-radius: 6px; padding: 3px 0; margin-top: 1px; }
+.dx-al .t { font-weight: 700; font-size: 13.5px; }
+.dx-al .d { font-size: 12.5px; color: #6b7280; margin-top: 2px; line-height: 1.4; }
+.dx-ok { display: flex; gap: 10px; align-items: center; padding: 16px; background: #f0fdf4; border-radius: 8px; color: #166534; font-weight: 600; font-size: 14px; }
+.dx-ag-resumo { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.dx-ag-chip { border: 1px solid var(--cor-borda); background: transparent; color: inherit; border-radius: 16px; padding: 4px 11px; font-size: 12px; cursor: pointer; }
+.dx-ag-chip:hover { border-color: var(--cor-primaria); }
+.dx-ag-chip.atr { border-color: #f1b0b7; color: #b91c1c; font-weight: 700; }
+.dx-ag { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 6px; border-bottom: 1px solid var(--cor-borda); cursor: pointer; border-radius: 6px; }
+.dx-ag:hover { background: rgba(255,122,66,.07); }
+.dx-ag:last-child { border-bottom: 0; }
+.dx-ag .dt { font-size: 11.5px; font-weight: 700; text-align: center; border-radius: 8px; padding: 4px 0; background: #eef2f7; color: #374151; line-height: 1.2; }
+.dx-ag .dt.hoje { background: #fff3cd; color: #856404; }
+.dx-ag .nm { font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dx-ag .mt { font-size: 11.5px; color: #8a8f98; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dx-ag .vl { font-weight: 700; font-size: 13.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dx-vazio { text-align: center; color: #9ca3af; padding: 22px 8px; font-size: 13px; }
+.dx-mais { text-align: center; padding-top: 8px; }
+.dx-mais a { color: var(--cor-primaria); font-size: 13px; font-weight: 600; text-decoration: none; cursor: pointer; }
+@media (max-width: 1100px) { .dx-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .dx-grid2 { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .dx-kpis { grid-template-columns: 1fr; } }
+html[data-tema="escuro"] .dx-kpi { background: var(--esc-sup); border-color: #262a30; box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+html[data-tema="escuro"] .dx-kpi .k, html[data-tema="escuro"] .dx-kpi .s, html[data-tema="escuro"] .dx-al .d, html[data-tema="escuro"] .dx-ag .mt, html[data-tema="escuro"] .dx-periodo { color: var(--esc-muted); }
+html[data-tema="escuro"] .dx-delta.bom { background: #173a22; color: #7ddc96; } html[data-tema="escuro"] .dx-delta.ruim { background: #43191e; color: #ff8a95; } html[data-tema="escuro"] .dx-delta.neu { background: #2c3138; color: #ccc; }
+html[data-tema="escuro"] .dx-ok { background: #173a22; color: #7ddc96; }
+html[data-tema="escuro"] .dx-ag .dt { background: #2c3138; color: #ddd; } html[data-tema="escuro"] .dx-ag .dt.hoje { background: #3d3415; color: #ffd866; }
 /* ================= APRESENTAÇÃO MENSAL ================= */
 .ap-previa { display: flex; flex-direction: column; gap: 22px; align-items: center; overflow-x: auto; padding: 4px 2px 8px; }
 .ap-slide-wrap { display: flex; flex-direction: column; gap: 6px; }
@@ -1228,9 +1358,14 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         <!-- DASHBOARD -->
         <div id="dashboard" class="page active">
             <div class="page-header">
-                <h1>Dashboard</h1>
-                <div class="user-info">
-                    <p id="userGreeting">Bem-vindo!</p>
+                <div>
+                    <h1>Dashboard</h1>
+                    <div class="user-info"><p id="userGreeting" style="margin:2px 0 0;">Bem-vindo!</p></div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-secondary btn-small" onclick="openModalLancarReceber()" style="background:#16a34a;color:#fff;">+ A receber</button>
+                    <button class="btn btn-secondary btn-small" onclick="openModalLancarPagar()" style="background:#dc3545;color:#fff;">+ A pagar</button>
+                    <button class="btn btn-secondary btn-small" onclick="showPage('apresentacao')">📑 Apresentação</button>
                 </div>
             </div>
 
@@ -1263,7 +1398,35 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <!-- Gauges DRE — PRIMEIRO após os filtros -->
+            <!-- ===== PAINEL EXECUTIVO ===== -->
+            <div class="dx-periodo" id="dxPeriodo"></div>
+            <div class="dx-kpis" id="dxKpis"></div>
+            <div class="dx-grid2">
+                <div class="card dx-card">
+                    <div class="card-title">⚠️ O que precisa de atenção</div>
+                    <div id="dxAlertas"></div>
+                </div>
+                <div class="card dx-card">
+                    <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span>📅 Agenda — próximos 7 dias</span>
+                        <div class="pl-seg" id="dxAgSeg">
+                            <button data-v="todos" class="on" onclick="dxAgendaFiltro('todos')">Tudo</button>
+                            <button data-v="pagar" onclick="dxAgendaFiltro('pagar')">A pagar</button>
+                            <button data-v="receber" onclick="dxAgendaFiltro('receber')">A receber</button>
+                        </div>
+                    </div>
+                    <div id="dxAgenda"></div>
+                </div>
+            </div>
+            <div class="card dx-card" style="margin-top:16px;">
+                <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span>📈 Receitas, despesas e resultado — últimos 12 meses</span>
+                    <span style="font-size:12px;font-weight:400;color:#888;">Regime de competência · clique num mês para ver os lançamentos</span>
+                </div>
+                <div class="chart-container" style="height:320px;"><canvas id="chartDx12m"></canvas></div>
+            </div>
+            <div style="height:16px;"></div>
+            <!-- Gauges DRE -->
             <div class="card" style="margin-bottom:16px;">
                 <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;"><span>🎯 Indicadores DRE — Metas</span><button onclick="abrirModalMetas()" class="btn btn-secondary btn-small" style="font-size:11px;">✏️ Editar Metas</button></div>
                 <div id="dashGaugeAviso" style="display:none;padding:8px 14px;background:#fff3cd;color:#856404;border-radius:6px;font-size:12px;margin-bottom:12px;"></div>
@@ -1273,8 +1436,8 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <!-- Cards resumo -->
-            <div class="dashboard-grid">
+            <!-- Cards resumo (antigos — substituídos pelo painel executivo) -->
+            <div class="dashboard-grid secao-oculta">
                 <div class="stat-card">
                     <div class="stat-label">A Receber</div>
                     <div class="stat-value" id="totalReceber">R$ 0,00</div>
@@ -1299,14 +1462,15 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
             <!-- Gráfico de fluxo -->
             <div class="card" style="margin-top:16px;">
-                <div class="card-title">Fluxo de Caixa (Últimos 30 dias)</div>
+                <div class="card-title">💵 Fluxo de caixa realizado — últimos 30 dias</div>
                 <div class="chart-container">
                     <canvas id="chartFluxo"></canvas>
                 </div>
             </div>
 
+            <div class="dx-grid2" style="margin-top:16px;">
             <!-- Maiores Devedores — tabela -->
-            <div class="card" style="margin-top:16px;">
+            <div class="card">
                 <div class="card-title">📋 Maiores Devedores (A Receber Pendente)</div>
                 <div class="table-container">
                     <table id="tabelaDevedores" style="font-size:13px;">
@@ -1325,7 +1489,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             </div>
 
             <!-- Maiores Fornecedores — tabela -->
-            <div class="card" style="margin-top:16px;">
+            <div class="card">
                 <div class="card-title">📋 Maiores Fornecedores (A Pagar Pendente)</div>
                 <div class="table-container">
                     <table id="tabelaFornecedoresDash" style="font-size:13px;">
@@ -1341,6 +1505,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <tbody id="corpoFornecedoresDash"></tbody>
                     </table>
                 </div>
+            </div>
             </div>
             <!-- PMP x PMR Indicador -->
             <div class="card" style="margin-top:16px;" id="cardPmpPmr">
@@ -1393,9 +1558,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
             <div class="alert alert-success" id="alertGruposDRE"></div>
-            <div class="card">
-                <p style="font-size:13px;color:#666;margin:0 0 16px;">Edite os nomes (legendas) das linhas da DRE. As alterações valem para a DRE por Competência e para a DRE Mensal, e ficam salvas neste navegador.</p>
-                <div id="corpoGruposDRE" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
+            <div class="gd-intro">
+                <div><b>Estrutura da DRE</b> — edite o nome de cada linha e confira quais categorias alimentam cada grupo. Os nomes valem para a DRE por Competência, a DRE Mensal e a Apresentação Mensal, e ficam salvos neste navegador.</div>
+                <div class="gd-leg"><span class="gd-tag rec">(+) Soma</span><span class="gd-tag des">(−) Subtrai</span><span class="gd-tag sub">= Subtotal</span></div>
+            </div>
+            <div id="gdAvisoSemGrupo"></div>
+            <div class="card" style="padding:0;overflow:hidden;">
+                <div id="corpoGruposDRE" class="gd-lista"></div>
             </div>
         </div>
 
@@ -3548,58 +3717,56 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
 <!-- MODAIS -->
 <div class="modal" id="modalCategoria">
-    <div class="modal-content" style="max-width:500px;">
-        <div class="modal-header">
-            <span id="modalCategoriaTitulo">Nova Categoria</span>
-            <button class="modal-close" onclick="closeModal('modalCategoria')">&times;</button>
+    <div class="modal-content cad-box">
+        <div class="cad-head">
+            <div class="cad-ico">🗂️</div>
+            <div><div class="cad-tit" id="modalCategoriaTitulo">Nova Categoria</div><div class="cad-sub">Classifique receitas e despesas e defina onde elas entram na DRE</div></div>
+            <button type="button" class="pl-x" onclick="closeModal('modalCategoria')" title="Fechar">&times;</button>
         </div>
-        <form onsubmit="salvarCategoria(event)">
-            <div class="form-group">
-                <label>Nome*</label>
-                <input type="text" id="nomeCategoria" required>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Grupo DRE</label>
-                    <select id="categoriaGrupoDRE">
-                        <option value="">Nenhum</option>
-                        <option value="RECEITA_BRUTA">Receita Bruta</option>
-                        <option value="DEDUCOES">Deduções / Impostos s/ Receita</option>
-                        <option value="CPV">CPV / Custo dos Serviços</option>
-                        <option value="DESP_COMERCIAL">Despesas Comerciais</option>
-                        <option value="DESP_ADMIN">Despesas Administrativas</option>
-                        <option value="DESP_FINANCEIRA">Despesas Financeiras</option>
-                        <option value="RECEITA_FINANCEIRA">Receitas Financeiras</option>
-                        <option value="EMPRESTIMO">Empréstimos e Financiamentos</option>
-                        <option value="INVESTIMENTO">Investimentos</option>
-                        <option value="OUTRAS_RECEITAS">Outras Receitas</option>
-                        <option value="OUTRAS_DESPESAS">Outras Despesas</option>
-                    </select>
+        <form onsubmit="salvarCategoria(event)" style="display:flex;flex-direction:column;min-height:0;">
+            <div class="cad-body">
+                <div class="cad-sec">Identificação</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>Nome<span class="req">*</span></label><input type="text" id="nomeCategoria" required placeholder="Ex.: Marketing e Publicidade"></div>
+                    <div class="cad-field full"><label>Descrição</label><textarea id="descricaoCategoria" rows="2" placeholder="Para que serve esta categoria (opcional)"></textarea></div>
                 </div>
-                <div class="form-group">
-                    <label>Tipo</label>
-                    <select id="categoriaTipo">
-                        <option value="">-</option>
-                        <option value="Receita">Receita</option>
-                        <option value="Custo">Custo</option>
-                        <option value="Despesa">Despesa</option>
-                        <option value="Imposto">Imposto</option>
-                        <option value="Investimento">Investimento</option>
-                        <option value="Financeiro">Financeiro</option>
-                        <option value="Outros">Outros</option>
-                    </select>
+                <div class="cad-sec">Classificação</div>
+                <div class="cad-grid">
+                    <div class="cad-field"><label>Grupo da DRE</label>
+                        <select id="categoriaGrupoDRE" onchange="cadAtualizarPreviaDRE(true)">
+                            <option value="">Nenhum (não aparece na DRE)</option>
+                            <option value="RECEITA_BRUTA">Receita Bruta</option>
+                            <option value="DEDUCOES">Deduções / Impostos s/ Receita</option>
+                            <option value="CPV">CPV / Custo dos Serviços</option>
+                            <option value="DESP_COMERCIAL">Despesas Comerciais</option>
+                            <option value="DESP_ADMIN">Despesas Administrativas</option>
+                            <option value="DESP_FINANCEIRA">Despesas Financeiras</option>
+                            <option value="RECEITA_FINANCEIRA">Receitas Financeiras</option>
+                            <option value="EMPRESTIMO">Empréstimos e Financiamentos</option>
+                            <option value="INVESTIMENTO">Investimentos</option>
+                            <option value="OUTRAS_RECEITAS">Outras Receitas</option>
+                            <option value="OUTRAS_DESPESAS">Outras Despesas</option>
+                        </select></div>
+                    <div class="cad-field"><label>Tipo</label>
+                        <select id="categoriaTipo" onchange="cadAtualizarPreviaDRE(false)">
+                            <option value="">Selecione...</option>
+                            <option value="Receita">Receita</option>
+                            <option value="Custo">Custo</option>
+                            <option value="Despesa">Despesa</option>
+                            <option value="Imposto">Imposto</option>
+                            <option value="Investimento">Investimento</option>
+                            <option value="Financeiro">Financeiro</option>
+                            <option value="Outros">Outros</option>
+                        </select></div>
+                    <div class="cad-field full"><div class="cad-preview" id="cadPreviaDRE"></div></div>
                 </div>
             </div>
-            <div class="form-group">
-                <label>Descrição</label>
-                <textarea id="descricaoCategoria" rows="2"></textarea>
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="ativoCategoria" checked> Ativo</label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCategoria')">Cancelar</button>
+            <div class="cad-foot">
+                <label class="cad-switch"><input type="checkbox" id="ativoCategoria" checked><span class="trilho"></span><span class="rot-on">Categoria ativa</span><span class="rot-off">Categoria inativa</span></label>
+                <div class="btns">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalCategoria')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                </div>
             </div>
         </form>
     </div>
@@ -3642,117 +3809,92 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 </div>
 
 <div class="modal" id="modalProduto">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span id="modalProdutoTitulo">Novo Produto</span>
-            <button class="modal-close" onclick="closeModal('modalProduto')">&times;</button>
+    <div class="modal-content cad-box">
+        <div class="cad-head">
+            <div class="cad-ico">📦</div>
+            <div><div class="cad-tit" id="modalProdutoTitulo">Novo Produto</div><div class="cad-sub">Cadastre os produtos e vincule cada um a uma categoria</div></div>
+            <button type="button" class="pl-x" onclick="closeModal('modalProduto')" title="Fechar">&times;</button>
         </div>
-        <form onsubmit="salvarProduto(event)">
-            <div class="form-group">
-                <label>Nome*</label>
-                <input type="text" id="nomeProduto" required>
+        <form onsubmit="salvarProduto(event)" style="display:flex;flex-direction:column;min-height:0;">
+            <div class="cad-body">
+                <div class="cad-sec">Dados do produto</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>Nome<span class="req">*</span></label><input type="text" id="nomeProduto" required placeholder="Ex.: Picanha bovina kg"></div>
+                    <div class="cad-field full"><label>Categoria<span class="req">*</span></label><select id="categoriaProduto" required><option value="">Selecione...</option></select>
+                        <span class="cad-hint">A categoria define como o produto é agrupado nos relatórios.</span></div>
+                    <div class="cad-field full"><label>Descrição</label><textarea id="descricaoProduto" rows="3" placeholder="Detalhes, unidade, especificação (opcional)"></textarea></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Categoria*</label>
-                <select id="categoriaProduto" required>
-                    <option value="">Selecione...</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Descrição</label>
-                <textarea id="descricaoProduto" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ativoProduto" checked>
-                    Ativo
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalProduto')">Cancelar</button>
+            <div class="cad-foot">
+                <label class="cad-switch"><input type="checkbox" id="ativoProduto" checked><span class="trilho"></span><span class="rot-on">Produto ativo</span><span class="rot-off">Produto inativo</span></label>
+                <div class="btns">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalProduto')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
 <div class="modal" id="modalFornecedor">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span id="modalFornecedorTitulo">Novo Fornecedor</span>
-            <button class="modal-close" onclick="closeModal('modalFornecedor')">&times;</button>
+    <div class="modal-content cad-box">
+        <div class="cad-head">
+            <div class="cad-ico">🏭</div>
+            <div><div class="cad-tit" id="modalFornecedorTitulo">Novo Fornecedor</div><div class="cad-sub">Dados cadastrais e de contato do fornecedor</div></div>
+            <button type="button" class="pl-x" onclick="closeModal('modalFornecedor')" title="Fechar">&times;</button>
         </div>
-        <form onsubmit="salvarFornecedor(event)">
-            <div class="form-group">
-                <label>Nome*</label>
-                <input type="text" id="nomeFornecedor" required>
+        <form onsubmit="salvarFornecedor(event)" style="display:flex;flex-direction:column;min-height:0;">
+            <div class="cad-body">
+                <div class="cad-sec">Identificação</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>Nome / Razão social<span class="req">*</span></label><input type="text" id="nomeFornecedor" required placeholder="Ex.: Frigorífico Boi Bom Ltda"></div>
+                    <div class="cad-field"><label>CNPJ / CPF</label><input type="text" id="cnpjFornecedor" placeholder="00.000.000/0000-00" inputmode="numeric" oninput="cadMascaraDoc(this)" maxlength="18"></div>
+                    <div class="cad-field"><label>Telefone</label><input type="text" id="telefoneFornecedor" placeholder="(00) 00000-0000" inputmode="tel" oninput="cadMascaraTelefone(this)" maxlength="15"></div>
+                </div>
+                <div class="cad-sec">Contato e endereço</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>E-mail</label><input type="email" id="emailFornecedor" placeholder="nome@empresa.com.br"></div>
+                    <div class="cad-field full"><label>Endereço</label><textarea id="enderecoFornecedor" rows="2" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>CNPJ</label>
-                <input type="text" id="cnpjFornecedor" placeholder="XX.XXX.XXX/XXXX-XX">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="emailFornecedor">
-            </div>
-            <div class="form-group">
-                <label>Telefone</label>
-                <input type="text" id="telefoneFornecedor">
-            </div>
-            <div class="form-group">
-                <label>Endereço</label>
-                <textarea id="enderecoFornecedor" rows="2"></textarea>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ativoFornecedor" checked>
-                    Ativo
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalFornecedor')">Cancelar</button>
+            <div class="cad-foot">
+                <label class="cad-switch"><input type="checkbox" id="ativoFornecedor" checked><span class="trilho"></span><span class="rot-on">Fornecedor ativo</span><span class="rot-off">Fornecedor inativo</span></label>
+                <div class="btns">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalFornecedor')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                </div>
             </div>
         </form>
     </div>
 </div>
 
 <div class="modal" id="modalCliente">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span id="modalClienteTitulo">Novo Cliente</span>
-            <button class="modal-close" onclick="closeModal('modalCliente')">&times;</button>
+    <div class="modal-content cad-box">
+        <div class="cad-head">
+            <div class="cad-ico">👥</div>
+            <div><div class="cad-tit" id="modalClienteTitulo">Novo Cliente</div><div class="cad-sub">Dados cadastrais e de contato do cliente</div></div>
+            <button type="button" class="pl-x" onclick="closeModal('modalCliente')" title="Fechar">&times;</button>
         </div>
-        <form onsubmit="salvarCliente(event)">
-            <div class="form-group">
-                <label>Nome*</label>
-                <input type="text" id="nomeCliente" required>
+        <form onsubmit="salvarCliente(event)" style="display:flex;flex-direction:column;min-height:0;">
+            <div class="cad-body">
+                <div class="cad-sec">Identificação</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>Nome / Razão social<span class="req">*</span></label><input type="text" id="nomeCliente" required placeholder="Ex.: Restaurante Sabor & Cia"></div>
+                    <div class="cad-field"><label>CPF / CNPJ</label><input type="text" id="cpfcnpjCliente" placeholder="000.000.000-00" inputmode="numeric" oninput="cadMascaraDoc(this)" maxlength="18"></div>
+                    <div class="cad-field"><label>Telefone</label><input type="text" id="telefoneCliente" placeholder="(00) 00000-0000" inputmode="tel" oninput="cadMascaraTelefone(this)" maxlength="15"></div>
+                </div>
+                <div class="cad-sec">Contato e endereço</div>
+                <div class="cad-grid">
+                    <div class="cad-field full"><label>E-mail</label><input type="email" id="emailCliente" placeholder="nome@empresa.com.br"></div>
+                    <div class="cad-field full"><label>Endereço</label><textarea id="enderecoCliente" rows="2" placeholder="Rua, número, bairro, cidade/UF, CEP"></textarea></div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>CPF/CNPJ</label>
-                <input type="text" id="cpfcnpjCliente" placeholder="XXX.XXX.XXX-XX">
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="emailCliente">
-            </div>
-            <div class="form-group">
-                <label>Telefone</label>
-                <input type="text" id="telefoneCliente">
-            </div>
-            <div class="form-group">
-                <label>Endereço</label>
-                <textarea id="enderecoCliente" rows="2"></textarea>
-            </div>
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" id="ativoCliente" checked>
-                    Ativo
-                </label>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success">Salvar</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalCliente')">Cancelar</button>
+            <div class="cad-foot">
+                <label class="cad-switch"><input type="checkbox" id="ativoCliente" checked><span class="trilho"></span><span class="rot-on">Cliente ativo</span><span class="rot-off">Cliente inativo</span></label>
+                <div class="btns">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('modalCliente')">Cancelar</button>
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                </div>
             </div>
         </form>
     </div>
@@ -8959,16 +9101,61 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     }
 
     // ---- Tela dedicada: Grupos da DRE ----
+    const _GD_ESTRUTURA = [
+        ['RECEITA_BRUTA', 'rec'], ['DEDUCOES', 'des'], ['RECEITA_LIQUIDA', 'sub', 'Receita Bruta − Deduções'],
+        ['CPV', 'des'], ['LUCRO_BRUTO', 'sub', 'Receita Líquida − CPV'],
+        ['DESP_COMERCIAL', 'des'], ['DESP_ADMIN', 'des'], ['EBITDA', 'sub', 'Lucro Bruto − Despesas Comerciais − Despesas Administrativas'],
+        ['RECEITA_FINANCEIRA', 'rec'], ['DESP_FINANCEIRA', 'des'], ['RESULTADO_FINANCEIRO', 'sub', 'Receitas Financeiras − Despesas Financeiras'],
+        ['LAJIR', 'sub', 'EBITDA + Resultado Financeiro'],
+        ['EMPRESTIMO', 'des'], ['INVESTIMENTO', 'des'], ['OUTRAS_RECEITAS', 'rec'], ['OUTRAS_DESPESAS', 'des'],
+        ['RESULTADO_LIQUIDO', 'sub', 'Lajir − Empréstimos − Investimentos + Outras Receitas − Outras Despesas']
+    ];
+    let _gdAbertos = {};
     function renderizarPaginaGruposDRE() {
         const cont = document.getElementById('corpoGruposDRE');
         if (!cont) return;
-        cont.innerHTML = DRE_LEGENDAS_CAMPOS.map(([id, rotulo]) =>
-            '<div class="form-group" style="margin:0;">' +
-            '<label style="font-size:12px;color:#555;">' + rotulo + '</label>' +
-            '<input type="text" data-leg-pg="' + id + '" value="' +
-            String(legDRE(id)).replace(/"/g, '&quot;') + '">' +
-            '</div>'
-        ).join('');
+        const cats = (dadosCache.categorias || []);
+        const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+        const rotCampo = id => ((DRE_LEGENDAS_CAMPOS.find(c => c[0] === id) || [])[1]) || id;
+        cont.innerHTML = _GD_ESTRUTURA.map(([id, tp, formula]) => {
+            const vinc = tp === 'sub' ? [] : cats.filter(c => c.grupo_dre === id).sort((x, y) => x.nome.localeCompare(y.nome));
+            const ativos = vinc.filter(c => c.ativo !== false).length;
+            const sinal = tp === 'rec' ? '+' : tp === 'des' ? '−' : '=';
+            const padrao = DRE_LEGENDAS_PADRAO[id] || '';
+            const alterado = String(legDRE(id)) !== String(padrao);
+            const lado = tp === 'sub'
+                ? '<div class="gd-formula" title="Como é calculado">ƒ ' + esc(formula) + '</div>'
+                : '<button type="button" class="gd-count' + (vinc.length ? '' : ' vazio') + '" onclick="_gdToggle(\'' + id + '\')">' + (vinc.length ? vinc.length + ' categoria' + (vinc.length > 1 ? 's' : '') + (ativos < vinc.length ? ' (' + (vinc.length - ativos) + ' inativa' + (vinc.length - ativos > 1 ? 's' : '') + ')' : '') + ' ' + (_gdAbertos[id] ? '▴' : '▾') : 'Nenhuma categoria') + '</button>';
+            const chips = (tp !== 'sub' && _gdAbertos[id]) ? '<div class="gd-chips">' + (vinc.length ? vinc.map(c =>
+                '<button type="button" class="gd-chip' + (c.ativo === false ? ' off' : '') + '" onclick="editarCategoria(' + c.id + ')" title="Editar categoria">' + esc(c.nome) + '</button>').join('') : '<span class="gd-vazio">Nenhuma categoria está ligada a este grupo. Vincule em Cadastros → Categorias, campo "Grupo da DRE".</span>') + '</div>' : '';
+            return '<div class="gd-linha ' + tp + '">' +
+                '<div class="gd-sinal">' + sinal + '</div>' +
+                '<div class="gd-main">' +
+                    '<div class="gd-campo"><span class="gd-rot">' + esc(rotCampo(id)) + '</span>' + (alterado ? '<span class="gd-alt" title="Padrão: ' + esc(padrao) + '">personalizado</span>' : '') + '</div>' +
+                    '<div class="gd-inp-wrap"><input type="text" data-leg-pg="' + id + '" value="' + esc(legDRE(id)) + '" placeholder="' + esc(padrao) + '">' +
+                    (alterado ? '<button type="button" class="gd-reset" onclick="_gdResetLinha(\'' + id + '\')" title="Voltar ao nome padrão">↺</button>' : '') + '</div>' +
+                    chips +
+                '</div>' +
+                '<div class="gd-lado">' + lado + '</div>' +
+            '</div>';
+        }).join('');
+        // Aviso: categorias sem grupo da DRE
+        const sem = cats.filter(c => !c.grupo_dre && c.ativo !== false).sort((x, y) => x.nome.localeCompare(y.nome));
+        const av = document.getElementById('gdAvisoSemGrupo');
+        if (av) av.innerHTML = sem.length ? '<div class="gd-aviso">⚠️ <b>' + sem.length + ' categoria(s) ativa(s) sem grupo da DRE.</b> Nas contas a pagar elas entram como Despesas Administrativas e nas contas a receber como Receita Bruta. Clique para corrigir: ' +
+            sem.map(c => '<button type="button" class="gd-chip" onclick="editarCategoria(' + c.id + ')">' + esc(c.nome) + '</button>').join('') + '</div>' : '';
+    }
+    function _gdToggle(id) { _gdAbertos[id] = !_gdAbertos[id]; _gdPreservarEdicao(renderizarPaginaGruposDRE); }
+    function _gdResetLinha(id) {
+        const inp = document.querySelector('#corpoGruposDRE input[data-leg-pg="' + id + '"]');
+        if (inp) inp.value = DRE_LEGENDAS_PADRAO[id] || '';
+    }
+    // Mantém o que foi digitado (ainda não salvo) ao redesenhar
+    function _gdPreservarEdicao(fn) {
+        const vals = {};
+        document.querySelectorAll('#corpoGruposDRE input[data-leg-pg]').forEach(i => { vals[i.getAttribute('data-leg-pg')] = i.value; });
+        fn();
+        document.querySelectorAll('#corpoGruposDRE input[data-leg-pg]').forEach(i => { const k = i.getAttribute('data-leg-pg'); if (vals[k] != null) i.value = vals[k]; });
     }
     function salvarLegendasDREPagina() {
         const inputs = document.querySelectorAll('#corpoGruposDRE input[data-leg-pg]');
@@ -9271,39 +9458,95 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     // Renderiza as linhas da tabela de detalhe do DRE (usado tanto pela visão anual quanto mensal).
     // Cada item pode ser de 3 fontes: 'dre' (lançamento direto), 'receber' ou 'pagar' — todos editáveis.
     let _detalheColunaData = null; // título da 1ª coluna (padrão "Competência")
+    let _dreDetItens = [], _dreDetOrdem = 'data';
     function _renderLinhasDetalheDRE(itens) {
         const thData = document.getElementById('thDetalheDREData');
         if (thData) thData.textContent = _detalheColunaData || 'Competência';
         _detalheColunaData = null;
+        _dreDetItens = (itens || []).slice();
+        const busca = document.getElementById('dreDetBusca'); if (busca) busca.value = '';
+        _dreDetOrdenar('data');
+    }
+    function _dreDetOrdenar(v) {
+        _dreDetOrdem = v;
+        document.querySelectorAll('#dreDetOrdem button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+        _dreDetRender();
+    }
+    function _dreDetConta(item) {
+        if (item.fonte === 'receber') return [...(dadosCache.contasReceber || []), ...(dadosCache.contasRecebidas || [])].find(c => c.id === item.id);
+        if (item.fonte === 'pagar') return [...(dadosCache.contasPagar || []), ...(dadosCache.contasPagas || [])].find(c => c.id === item.id);
+        return null;
+    }
+    function _dreDetRender() {
         const tbody = document.querySelector('#tabelaDetalheDRE tbody');
         if (!tbody) return;
+        const q = ((document.getElementById('dreDetBusca') || {}).value || '').trim().toLowerCase();
+        let lista = _dreDetItens.filter(i => !q || [i.descricao, i.catNome, i.parte, i.centro].join(' ').toLowerCase().includes(q));
+        lista = lista.sort(_dreDetOrdem === 'valor'
+            ? (a, b) => Math.abs(parseFloat(b.valor || 0)) - Math.abs(parseFloat(a.valor || 0))
+            : (a, b) => (a.competencia || '').localeCompare(b.competencia || ''));
+        const vals = lista.map(i => Math.abs(parseFloat(i.valor || 0)));
+        const total = vals.reduce((s, v) => s + v, 0);
+        const maior = lista.length ? lista[vals.indexOf(Math.max(...vals))] : null;
+        const nCat = new Set(lista.map(i => i.catNome)).size;
+        const fmt = v => 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+        const kp = document.getElementById('dreDetKpis');
+        if (kp) kp.innerHTML =
+            '<div class="pl-kpi"><div class="k">Lançamentos</div><div class="v">' + lista.length + '</div></div>' +
+            '<div class="pl-kpi sal"><div class="k">Total</div><div class="v">' + fmt(total) + '</div></div>' +
+            '<div class="pl-kpi pen"><div class="k">Ticket médio</div><div class="v">' + fmt(lista.length ? total / lista.length : 0) + '</div></div>' +
+            '<div class="pl-kpi sai"><div class="k">Maior lançamento</div><div class="v">' + (maior ? fmt(Math.abs(parseFloat(maior.valor || 0))) : '—') + '</div></div>' +
+            '<div class="pl-kpi ent"><div class="k">Categorias</div><div class="v">' + nCat + '</div></div>';
         tbody.innerHTML = '';
-        itens.forEach((item, idx) => {
+        lista.forEach(item => {
             const val = parseFloat(item.valor || 0);
+            const conta = _dreDetConta(item);
+            let situ = '<span class="pl-badge" style="background:#e3f2fd;color:#1565c0;">Lanç. DRE</span>';
+            let baixa = '';
+            if (item.fonte === 'receber' || item.fonte === 'pagar') {
+                const quit = conta && (conta.status === 'pago' || conta.status === 'recebido');
+                const hojeS = new Date().toISOString().slice(0, 10);
+                if (!conta) situ = '<span style="color:#aaa;">—</span>';
+                else if (quit) situ = '<span class="pl-badge ok">' + (item.fonte === 'receber' ? 'Recebido' : 'Pago') + '</span>';
+                else if ((conta.data_vencimento || '') < hojeS) situ = '<span class="pl-badge atr">Atrasado</span>';
+                else situ = '<span class="pl-badge pend">Pendente</span>';
+                if (conta && !quit) baixa = '<button onclick="_dreDetBaixar(' + item.id + ',\'' + item.fonte + '\')" class="pl-btn pay" title="' + (item.fonte === 'receber' ? 'Confirmar recebimento' : 'Confirmar pagamento') + '">' + (item.fonte === 'receber' ? '✅ Receber' : '💳 Pagar') + '</button>';
+            }
             let acoes = '<span style="color:#aaa;font-size:11px;">—</span>';
             if (item.id != null) {
                 if (item.fonte === 'dre') {
-                    acoes = '<button onclick="editarLancDRE(' + item.id + ')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
-                            '<button onclick="deletarLancDRE(' + item.id + ')" class="btn btn-danger btn-small">🗑️</button>';
+                    acoes = '<button onclick="editarLancDRE(' + item.id + ')" class="pl-btn">✏️ Editar</button>' +
+                            '<button onclick="deletarLancDRE(' + item.id + ')" class="pl-btn del" title="Excluir">🗑️</button>';
                 } else if (item.fonte === 'receber') {
-                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'receber\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
-                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_receber\')" class="btn btn-danger btn-small">🗑️</button>';
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'receber\')" class="pl-btn">✏️ Editar</button>' + baixa +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_receber\')" class="pl-btn del" title="Excluir">🗑️</button>';
                 } else if (item.fonte === 'pagar') {
-                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'pagar\')" class="btn btn-secondary btn-small">✏️ Editar</button> ' +
-                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_pagar\')" class="btn btn-danger btn-small">🗑️</button>';
+                    acoes = '<button onclick="editarLancamento(' + item.id + ', \'pagar\')" class="pl-btn">✏️ Editar</button>' + baixa +
+                            '<button onclick="deletarConta(' + item.id + ', \'contas_a_pagar\')" class="pl-btn del" title="Excluir">🗑️</button>';
                 }
             }
-            tbody.innerHTML += `<tr style="${idx % 2 === 1 ? 'background:#fafafa;' : ''}">
-                <td style="white-space:nowrap;font-weight:500;">${item.competencia || '-'}</td>
-                <td>${item.descricao || '-'}</td>
-                <td>${item.catNome || '-'}</td>
-                <td>${item.parte || '-'}</td>
-                <td>${item.centro || '-'}</td>
-                <td style="text-align:right;font-weight:700;font-size:14px;color:${val < 0 ? '#dc3545' : '#28a745'};white-space:nowrap;">R$ ${Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-                <td style="white-space:nowrap;">${acoes}</td>
-            </tr>`;
+            const comp = item.competencia || '';
+            const compTxt = /^\d{4}-\d{2}-\d{2}$/.test(comp) ? comp.slice(8, 10) + '/' + comp.slice(5, 7) + '/' + comp.slice(0, 4) : (/^\d{4}-\d{2}$/.test(comp) ? comp.slice(5, 7) + '/' + comp.slice(0, 4) : (comp || '-'));
+            const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+            tbody.innerHTML += '<tr>' +
+                '<td style="white-space:nowrap;font-weight:600;">' + compTxt + '</td>' +
+                '<td><div class="pl-desc">' + esc(item.descricao || '-') + '</div>' + (item.centro && item.centro !== '-' ? '<div class="pl-meta">Centro: ' + esc(item.centro) + '</div>' : '') + '</td>' +
+                '<td>' + esc(item.catNome || '-') + '</td>' +
+                '<td>' + esc(item.parte || '-') + '</td>' +
+                '<td>' + situ + '</td>' +
+                '<td class="r pl-val" style="color:' + (val < 0 || item.fonte === 'pagar' ? '#dc3545' : '#28a745') + ';">R$ ' + Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+                '<td class="r"><div class="pl-acts">' + acoes + '</div></td>' +
+            '</tr>';
         });
-        if (itens.length === 0) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento neste período</td></tr>';
+        if (lista.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="pl-vazio">' + (_dreDetItens.length ? 'Nenhum lançamento com essa busca.' : 'Nenhum lançamento neste período') + '</td></tr>';
+        const info = document.getElementById('dreDetInfo');
+        if (info) info.textContent = 'Mostrando ' + lista.length + ' de ' + _dreDetItens.length + ' lançamento(s)';
+    }
+    // Baixa (pagar/receber) direto do detalhe da DRE
+    let _dreDetReloadBaixa = null;
+    function _dreDetBaixar(id, fonte) {
+        _dreDetReloadBaixa = _detalheAnaliseReload;
+        fonte === 'receber' ? receberConta(id) : pagarConta(id);
     }
 
     function verDetalheDRE(grupoId) {
@@ -9329,6 +9572,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     let _dreMensalItensGrupo = {};   // { grupoId: [ itens[], itens[], ... 12x ] }
     let _dreMensalCPV = [];          // [ [nome, {valores:[12], itens:[12x[]]}], ... ]
     let _dreMensalDA  = [];          // idem, para Despesas Administrativas
+    let _dreMensalSubs = {};         // { GRUPO: [ [nome, {valores, itens}], ... ] } — subcategorias de todos os grupos
 
     function gerarTabelaMensalDRE(dreLancs, contasRec, contasPag, ano) {
         const headerRow = document.getElementById('dreHeaderMeses');
@@ -9398,6 +9642,19 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
         _dreMensalItensGrupo = {};
         Object.keys(dados).forEach(g => { _dreMensalItensGrupo[g] = dados[g].itens; });
+
+        // Subcategorias (↳) para TODOS os grupos da DRE, a partir dos próprios lançamentos do grupo
+        _dreMensalSubs = {};
+        Object.keys(dados).forEach(g => {
+            const subs = {};
+            dados[g].itens.forEach((lista, m) => lista.forEach(it => {
+                const nome = it.catNome || 'Sem Categoria';
+                if (!subs[nome]) subs[nome] = { valores: Array(12).fill(0), itens: Array.from({length:12}, () => []) };
+                subs[nome].valores[m] += parseFloat(it.valor || 0);
+                subs[nome].itens[m].push(it);
+            }));
+            _dreMensalSubs[g] = Object.entries(subs).sort((a, b) => b[1].valores.reduce((s, v) => s + v, 0) - a[1].valores.reduce((s, v) => s + v, 0));
+        });
 
         // Calcular subtotais por mês
         const calcMes = (m) => {
@@ -9503,6 +9760,12 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             { label: legDRE('RESULTADO_LIQUIDO'),    fn: m => calcMes(m).res,  bg: '#ffffff', bold: true, sinal: true },
         ];
 
+        const _GRUPOS_RECEITA_DRE = ['RECEITA_BRUTA', 'RECEITA_FINANCEIRA', 'OUTRAS_RECEITAS'];
+        linhas.forEach(l => {
+            if (l.grupoId && !l.expandir && (_dreMensalSubs[l.grupoId] || []).length) { l.expandir = _dreMensalSubs[l.grupoId]; l.expandirTipo = 'sub:' + l.grupoId; }
+            if (l.grupoId) l.ehReceita = _GRUPOS_RECEITA_DRE.includes(l.grupoId);
+        });
+
         const corSinal = v => v < 0 ? 'color:#dc3545;' : v > 0 ? 'color:#28a745;' : 'color:#999;';
         const fmtVSinal = v => v !== 0 ? (v < 0 ? '- ' : '+ ') + 'R$&nbsp;' + Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
 
@@ -9552,7 +9815,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                     const totalSub = mesesSub.reduce((s,v)=>s+v,0);
                     if (totalSub === 0) return;
                     const celMesSub = (v, m) => {
-                        const celVal = `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos">${v > 0 ? fmtV(-v) : '-'}</td>`;
+                        const celVal = `<td data-mes="${m}" style="text-align:right;padding:4px 8px;font-size:11px;color:${v ? (linha.ehReceita ? '#28a745' : '#dc3545') : '#ccc'};${v ? 'cursor:pointer;' : ''}"${v ? ` onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},${m})" title="Clique para ver os lançamentos"` : ''}>${v ? fmtV(linha.ehReceita ? v : -v) : '-'}</td>`;
                         const celValPct = `<td data-mes="${m}" class="dre-col-pct" style="text-align:right;padding:4px 4px;font-size:10px;color:#bbb;">${v > 0 ? pctMes(v, m) : '-'}</td>`;
                         return celVal + celValPct;
                     };
@@ -9560,7 +9823,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         '<td style="padding:4px 8px 4px 22px;font-size:11px;color:#888;">' +
                         '<span style="color:#bbb;margin-right:4px;">\u21b3</span>' + nomeSub + '</td>' +
                         mesesSub.map((v, m) => celMesSub(v, m)).join('') +
-                        `<td class="dre-col-total" style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:#dc3545;cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(-totalSub) + '</td>' +
+                        `<td class="dre-col-total" style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:${linha.ehReceita ? '#28a745' : '#dc3545'};cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(linha.ehReceita ? totalSub : -totalSub) + '</td>' +
                         '<td class="dre-col-total dre-col-pct" style="text-align:right;padding:4px 8px;font-size:11px;color:#aaa;">' + pctRB(totalSub) + '</td>' +
                         '</tr>';
                 });
@@ -9638,7 +9901,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const porMes = _dreMensalItensGrupo[chave] || [];
             itens = mes === -1 ? [].concat(...porMes) : (porMes[mes] || []);
         } else {
-            const origem = tipo === 'cpv' ? _dreMensalCPV : _dreMensalDA;
+            const origem = tipo === 'cpv' ? _dreMensalCPV : tipo === 'da' ? _dreMensalDA : (_dreMensalSubs[String(tipo).replace(/^sub:/, '')] || []);
             const entry = origem[chave];
             if (!entry) return;
             titulo = entry[0];
@@ -11686,33 +11949,45 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 </div>
 
 <div class="modal" id="modalDetalheDRE">
-    <div class="modal-content" style="max-width:920px;">
-        <div class="modal-header">
+    <div class="modal-content pl-box">
+        <div class="pl-head">
             <div>
-                <div id="tituloDetalheDRE" style="font-size:16px;">Detalhes</div>
-                <div id="subtituloDetalheDRE" style="font-size:12px;font-weight:400;color:#888;margin-top:2px;"></div>
+                <div class="pl-kicker">Detalhamento da DRE</div>
+                <div class="pl-title" id="tituloDetalheDRE">Detalhes</div>
+                <div class="pl-sub" id="subtituloDetalheDRE"></div>
             </div>
-            <button class="modal-close" onclick="closeModal('modalDetalheDRE')">&times;</button>
+            <button class="pl-x" onclick="closeModal('modalDetalheDRE')" title="Fechar">&times;</button>
         </div>
-        <div class="table-container" style="max-height:60vh;overflow-y:auto;">
-            <table id="tabelaDetalheDRE" style="font-size:14px;">
-                <thead style="position:sticky;top:0;z-index:2;">
+        <div class="pl-kpis" id="dreDetKpis"></div>
+        <div class="pl-toolbar">
+            <input type="text" class="pl-busca" id="dreDetBusca" placeholder="Buscar por descrição, categoria, cliente/fornecedor..." oninput="_dreDetRender()">
+            <div class="pl-seg" id="dreDetOrdem">
+                <button data-v="data" class="on" onclick="_dreDetOrdenar('data')">Por data</button>
+                <button data-v="valor" onclick="_dreDetOrdenar('valor')">Maiores valores</button>
+            </div>
+        </div>
+        <div class="pl-wrap">
+            <table id="tabelaDetalheDRE" class="pl-table">
+                <thead>
                     <tr>
-                        <th style="min-width:90px;" id="thDetalheDREData">Competência</th>
-                        <th style="min-width:200px;">Descrição</th>
-                        <th style="min-width:140px;">Categoria</th>
-                        <th style="min-width:140px;">Fornecedor/Cliente</th>
-                        <th style="min-width:100px;">Centro</th>
-                        <th style="min-width:130px;text-align:right;">Valor</th>
-                        <th style="min-width:150px;">Ações</th>
+                        <th id="thDetalheDREData">Competência</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Fornecedor/Cliente</th>
+                        <th>Situação</th>
+                        <th class="r">Valor</th>
+                        <th class="r">Ações</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
             </table>
         </div>
-        <div class="form-actions" style="margin-top:12px;">
-            <button class="btn btn-secondary" onclick="exportarExcelDetalheLancamentos()" style="background:#217346;color:white;">📊 Excel</button>
-            <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
+        <div class="pl-foot">
+            <div class="info" id="dreDetInfo"></div>
+            <div style="display:flex;gap:8px;">
+                <button class="btn btn-secondary" onclick="exportarExcelDetalheLancamentos()" style="background:#217346;color:white;">📊 Exportar Excel</button>
+                <button class="btn btn-secondary" onclick="closeModal('modalDetalheDRE')">Fechar</button>
+            </div>
         </div>
     </div>
 </div>
@@ -12125,6 +12400,10 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
             window[nome] = async function () {
                 const r = await orig.apply(this, arguments);
                 if (_pl && document.getElementById('modalPainelLanc').classList.contains('active')) await _plPosAcao();
+                const md = document.getElementById('modalDetalheDRE');
+                if (md && md.classList.contains('active') && typeof _dreDetReloadBaixa === 'function') {
+                    const fn = _dreDetReloadBaixa; _dreDetReloadBaixa = null; md.classList.remove('active'); try { await fn(); } catch (e) {}
+                }
                 return r;
             };
         });
@@ -13590,6 +13869,206 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         });
         return pptx;
     }
+</script>
+
+
+<script>
+    // ================= CADASTROS: máscaras e prévia da DRE =================
+    function cadMascaraDoc(el) {
+        const d = el.value.replace(/\D/g, '').slice(0, 14);
+        let v;
+        if (d.length <= 11) v = d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        else v = d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2');
+        el.value = v;
+    }
+    function cadMascaraTelefone(el) {
+        const d = el.value.replace(/\D/g, '').slice(0, 11);
+        let v = d;
+        if (d.length > 10) v = d.replace(/^(\d{2})(\d{5})(\d{0,4}).*/, '($1) $2-$3');
+        else if (d.length > 6) v = d.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+        else if (d.length > 2) v = d.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+        else if (d.length) v = '(' + d;
+        el.value = v;
+    }
+    const _CAD_GRUPO_INFO = {
+        RECEITA_BRUTA: ['pos', 'Soma na receita', 'Receita'], DEDUCOES: ['neg', 'Diminui a receita', 'Imposto'], CPV: ['neg', 'Custo direto', 'Custo'],
+        DESP_COMERCIAL: ['neg', 'Despesa operacional', 'Despesa'], DESP_ADMIN: ['neg', 'Despesa operacional', 'Despesa'],
+        RECEITA_FINANCEIRA: ['pos', 'Resultado financeiro', 'Financeiro'], DESP_FINANCEIRA: ['neg', 'Resultado financeiro', 'Financeiro'],
+        EMPRESTIMO: ['neg', 'Abaixo do Lajir', 'Financeiro'], INVESTIMENTO: ['neg', 'Abaixo do Lajir', 'Investimento'],
+        OUTRAS_RECEITAS: ['pos', 'Abaixo do Lajir', 'Receita'], OUTRAS_DESPESAS: ['neg', 'Abaixo do Lajir', 'Despesa']
+    };
+    function cadAtualizarPreviaDRE(sugerirTipo) {
+        const g = (document.getElementById('categoriaGrupoDRE') || {}).value || '';
+        const el = document.getElementById('cadPreviaDRE'); if (!el) return;
+        if (!g) { el.innerHTML = '<span class="cad-chip neu">Fora da DRE</span> Lançamentos desta categoria não entram na DRE. Sem grupo, contas a pagar contam como Despesas Administrativas.'; return; }
+        const info = _CAD_GRUPO_INFO[g] || ['neu', '', ''];
+        const rot = (typeof legDRE === 'function' ? legDRE(g) : g).trim();
+        el.innerHTML = 'Aparece na DRE na linha <b>' + rot.replace(/</g, '&lt;') + '</b> <span class="cad-chip ' + info[0] + '">' + (info[0] === 'pos' ? '(+) ' : '(−) ') + info[1] + '</span>';
+        const tipo = document.getElementById('categoriaTipo');
+        if (sugerirTipo && tipo && !tipo.value && info[2]) tipo.value = info[2];
+    }
+    // Ao recarregar as categorias, atualiza a tela Grupos da DRE se estiver aberta
+    (function () {
+        const orig = window.carregarCategorias;
+        if (typeof orig !== 'function') return;
+        window.carregarCategorias = async function () {
+            const r = await orig.apply(this, arguments);
+            const pg = document.getElementById('grupos-dre');
+            if (pg && pg.classList.contains('active') && typeof _gdPreservarEdicao === 'function') _gdPreservarEdicao(renderizarPaginaGruposDRE);
+            return r;
+        };
+    })();
+    // Atualiza a prévia sempre que a janela de categoria abrir
+    (function () {
+        const m = document.getElementById('modalCategoria');
+        if (m && window.MutationObserver) new MutationObserver(() => { if (m.classList.contains('active')) cadAtualizarPreviaDRE(false); }).observe(m, { attributes: true, attributeFilter: ['class'] });
+    })();
+</script>
+
+<script>
+    // ================= DASHBOARD EXECUTIVO =================
+    let _dx = null, _dxAgFiltro = 'todos';
+    function _dxDelta(p, inverso) {
+        if (p == null || !isFinite(p)) return '';
+        const cls = Math.abs(p) < 0.5 ? 'neu' : ((p > 0) !== !!inverso ? 'bom' : 'ruim');
+        return '<span class="dx-delta ' + cls + '">' + (p > 0 ? '▲ +' : p < 0 ? '▼ ' : '') + p.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%</span>';
+    }
+    async function dxRender(rec, pag) {
+        if (!document.getElementById('dxKpis')) return;
+        const [bancos, cheques] = await Promise.all([fetchSupabase('bancos', 'GET'), fetchSupabase('cheques', 'GET')]);
+        const hojeD = new Date();
+        const anoF = (document.getElementById('dashFiltroAno') || {}).value, mesF = (document.getElementById('dashFiltroMes') || {}).value;
+        const ano = parseInt(anoF || hojeD.getFullYear()), mes = parseInt(mesF || (hojeD.getMonth() + 1));
+        const A = apAnalisar(rec, pag, cheques || [], ano, mes, 'competencia', []);
+        const hoje = A.hoje;
+        // Saldo em bancos (mesma regra da tela Bancos)
+        const bAtivos = (bancos || []).filter(b => b.ativo !== false);
+        const saldos = _calcularSaldosBancos(bAtivos, rec, pag);
+        const saldoBancos = bAtivos.reduce((s, b) => s + (saldos[b.id] != null ? saldos[b.id] : parseFloat(b.saldo_inicial || 0)), 0);
+        const projetado = saldoBancos + A.saldo30;
+        const despDia = A.mediaDesp3 / 30;
+        const folego = despDia > 0 ? Math.floor(saldoBancos / despDia) : null;
+        _dx = { A, rec, pag, cheques: cheques || [] };
+
+        document.getElementById('dxPeriodo').textContent = 'Indicadores de ' + apRotMes(A.sel) + ' (competência) · posição de saldos e contas em ' + apData(hoje) + (mesF ? '' : ' · use os filtros Ano/Mês para analisar outro mês');
+        const k = (cor, rot, val, sub, acao, info) => '<div class="dx-kpi' + (acao ? ' clic' : '') + '" style="--dx-cor:' + cor + ';"' + (acao ? ' onclick="' + acao + '" title="Ver lançamentos"' : '') + '>' +
+            '<div class="k"><span>' + rot + '</span>' + (info ? '<span title="' + info + '" style="cursor:help;opacity:.7;">ⓘ</span>' : '') + '</div><div class="v">' + val + '</div><div class="s">' + sub + '</div></div>';
+        const R = v => apR0(v);
+        document.getElementById('dxKpis').innerHTML =
+            k(saldoBancos < 0 ? '#dc3545' : '#2563eb', '🏦 Saldo em bancos', '<span style="color:' + (saldoBancos < 0 ? '#dc3545' : 'inherit') + '">' + R(saldoBancos) + '</span>', bAtivos.length + ' conta(s) ativa(s)', "showPage('bancos')", 'Saldo inicial + recebimentos − pagamentos registrados em cada banco') +
+            k(A.resultado < 0 ? '#dc3545' : '#16a34a', '📊 Resultado do mês', '<span style="color:' + (A.resultado < 0 ? '#dc3545' : '#16a34a') + '">' + R(A.resultado) + '</span>', 'Margem ' + (A.margem == null ? 'n/d' : A.margem.toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%') + ' ' + _dxDelta(apVar(A.resultado, A.recPrev - A.despPrev)), "dxAbrirMes(" + (A.meses12.length - 1) + ")", 'Receitas − despesas do mês pela data de competência') +
+            k('#16a34a', '💰 Receita do mês', R(A.receita), _dxDelta(A.vRecMoM) + ' vs ' + apRotMes(A.prev, true), "dxAbrir('recMes')") +
+            k('#dc3545', '💸 Despesas do mês', R(A.despesa), _dxDelta(A.vDespMoM, true) + ' vs ' + apRotMes(A.prev, true), "dxAbrir('pagMes')") +
+            k('#0891b2', '📥 A receber', R(A.totPendRec), A.totAtrRec ? '<span style="color:#dc3545;font-weight:700;">' + R(A.totAtrRec) + ' atrasado</span>' : A.pendRec.length + ' título(s), nenhum atrasado', "dxAbrir('recPend')") +
+            k('#d97706', '📤 A pagar', R(A.totPendPag), A.totAtrPag ? '<span style="color:#dc3545;font-weight:700;">' + R(A.totAtrPag) + ' atrasado</span>' : A.pendPag.length + ' conta(s), nenhuma atrasada', "dxAbrir('pagPend')") +
+            k(projetado < 0 ? '#dc3545' : '#7c3aed', '🔮 Saldo projetado 30 dias', '<span style="color:' + (projetado < 0 ? '#dc3545' : 'inherit') + '">' + R(projetado) + '</span>', 'Bancos ' + apK(saldoBancos) + ' + receber ' + apK(A.proxRec) + ' − pagar ' + apK(A.proxPag + A.proxChq), "dxAbrir('prox30')", 'Saldo em bancos + a receber nos próximos 30 dias − a pagar e cheques nos próximos 30 dias') +
+            k(folego != null && folego < 30 ? '#dc3545' : '#475569', '⏳ Fôlego de caixa', folego == null ? '—' : (folego < 0 ? '0' : folego) + ' dias', 'Quanto tempo o saldo cobre as despesas (média 3 meses: ' + apK(A.mediaDesp3) + '/mês)', '', 'Saldo em bancos ÷ despesa média diária dos últimos 3 meses');
+
+        // Alertas
+        const cores = { alta: '#dc3545', media: '#d97706', info: '#2563eb' }, rot = { alta: 'ALTA', media: 'MÉDIA', info: 'INFO' };
+        const al = A.alertas.filter(a => a.nivel !== 'info').slice(0, 5);
+        document.getElementById('dxAlertas').innerHTML = al.length ? al.map(a => '<div class="dx-al"><div class="tag" style="background:' + cores[a.nivel] + ';">' + rot[a.nivel] + '</div><div><div class="t">' + _plEsc(a.titulo) + '</div><div class="d">' + _plEsc(a.texto) + '</div></div></div>').join('') +
+            (A.alertas.length > 5 ? '<div class="dx-mais"><a onclick="showPage(\'apresentacao\')">Ver análise completa na Apresentação Mensal →</a></div>' : '')
+            : '<div class="dx-ok">✅ Nenhum ponto crítico identificado no mês.</div>';
+        dxAgendaRender();
+
+        // Gráfico 12 meses
+        const ctx = document.getElementById('chartDx12m');
+        if (ctx && window.Chart && typeof Chart === 'function') {
+            if (charts.dx12m) { try { charts.dx12m.destroy(); } catch (e) {} }
+            const esc = document.documentElement.getAttribute('data-tema') === 'escuro';
+            charts.dx12m = new Chart(ctx, {
+                data: {
+                    labels: A.meses12.map(m => apRotMes(m, true)),
+                    datasets: [
+                        { type: 'line', label: 'Resultado', data: A.serieRes, borderColor: esc ? '#e5e7eb' : '#1f2a37', backgroundColor: esc ? '#e5e7eb' : '#1f2a37', borderWidth: 2.5, pointRadius: 3.5, tension: 0.3, order: 0 },
+                        { type: 'bar', label: 'Receitas', data: A.serieRec, backgroundColor: '#16a34a', borderRadius: 4, maxBarThickness: 26, order: 1 },
+                        { type: 'bar', label: 'Despesas', data: A.serieDesp, backgroundColor: '#dc3545', borderRadius: 4, maxBarThickness: 26, order: 1 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + apR(c.parsed.y), footer: () => 'Clique para ver os lançamentos' } }
+                    },
+                    scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => _fmtCompacto(v, true) } } },
+                    onHover: (e, els) => { const t = e.native && e.native.target; if (t) t.style.cursor = els.length ? 'pointer' : 'default'; },
+                    onClick: (e, els) => { if (els.length) dxAbrirMes(els[0].index); }
+                }
+            });
+        }
+    }
+
+    function dxAgendaFiltro(v) { _dxAgFiltro = v; document.querySelectorAll('#dxAgSeg button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); dxAgendaRender(); }
+    function dxAgendaRender() {
+        const el = document.getElementById('dxAgenda'); if (!el || !_dx) return;
+        const hoje = _dx.A.hoje, lim = apSomaDias(hoje, 7);
+        const cli = c => ((dadosCache.clientes || []).find(x => x.id === c.cliente_id) || {}).nome || '—';
+        const forn = c => ((dadosCache.fornecedores || []).find(x => x.id === c.fornecedor_id) || {}).nome || '—';
+        let itens = [];
+        if (_dxAgFiltro !== 'pagar') _dx.rec.filter(c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= lim).forEach(c => itens.push({ t: 'receber', c, parte: cli(c), d: c.data_vencimento }));
+        if (_dxAgFiltro !== 'receber') _dx.pag.filter(c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= lim).forEach(c => itens.push({ t: 'pagar', c, parte: forn(c), d: c.data_vencimento }));
+        if (_dxAgFiltro !== 'receber') _dx.cheques.filter(c => c.status !== 'compensado' && c.bom_para >= hoje && c.bom_para <= lim).forEach(c => itens.push({ t: 'cheque', c, parte: forn(c), d: c.bom_para }));
+        itens.sort((a, b) => a.d.localeCompare(b.d) || apV(b.c) - apV(a.c));
+        const atrR = _dx.A.atrRec, atrP = _dx.A.atrPag;
+        const tot = t => itens.filter(i => (t === 'pagar' ? i.t !== 'receber' : i.t === 'receber')).reduce((s, i) => s + apV(i.c), 0);
+        const resumo = '<div class="dx-ag-resumo">' +
+            (_dxAgFiltro !== 'pagar' ? '<span class="dx-ag-chip" style="cursor:default;">Entradas 7d: <b style="color:#16a34a;">' + apR0(tot('receber')) + '</b></span>' : '') +
+            (_dxAgFiltro !== 'receber' ? '<span class="dx-ag-chip" style="cursor:default;">Saídas 7d: <b style="color:#dc3545;">' + apR0(tot('pagar')) + '</b></span>' : '') +
+            (atrP.length && _dxAgFiltro !== 'receber' ? '<button class="dx-ag-chip atr" onclick="dxAbrir(\'pagAtr\')">' + atrP.length + ' a pagar vencido(s)</button>' : '') +
+            (atrR.length && _dxAgFiltro !== 'pagar' ? '<button class="dx-ag-chip atr" onclick="dxAbrir(\'recAtr\')">' + atrR.length + ' a receber vencido(s)</button>' : '') + '</div>';
+        const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const linhas = itens.slice(0, 8).map(i => {
+            const dd = new Date(i.d + 'T12:00:00'), eh = i.d === hoje;
+            const cor = i.t === 'receber' ? '#16a34a' : '#dc3545';
+            const acao = i.t === 'cheque' ? "abrirPainelCheques({titulo:'Cheque" + (i.c.numero ? ' Nº ' + String(i.c.numero).replace(/'/g, '') : '') + "',subtitulo:'Vence em " + apData(i.d) + "',filtro:c=>c.id===" + i.c.id + "})"
+                : "dxAbrirLanc('" + i.t + "'," + i.c.id + ")";
+            return '<div class="dx-ag" onclick="' + acao + '"><div class="dt' + (eh ? ' hoje' : '') + '">' + (eh ? 'HOJE' : dias[dd.getDay()]) + '<br>' + i.d.slice(8, 10) + '/' + i.d.slice(5, 7) + '</div>' +
+                '<div style="min-width:0;"><div class="nm">' + _plEsc(i.t === 'cheque' ? 'Cheque' + (i.c.numero ? ' Nº ' + i.c.numero : '') : (i.c.descricao || '(sem descrição)')) + '</div><div class="mt">' + (i.t === 'receber' ? 'Receber de ' : i.t === 'cheque' ? 'Cheque p/ ' : 'Pagar a ') + _plEsc(i.parte) + '</div></div>' +
+                '<div class="vl" style="color:' + cor + ';">' + (i.t === 'receber' ? '+' : '−') + apR0(apV(i.c)) + '</div></div>';
+        }).join('');
+        el.innerHTML = resumo + (linhas || '<div class="dx-vazio">Nada vence nos próximos 7 dias.</div>') + (itens.length > 8 ? '<div class="dx-mais"><a onclick="dxAbrir(\'prox7\')">Ver todos os ' + itens.length + ' vencimentos →</a></div>' : '');
+    }
+
+    function dxAbrirLanc(tipo, id) {
+        abrirPainelLancamentos({ titulo: 'Lançamento', subtitulo: 'Agenda de vencimentos', filtroRec: tipo === 'receber' ? (c => c.id === id) : null, filtroPag: tipo === 'pagar' ? (c => c.id === id) : null, recarregar: atualizarDashboard });
+    }
+    function dxAbrirMes(i) {
+        if (!_dx) return;
+        const k = _dx.A.meses12[i];
+        const ref = c => (c.data_competencia || c.data_vencimento || '').slice(0, 7) === k;
+        abrirPainelLancamentos({ titulo: 'Lançamentos de ' + apRotMes(k), subtitulo: 'Receitas e despesas pela data de competência', filtroRec: ref, filtroPag: ref, recarregar: atualizarDashboard });
+    }
+    function dxAbrir(q) {
+        if (!_dx) return;
+        const A = _dx.A, hoje = A.hoje, k = A.sel;
+        const comp = c => (c.data_competencia || c.data_vencimento || '').slice(0, 7) === k;
+        const l30 = apSomaDias(hoje, 30), l7 = apSomaDias(hoje, 7);
+        const cfg = {
+            recMes: ['Receitas de ' + apRotMes(k), 'Pela data de competência', comp, null],
+            pagMes: ['Despesas de ' + apRotMes(k), 'Pela data de competência', null, comp],
+            recPend: ['Contas a receber em aberto', 'Todos os títulos pendentes', c => c.status === 'pendente', null],
+            pagPend: ['Contas a pagar em aberto', 'Todas as contas pendentes', null, c => c.status === 'pendente'],
+            recAtr: ['A receber vencidos', 'Títulos pendentes com vencimento passado', c => c.status === 'pendente' && c.data_vencimento < hoje, null],
+            pagAtr: ['A pagar vencidos', 'Contas pendentes com vencimento passado', null, c => c.status === 'pendente' && c.data_vencimento < hoje],
+            prox30: ['Vencimentos dos próximos 30 dias', 'Entradas e saídas pendentes até ' + apData(l30) + ' (cheques na tela de cheques)', c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= l30, c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= l30],
+            prox7: ['Vencimentos dos próximos 7 dias', 'Entradas e saídas pendentes até ' + apData(l7), c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= l7, c => c.status === 'pendente' && c.data_vencimento >= hoje && c.data_vencimento <= l7]
+        }[q];
+        if (!cfg) return;
+        abrirPainelLancamentos({ titulo: cfg[0], subtitulo: cfg[1], filtroRec: cfg[2], filtroPag: cfg[3], recarregar: atualizarDashboard });
+    }
+
+    // Liga o painel executivo à atualização do dashboard existente
+    (function () {
+        const orig = window.renderizarDashboard;
+        if (typeof orig !== 'function') return;
+        window.renderizarDashboard = function (rec, pag) {
+            const r = orig.apply(this, arguments);
+            try { dxRender(rec, pag); } catch (e) { console.error(e); }
+            return r;
+        };
+    })();
 </script>
 
 <script>
