@@ -1017,6 +1017,11 @@ html[data-tema="escuro"] .btn-atualizar { background: var(--esc-sup2); }
 html[data-tema="escuro"] .pdf-menu { background: var(--esc-sup); border-color: #3a3f47; }
 html[data-tema="escuro"] .pdf-menu button:hover { background: #3a2a20; }
 html[data-tema="escuro"] .pdf-menu .pg { background: #2a1d16; }
+.lz-sent td { text-align: center; padding: 12px !important; background: #fafbfc !important; color: #6b7280; font-size: 12.5px; }
+.lz-todas { margin-left: 10px; border: 1px solid var(--cor-borda); background: #fff; color: var(--cor-primaria); border-radius: 6px; padding: 4px 12px; font-weight: 600; cursor: pointer; font-size: 12px; }
+.lz-todas:hover { border-color: var(--cor-primaria); }
+html[data-tema="escuro"] .lz-sent td { background: var(--esc-sup2) !important; }
+html[data-tema="escuro"] .lz-todas { background: var(--esc-sup); }
 /* ================= APRESENTAÇÃO MENSAL ================= */
 .ap-previa { display: flex; flex-direction: column; gap: 22px; align-items: center; overflow-x: auto; padding: 4px 2px 8px; }
 .ap-slide-wrap { display: flex; flex-direction: column; gap: 6px; }
@@ -4346,7 +4351,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 if (!alvo.includes(termo)) return;
             }
             exibidas++;
-            tbody.innerHTML += `<tr>
+            tbody.insertAdjacentHTML('beforeend', `<tr>
                 <td><b>${cat.nome}</b></td>
                 <td><span style="background:#e8f4fd;color:#1565c0;padding:2px 8px;border-radius:10px;font-size:11px;">${grupoLabel}</span></td>
                 <td>${cat.tipo || '-'}</td>
@@ -4356,7 +4361,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                     <button class="btn btn-secondary btn-small" onclick="editarCategoria(${cat.id})">Editar</button>
                     <button class="btn btn-danger btn-small" onclick="deletarCategoria(${cat.id})">Deletar</button>
                 </td>
-            </tr>`;
+            </tr>`);
         });
         if (exibidas === 0) {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">' +
@@ -4499,7 +4504,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
         dadosCache.produtos.forEach(prod => {
             const categoria = dadosCache.categorias.find(c => c.id === prod.categoria_id);
-            tbody.innerHTML += `
+            tbody.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${prod.nome}</td>
                     <td>${categoria ? categoria.nome : '-'}</td>
@@ -4510,7 +4515,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <button class="btn btn-danger btn-small" onclick="deletarProduto(${prod.id})">Deletar</button>
                     </td>
                 </tr>
-            `;
+            `);
         });
     }
 
@@ -4612,7 +4617,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         tbody.innerHTML = '';
 
         dadosCache.fornecedores.forEach(forn => {
-            tbody.innerHTML += `
+            tbody.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${forn.nome}</td>
                     <td>${forn.cnpj || '-'}</td>
@@ -4624,7 +4629,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <button class="btn btn-danger btn-small" onclick="deletarFornecedor(${forn.id})">Deletar</button>
                     </td>
                 </tr>
-            `;
+            `);
         });
     }
 
@@ -4738,7 +4743,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         tbody.innerHTML = '';
 
         dadosCache.clientes.forEach(cli => {
-            tbody.innerHTML += `
+            tbody.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${cli.nome}</td>
                     <td>${cli.cpf_cnpj || '-'}</td>
@@ -4750,7 +4755,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <button class="btn btn-danger btn-small" onclick="deletarCliente(${cli.id})">Deletar</button>
                     </td>
                 </tr>
-            `;
+            `);
         });
     }
 
@@ -4932,7 +4937,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 : `<button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>`;
-            tbody.innerHTML += `<tr>
+            tbody.insertAdjacentHTML('beforeend', `<tr>
                 <td>${cliente ? cliente.nome : '-'}</td>
                 <td>${conta.descricao}</td>
                 <td style="font-size:11px;color:#555;">${conta.nota_fiscal || '-'}</td>
@@ -4944,7 +4949,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 <td>
                     ${acoes}
                 </td>
-            </tr>`;
+            </tr>`);
         });
     }
 
@@ -5137,7 +5142,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 : `<button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>`;
-            tbody.innerHTML += `<tr>
+            tbody.insertAdjacentHTML('beforeend', `<tr>
                 <td>${fornecedor ? fornecedor.nome : '-'}</td>
                 <td>${categoria ? categoria.nome : '-'}</td>
                 <td>${conta.descricao}</td>
@@ -5150,7 +5155,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 <td>
                     ${acoes}
                 </td>
-            </tr>`;
+            </tr>`);
         });
     }
 
@@ -5376,7 +5381,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const parcLabel = conta.total_parcelas > 1 ? conta.parcela_atual + '/' + conta.total_parcelas : '-';
             const vencFmt = conta.data_vencimento ? new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
             const recFmt  = conta.data_recebimento ? new Date(conta.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
-            tbody.innerHTML += `<tr>
+            tbody.insertAdjacentHTML('beforeend', `<tr>
                 <td>${cliente ? cliente.nome : '-'}</td>
                 <td>${conta.descricao}</td>
                 <td style="text-align:center;">${parcLabel}</td>
@@ -5391,7 +5396,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                     <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">🗑️</button>
                 </td>
-            </tr>`;
+            </tr>`);
         });
     }
 
@@ -5451,7 +5456,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const parcLabel  = conta.total_parcelas > 1 ? conta.parcela_atual + '/' + conta.total_parcelas : '-';
             const vencFmt    = conta.data_vencimento ? new Date(conta.data_vencimento + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
             const pagFmt     = conta.data_pagamento  ? new Date(conta.data_pagamento  + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
-            tbody.innerHTML += `<tr>
+            tbody.insertAdjacentHTML('beforeend', `<tr>
                 <td>${fornecedor ? fornecedor.nome : '-'}</td>
                 <td>${categoria  ? categoria.nome  : '-'}</td>
                 <td>${conta.descricao}</td>
@@ -5468,7 +5473,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                     <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">🗑️</button>
                 </td>
-            </tr>`;
+            </tr>`);
         });
     }
 
@@ -6235,7 +6240,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const anoFim   = isFCP ? anoAtual + 2 : anoAtual;
             const anoInicio = anoAtual - 5;
             for (let ano = anoFim; ano >= anoInicio; ano--) {
-                select.innerHTML += `<option value="${ano}">${ano}${ano === anoAtual ? ' (atual)' : ''}</option>`;
+                select.insertAdjacentHTML('beforeend', `<option value="${ano}">${ano}${ano === anoAtual ? ' (atual)' : ''}</option>`);
             }
         });
     }
@@ -6245,7 +6250,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         
         selects.forEach(select => {
             for (let dia = 1; dia <= 31; dia++) {
-                select.innerHTML += `<option value="${String(dia).padStart(2, '0')}">${dia}</option>`;
+                select.insertAdjacentHTML('beforeend', `<option value="${String(dia).padStart(2, '0')}">${dia}</option>`);
             }
         });
     }
@@ -6259,7 +6264,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         if (categoriaSelecionada) {
             const produtos = dadosCache.produtos.filter(p => p.categoria_id == categoriaSelecionada);
             produtos.forEach(prod => {
-                selectProdutos.innerHTML += `<option value="${prod.id}">${prod.nome}</option>`;
+                selectProdutos.insertAdjacentHTML('beforeend', `<option value="${prod.id}">${prod.nome}</option>`);
             });
         }
     }
@@ -6382,7 +6387,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             })
             .sort((a, b) => b.valor - a.valor)
             .forEach((item, index) => {
-                tbody.innerHTML += `
+                tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.nome}</td>
@@ -6390,7 +6395,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <td>R$ ${item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                         <td>${item.pct}%</td>
                     </tr>
-                `;
+                `);
             });
 
         // Gráfico Top 10
@@ -6505,7 +6510,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             })
             .sort((a, b) => b.valor - a.valor)
             .forEach((item, index) => {
-                tbody.innerHTML += `
+                tbody.insertAdjacentHTML('beforeend', `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.nome}</td>
@@ -6513,7 +6518,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <td>R$ ${item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
                         <td>${item.pct}%</td>
                     </tr>
-                `;
+                `);
             });
 
         // Store for toggle
@@ -6662,7 +6667,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             .map(function([nome, d]){ return { nome: nome, quantidade: d.quantidade, valor: d.valor, pct: total>0?(d.valor/total*100).toFixed(2):'0.00' }; })
             .sort(function(a,b){ return b.valor-a.valor; })
             .forEach(function(item, index) {
-                tbody.innerHTML += '<tr><td>'+(index+1)+'</td><td>'+item.nome+'</td><td>'+item.quantidade+'</td><td>R$ '+item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>'+item.pct+'%</td></tr>';
+                tbody.insertAdjacentHTML('beforeend', '<tr><td>'+(index+1)+'</td><td>'+item.nome+'</td><td>'+item.quantidade+'</td><td>R$ '+item.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td><td>'+item.pct+'%</td></tr>');
             });
     }
 
@@ -7020,7 +7025,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
             // Linha principal (prefixo)
             var temSubs = Object.keys(g.subs).length > 0;
-            tbody.innerHTML += '<tr style="background:'+bg+';border-top:'+(idx>0?'1px solid #f0f0f0':'none')+'">'
+            tbody.insertAdjacentHTML('beforeend', '<tr style="background:'+bg+';border-top:'+(idx>0?'1px solid #f0f0f0':'none')+'">'
                 + '<td style="font-weight:700;padding:6px 10px;font-size:12px;position:sticky;left:0;background:'+bg+';color:#444;">'
                 + pref + '</td>'
                 + g.valores.map(function(v){
@@ -7028,12 +7033,12 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         + (v>0?fmtValFull(v):'—')+'</td>';
                 }).join('')
                 + '<td style="text-align:right;padding:6px 10px;font-size:12px;font-weight:700;color:#8e44ad;white-space:nowrap;">'+fmtValFull(g.total)+'</td>'
-                + '</tr>';
+                + '</tr>');
 
             // Subcategorias ↳
             Object.keys(g.subs).sort(function(a,b){ return g.subs[b].total-g.subs[a].total; }).forEach(function(subNome) {
                 var s = g.subs[subNome];
-                tbody.innerHTML += '<tr style="background:'+bg+'">'
+                tbody.insertAdjacentHTML('beforeend', '<tr style="background:'+bg+'">'
                     + '<td style="padding:3px 10px 3px 26px;font-size:11px;color:#888;position:sticky;left:0;background:'+bg+';">'
                     + '<span style="color:#ccc;margin-right:4px;">↳</span>'+subNome+'</td>'
                     + s.valores.map(function(v){
@@ -7041,7 +7046,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                             + (v>0?fmtValFull(v):'—')+'</td>';
                     }).join('')
                     + '<td style="text-align:right;padding:3px 10px;font-size:11px;font-weight:600;color:#dc3545;white-space:nowrap;">'+fmtValFull(s.total)+'</td>'
-                    + '</tr>';
+                    + '</tr>');
             });
         });
 
@@ -7081,13 +7086,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         linhas.forEach(function(l, idx) {
             const ticket = l.qtd > 0 ? l.valor/l.qtd : 0;
             const pct = totalGeral > 0 ? (l.valor/totalGeral*100).toFixed(1) : '0.0';
-            tbody.innerHTML += '<tr style="'+(idx%2===0?'':'background:#fafafa')+'">'
+            tbody.insertAdjacentHTML('beforeend', '<tr style="'+(idx%2===0?'':'background:#fafafa')+'">'
                 + '<td style="font-weight:600;">'+l.mes+'</td>'
                 + '<td style="text-align:right;color:'+(l.valor>0?'#dc3545':'#bbb')+';font-weight:'+(l.valor>0?'600':'400')+';"> '+(l.valor>0?'R$ '+l.valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'-')+'</td>'
                 + '<td style="text-align:right;">'+(l.qtd>0?l.qtd:'-')+'</td>'
                 + '<td style="text-align:right;">'+(l.qtd>0?'R$ '+ticket.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'-')+'</td>'
                 + '<td style="text-align:right;">'+(l.valor>0?pct+'%':'-')+'</td>'
-                + '</tr>';
+                + '</tr>');
         });
 
         const totVal  = document.getElementById('pagarMensalTotalVal');
@@ -7396,7 +7401,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const indicacao = i === 0 ? '⭐ Melhor dia' : i === 1 ? '✅ Ótima opção' : i === 2 ? '👍 Boa opção' : '';
             const bgRow = i < 3 ? (i === 0 ? 'background:#fffde7;' : 'background:#f0fdf4;') : '';
 
-            tbody.innerHTML += `<tr style="${bgRow}">
+            tbody.insertAdjacentHTML('beforeend', `<tr style="${bgRow}">
                 <td style="text-align:center;font-size:16px;">${medalhas[i] || (i+1)}</td>
                 <td style="font-weight:600;">${dia.d}</td>
                 <td>${dtFmt}</td>
@@ -7405,7 +7410,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 <td style="color:#28a745;">${fmtV(dia.totalR)}</td>
                 <td style="color:${saldoCor};font-weight:600;">${saldoFmt}</td>
                 <td>${indicacao}</td>
-            </tr>`;
+            </tr>`);
         });
 
         if (dias.length === 0) {
@@ -7453,7 +7458,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         (dadosCache.bancos || []).forEach(banco => {
             const saldoAtual = saldos ? (saldos[banco.id] !== undefined ? saldos[banco.id] : parseFloat(banco.saldo_inicial || 0)) : parseFloat(banco.saldo_inicial || 0);
             const saldoClass = saldoAtual >= 0 ? 'color:#28a745;font-weight:600;' : 'color:#dc3545;font-weight:600;';
-            tbody.innerHTML += '<tr>' +
+            tbody.insertAdjacentHTML('beforeend', '<tr>' +
                 '<td><b>' + banco.nome + '</b></td>' +
                 '<td>' + (banco.agencia || '-') + '</td>' +
                 '<td>' + (banco.conta || '-') + '</td>' +
@@ -7462,7 +7467,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 '<td style="' + saldoClass + '">R$ ' + saldoAtual.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
                 '<td><span class="status-badge ' + (banco.ativo ? 'status-recebido' : 'status-atrasado') + '">' + (banco.ativo ? 'Ativo' : 'Inativo') + '</span></td>' +
                 '<td><button class="btn btn-secondary btn-small" onclick="editarBanco(' + banco.id + ')">Editar</button> ' +
-                '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button></td></tr>';
+                '<button class="btn btn-danger btn-small" onclick="deletarBanco(' + banco.id + ')">Deletar</button></td></tr>');
         });
     }
 
@@ -7475,20 +7480,20 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const saldo = saldos ? (saldos[banco.id] !== undefined ? saldos[banco.id] : parseFloat(banco.saldo_inicial || 0)) : parseFloat(banco.saldo_inicial || 0);
             totalGeral += saldo;
             const cor = saldo >= 0 ? '#28a745' : '#dc3545';
-            container.innerHTML += '<div class="stat-card" style="border-left-color:' + cor + ';">' +
+            container.insertAdjacentHTML('beforeend', '<div class="stat-card" style="border-left-color:' + cor + ';">' +
                 '<div class="stat-label">🏦 ' + banco.nome + '</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">' + (banco.tipo || '') + '</div>' +
                 '<div class="stat-value" style="color:' + cor + ';font-size:20px;">R$ ' + saldo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
                 '<div style="font-size:11px;color:#999;margin-top:4px;">Inicial: R$ ' + parseFloat(banco.saldo_inicial||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
-                '</div>';
+                '</div>');
         });
         if ((dadosCache.bancos || []).filter(b => b.ativo).length > 1) {
             const corTotal = totalGeral >= 0 ? '#FF7A42' : '#dc3545';
-            container.innerHTML += '<div class="stat-card" style="border-left-color:' + corTotal + ';">' +
+            container.insertAdjacentHTML('beforeend', '<div class="stat-card" style="border-left-color:' + corTotal + ';">' +
                 '<div class="stat-label">💰 Saldo Total</div>' +
                 '<div style="font-size:11px;color:#999;margin-bottom:4px;">Todos os bancos</div>' +
                 '<div class="stat-value" style="color:' + corTotal + ';font-size:20px;">R$ ' + totalGeral.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</div>' +
-                '</div>';
+                '</div>');
         }
     }
 
@@ -7586,8 +7591,8 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         if (saldoInicial !== 0) {
             const cor = saldoInicial>=0?'#28a745':'#dc3545';
             const labelSaldo = dataInicioPeriodo ? 'Saldo Anterior (acumulado)' : 'Saldo Inicial';
-            tbody.innerHTML += '<tr style="background:#f8f9fa;"><td style="font-weight:600;color:#555;">'+labelSaldo+'</td>' +
-                '<td></td><td></td><td></td><td style="text-align:right;font-weight:700;color:'+cor+';">'+fmtVal(saldoInicial)+'</td></tr>';
+            tbody.insertAdjacentHTML('beforeend', '<tr style="background:#f8f9fa;"><td style="font-weight:600;color:#555;">'+labelSaldo+'</td>' +
+                '<td></td><td></td><td></td><td style="text-align:right;font-weight:700;color:'+cor+';">'+fmtVal(saldoInicial)+'</td></tr>');
         }
         const dias = Object.keys(porDia).sort();
 
@@ -7606,7 +7611,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             diasParaExibir = dias;
         }
 
-        if (diasParaExibir.length===0) tbody.innerHTML += '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>';
+        if (diasParaExibir.length===0) tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="5" style="text-align:center;color:#999;padding:24px;">Nenhum lançamento encontrado para o período.</td></tr>');
 
         diasParaExibir.forEach(dia => {
             const movs = porDia[dia] || [];
@@ -7618,13 +7623,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const dtObj = new Date(parseInt(partes[0],10), parseInt(partes[1],10)-1, parseInt(partes[2],10));
             const diaSemanaIdx = dtObj.getDay();
             const ehFimDeSemana = diaSemanaIdx===0 || diaSemanaIdx===6;
-            tbody.innerHTML += '<tr class="'+(ehFimDeSemana?'linha-fim-semana':'')+'">' +
+            tbody.insertAdjacentHTML('beforeend', '<tr class="'+(ehFimDeSemana?'linha-fim-semana':'')+'">' +
                 '<td><b>'+fmtData(dia)+'</b> <span class="dia-semana">'+nomesDiaSemana[diaSemanaIdx]+'</span></td>' +
                 '<td style="text-align:right;color:#28a745;font-weight:600;">'+(credDia>0?fmtVal(credDia):'-')+'</td>' +
                 '<td style="text-align:right;color:#dc3545;font-weight:600;">'+(debDia>0?fmtVal(debDia):'-')+'</td>' +
                 '<td style="text-align:right;font-weight:700;color:'+corDia+';">'+(saldoDia!==0?fmtVal(Math.abs(saldoDia))+(saldoDia<0?' ▼':' ▲'):'-')+'</td>' +
                 '<td style="text-align:right;font-weight:700;color:'+corAcum+';">'+fmtVal(acumulado)+'</td>' +
-                '</tr>';
+                '</tr>');
         });
         const fluxo=totalCred-totalDeb;
         tfoot.innerHTML = '<tr style="font-weight:700;background:#333;color:white;">' +
@@ -8511,10 +8516,10 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
         function addSectionHeader(label, cor, bgCor) {
             var cols = visao === 'mensal' ? 12 : 1;
-            tbody.innerHTML += '<tr style="background:' + bgCor + ';border-top:3px solid ' + cor + ';">'
+            tbody.insertAdjacentHTML('beforeend', '<tr style="background:' + bgCor + ';border-top:3px solid ' + cor + ';">'
                 + '<td style="font-weight:800;font-size:12px;padding:9px 10px;color:' + cor + ';position:sticky;left:0;background:' + bgCor + ';letter-spacing:0.3px;">' + label + '</td>'
                 + Array(cols+1).fill('<td style="border-bottom:1px solid ' + cor + '20;"></td>').join('')
-                + '</tr>';
+                + '</tr>');
         }
 
         function addCatRow(nome, data, cor, bgEven, bgOdd, idx, dIdx) {
@@ -8526,23 +8531,23 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                   }).join('')
                 : '<td' + clicDFC(dIdx, -1, data.total) + ' style="text-align:right;padding:5px 8px;color:' + (data.total>0?cor:'#ccc') + ';font-weight:600;">'
                     + (data.total>0 ? fmtValFull(data.total) : '—') + '</td>';
-            tbody.innerHTML += '<tr style="background:' + bg + ';">'
+            tbody.insertAdjacentHTML('beforeend', '<tr style="background:' + bg + ';">'
                 + '<td style="padding:6px 10px 6px 22px;font-size:12px;font-weight:500;color:#333;position:sticky;left:0;background:' + bg + ';">'
                 + nome + '</td>'
                 + cells
                 + '<td' + clicDFC(dIdx, -1, data.total) + ' style="text-align:right;padding:5px 10px;font-weight:700;color:' + cor + ';">'
                 + fmtValFull(data.total) + '</td>'
-                + '</tr>';
+                + '</tr>');
         }
 
         function addSubtotal(label, valor, cor, bgCor, tipo, dIdx) {
-            tbody.innerHTML += '<tr style="background:' + bgCor + ';border-top:2px solid ' + cor + ';">'
+            tbody.insertAdjacentHTML('beforeend', '<tr style="background:' + bgCor + ';border-top:2px solid ' + cor + ';">'
                 + '<td style="font-weight:800;padding:8px 10px;font-size:12px;color:' + cor + ';position:sticky;left:0;background:' + bgCor + ';">' + label + '</td>'
                 + (visao === 'mensal'
                     ? getSubtotalMeses(tipo, entradasCat, saidasCat, cor, dIdx)
                     : '<td' + clicDFC(dIdx, -1, valor) + ' style="text-align:right;padding:7px 8px;font-weight:700;color:' + cor + ';">' + fmtValFull(valor) + '</td>')
                 + '<td' + clicDFC(dIdx, -1, valor) + ' style="text-align:right;padding:8px 10px;font-weight:800;color:' + cor + ';">' + fmtValFull(valor) + '</td>'
-                + '</tr>';
+                + '</tr>');
         }
 
         function getSubtotalMeses(tipo, entCat, saiCat, cor, dIdx) {
@@ -8587,13 +8592,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                       }).join('')
                     : '<td' + clicDFC(sIdx, -1, d.total) + ' style="text-align:right;padding:4px 8px;font-size:11px;color:' + (d.total>0?'#dc3545':'#ccc') + ';">'
                         + (d.total>0 ? fmtValFull(d.total) : '—') + '</td>';
-                tbody.innerHTML += '<tr style="background:#fffbfb;">'
+                tbody.insertAdjacentHTML('beforeend', '<tr style="background:#fffbfb;">'
                     + '<td style="padding:4px 10px 4px 30px;font-size:11px;color:#999;position:sticky;left:0;background:#fffbfb;">'
                     + '<span style="color:#ddd;margin-right:5px;">↳</span>' + subNome + '</td>'
                     + cells
                     + '<td' + clicDFC(sIdx, -1, d.total) + ' style="text-align:right;padding:4px 10px;font-size:11px;font-weight:600;color:#dc3545;">'
                     + fmtValFull(d.total) + '</td>'
-                    + '</tr>';
+                    + '</tr>');
             });
         });
         addSubtotal('(=) TOTAL SAIDAS', totalSaidas, '#dc3545', '#fde8e8', 'sai', dfcReg('Total Saídas', null, function(){ return true; }));
@@ -8719,13 +8724,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const liqCor = liq >= 0 ? '#28a745' : '#dc3545';
             const acuCor = acumulado >= 0 ? '#28a745' : '#dc3545';
             const hasData = ent > 0 || sai > 0;
-            tbody.innerHTML += `<tr style="${hasData ? '' : 'color:#ccc;'}">
+            tbody.insertAdjacentHTML('beforeend', `<tr style="${hasData ? '' : 'color:#ccc;'}">
                 <td style="font-weight:${hasData?'600':'400'};">${nome}</td>
                 <td style="color:${hasData?'#28a745':'#ccc'};">${ent > 0 ? fmtBRL(ent) : '-'}</td>
                 <td style="color:${hasData?'#dc3545':'#ccc'};">${sai > 0 ? fmtBRL(sai) : '-'}</td>
                 <td style="color:${hasData?liqCor:'#ccc'};font-weight:${hasData?'600':'400'};">${hasData ? fmtValSig(liq) : '-'}</td>
                 <td style="color:${acuCor};font-weight:600;">${fmtValSig(acumulado)}</td>
-            </tr>`;
+            </tr>`);
         });
         const totLiq = totEnt - totSai;
         document.getElementById('dfcMensalTotalEnt').textContent = fmtBRL(totEnt);
@@ -9009,32 +9014,32 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         }
 
         // ── Seção ENTRADAS ──
-        tbody.innerHTML += linhaSeparador('ENTRADAS DE CAIXA');
+        tbody.insertAdjacentHTML('beforeend', linhaSeparador('ENTRADAS DE CAIXA'));
         if (Object.keys(catRec).length === 0) {
-            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>';
+            tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum recebimento no período</td></tr>');
         } else {
             Object.entries(catRec).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
-                tbody.innerHTML += linhaTabela(cat, arr, { indent: true, drill: _drillDe(cat, c => _catNomeRec(c) === cat, null) });
+                tbody.insertAdjacentHTML('beforeend', linhaTabela(cat, arr, { indent: true, drill: _drillDe(cat, c => _catNomeRec(c) === cat, null) }));
             });
         }
-        tbody.innerHTML += linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true, drill: _drillDe('Total Entradas', () => true, null) });
+        tbody.insertAdjacentHTML('beforeend', linhaTabela('= Total Entradas', totEntMes, { bg: '#d4edda', fc: '#155724', bold: true, drill: _drillDe('Total Entradas', () => true, null) }));
 
         // ── Seção SAÍDAS ──
-        tbody.innerHTML += linhaSeparador('SAÍDAS DE CAIXA');
+        tbody.insertAdjacentHTML('beforeend', linhaSeparador('SAÍDAS DE CAIXA'));
         if (Object.keys(catPag).length === 0) {
-            tbody.innerHTML += '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum pagamento no período</td></tr>';
+            tbody.insertAdjacentHTML('beforeend', '<tr><td colspan="' + (13+1) + '" style="padding:6px 10px;color:#aaa;font-size:12px;">Nenhum pagamento no período</td></tr>');
         } else {
             Object.entries(catPag).sort((a,b) => b[1].reduce((s,v)=>s+v,0) - a[1].reduce((s,v)=>s+v,0)).forEach(([cat, arr]) => {
                 const negArr = arr.map(v => -v);
-                tbody.innerHTML += linhaTabela(cat, negArr, { indent: true, drill: _drillDe(cat, null, c => _catNomePag(c) === cat) });
+                tbody.insertAdjacentHTML('beforeend', linhaTabela(cat, negArr, { indent: true, drill: _drillDe(cat, null, c => _catNomePag(c) === cat) }));
             });
         }
-        tbody.innerHTML += linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true, drill: _drillDe('Total Saídas', null, () => true) });
+        tbody.insertAdjacentHTML('beforeend', linhaTabela('= Total Saídas', totSaiMes.map(v => -v), { bg: '#f8d7da', fc: '#721c24', bold: true, drill: _drillDe('Total Saídas', null, () => true) }));
 
         // ── Saldo mensal e acumulado ──
-        tbody.innerHTML += linhaSeparador('SALDO');
+        tbody.insertAdjacentHTML('beforeend', linhaSeparador('SALDO'));
         const _idxSaldo = _drillDe('Saldo Mensal (Entradas - Saídas)', () => true, () => true);
-        tbody.innerHTML += linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true, drill: _idxSaldo });
+        tbody.insertAdjacentHTML('beforeend', linhaTabela('Saldo Mensal (Entradas - Saídas)', saldoMes, { bg: '#f5f5f5', bold: true, drill: _idxSaldo }));
 
         // Saldo Acumulado: cada célula tem fundo e cor próprios (verde/vermelho)
         const labelAcum = usarSaldoReal && saldoRealCaixa !== 0
@@ -9052,11 +9057,11 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         }).join('');
         const totalAcumSinal = totalAcum > 0 ? '+' : '';
         const totalAcumTxt = totalAcum !== 0 ? 'R$&nbsp;' + totalAcumSinal + totalAcum.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
-        tbody.innerHTML += '<tr style="border-top:2px solid #aaa;">'
+        tbody.insertAdjacentHTML('beforeend', '<tr style="border-top:2px solid #aaa;">'
             + '<td style="padding:5px 8px;font-weight:700;">' + labelAcum + '</td>'
             + celulaAcum
             + '<td style="text-align:right;padding:5px 8px;font-weight:800;font-size:13px;background:' + bgAcumTotal + ';color:' + corAcumTotal + ';">' + totalAcumTxt + '</td>'
-            + '</tr>';
+            + '</tr>');
 
         // Mostrar card
         const cardMensal = document.getElementById('cardFCPMensal');
@@ -9655,7 +9660,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             const comp = item.competencia || '';
             const compTxt = /^\d{4}-\d{2}-\d{2}$/.test(comp) ? comp.slice(8, 10) + '/' + comp.slice(5, 7) + '/' + comp.slice(0, 4) : (/^\d{4}-\d{2}$/.test(comp) ? comp.slice(5, 7) + '/' + comp.slice(0, 4) : (comp || '-'));
             const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-            tbody.innerHTML += '<tr>' +
+            tbody.insertAdjacentHTML('beforeend', '<tr>' +
                 '<td style="white-space:nowrap;font-weight:600;">' + compTxt + '</td>' +
                 '<td><div class="pl-desc">' + esc(item.descricao || '-') + '</div>' + (item.centro && item.centro !== '-' ? '<div class="pl-meta">Centro: ' + esc(item.centro) + '</div>' : '') + '</td>' +
                 '<td>' + esc(item.catNome || '-') + '</td>' +
@@ -9663,7 +9668,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 '<td>' + situ + '</td>' +
                 '<td class="r pl-val" style="color:' + (val < 0 || item.fonte === 'pagar' ? '#dc3545' : '#28a745') + ';">R$ ' + Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
                 '<td class="r"><div class="pl-acts">' + acoes + '</div></td>' +
-            '</tr>';
+            '</tr>');
         });
         if (lista.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="pl-vazio">' + (_dreDetItens.length ? 'Nenhum lançamento com essa busca.' : 'Nenhum lançamento neste período') + '</td></tr>';
         const info = document.getElementById('dreDetInfo');
@@ -9928,12 +9933,12 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
             const celPct = '<td class="dre-col-total dre-col-pct" style="text-align:right;padding:5px 8px;font-weight:600;color:#777;">' + pctRB(total) + '</td>';
 
-            tbody.innerHTML += '<tr style="' + rowBg + rowFc + bold + '">' +
+            tbody.insertAdjacentHTML('beforeend', '<tr style="' + rowBg + rowFc + bold + '">' +
                 '<td style="padding:5px 8px;' + bold + '">' + linha.label + '</td>' +
                 vals.map((v, m) => celMes(v, m)).join('') +
                 celTotal +
                 celPct +
-                '</tr>';
+                '</tr>');
 
             // Subcategorias expandidas (clicáveis também)
             if (linha.expandir && linha.expandir.length > 0) {
@@ -9946,13 +9951,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         const celValPct = `<td data-mes="${m}" class="dre-col-pct" style="text-align:right;padding:4px 4px;font-size:10px;color:#bbb;">${v > 0 ? pctMes(v, m) : '-'}</td>`;
                         return celVal + celValPct;
                     };
-                    tbody.innerHTML += '<tr style="background:#fafafa;">' +
+                    tbody.insertAdjacentHTML('beforeend', '<tr style="background:#fafafa;">' +
                         '<td style="padding:4px 8px 4px 22px;font-size:11px;color:#888;">' +
                         '<span style="color:#bbb;margin-right:4px;">\u21b3</span>' + nomeSub + '</td>' +
                         mesesSub.map((v, m) => celMesSub(v, m)).join('') +
                         `<td class="dre-col-total" style="text-align:right;padding:4px 8px;font-size:11px;font-weight:600;color:${linha.ehReceita ? '#28a745' : '#dc3545'};cursor:pointer;" onclick="abrirDetalheMensalDRE('${linha.expandirTipo}',${subIdx},-1)" title="Clique para ver os lançamentos do ano">` + fmtV(linha.ehReceita ? totalSub : -totalSub) + '</td>' +
                         '<td class="dre-col-total dre-col-pct" style="text-align:right;padding:4px 8px;font-size:11px;color:#aaa;">' + pctRB(totalSub) + '</td>' +
-                        '</tr>';
+                        '</tr>');
                 });
             }
         });
@@ -14204,7 +14209,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
     //    - Consultas GET iguais feitas ao mesmo tempo viram uma só.
     //    - O resultado vale por 20s; qualquer gravação (POST/PATCH/DELETE) limpa o cache.
     // =====================================================================
-    const _cacheBD = new Map(), _cacheBDTTL = 20000;
+    const _cacheBD = new Map(), _cacheBDTTL = 60000;
     let _bdPendentes = 0;
     function _cacheLimpar() { _cacheBD.clear(); }
     function _barraCarregando(delta) {
@@ -14510,6 +14515,64 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
     // INSTALAÇÃO
     // =====================================================================
     function _instalarMelhorias() {
+    // =====================================================================
+    // TABELAS GRANDES: desenha as primeiras linhas na hora e o resto conforme rola
+    // (o navegador não precisa calcular milhares de linhas para trocar de tela)
+    // =====================================================================
+    const _LAZY_INI = 150, _LAZY_PASSO = 250;
+    function _lazyAtualizarSentinela(tb) {
+        const sent = tb._lazySent; if (!sent) return;
+        const vis = tb.rows.length - 1, tot = vis + (tb._lazyResto ? tb._lazyResto.length : 0);
+        sent.querySelector('.lz-txt').textContent = 'Mostrando ' + vis + ' de ' + tot + ' linhas — role para carregar mais';
+    }
+    function _lazyMais(tb, qtd) {
+        if (!tb._lazyResto || !tb._lazyResto.length) return;
+        tb._lazyIgnorar = true;
+        const lote = tb._lazyResto.splice(0, qtd == null ? tb._lazyResto.length : qtd);
+        const frag = document.createDocumentFragment(); lote.forEach(r => frag.appendChild(r));
+        tb.insertBefore(frag, tb._lazySent);
+        if (!tb._lazyResto.length) { if (tb._lazyIO) tb._lazyIO.disconnect(); tb._lazySent.remove(); tb._lazySent = null; tb._lazyResto = null; }
+        else _lazyAtualizarSentinela(tb);
+        queueMicrotask(() => { tb._lazyIgnorar = false; });
+        if (typeof _ajustarTopoTabelas === 'function') requestAnimationFrame(_ajustarTopoTabelas);
+    }
+    function _lazyAplicar(tb) {
+        if (tb._lazyIgnorar) return;
+        if (tb._lazyIO) { tb._lazyIO.disconnect(); tb._lazyIO = null; }
+        tb._lazyResto = null; tb._lazySent = null;
+        const rows = Array.prototype.slice.call(tb.rows).filter(r => !r.classList.contains('lz-sent'));
+        tb.querySelectorAll('tr.lz-sent').forEach(r => r.remove());
+        if (rows.length <= _LAZY_INI + 50) return;
+        tb._lazyIgnorar = true;
+        const resto = rows.slice(_LAZY_INI);
+        resto.forEach(r => r.remove());
+        const ncol = Math.max(1, ...rows.slice(0, 5).map(r => r.cells.length));
+        const sent = document.createElement('tr'); sent.className = 'lz-sent';
+        sent.innerHTML = '<td colspan="' + ncol + '"><span class="lz-txt"></span> <button type="button" class="lz-todas">Mostrar todas</button></td>';
+        tb.appendChild(sent);
+        tb._lazyResto = resto; tb._lazySent = sent;
+        sent.querySelector('.lz-todas').addEventListener('click', () => _lazyMais(tb));
+        _lazyAtualizarSentinela(tb);
+        if ('IntersectionObserver' in window) {
+            tb._lazyIO = new IntersectionObserver(ent => { if (ent.some(e => e.isIntersecting)) _lazyMais(tb, _LAZY_PASSO); }, { rootMargin: '600px 0px' });
+            tb._lazyIO.observe(sent);
+        }
+        queueMicrotask(() => { tb._lazyIgnorar = false; });
+    }
+    // Completa todas as linhas (usado antes de imprimir/exportar a partir da tabela)
+    function _lazyTudo() { document.querySelectorAll('tbody').forEach(tb => { if (tb._lazyResto) _lazyMais(tb); }); }
+    window._lazyTudo = _lazyTudo;
+    ['tabelaPendentesPagar', 'tabelaPendentesReceber', 'tabelaPagas', 'tabelaRecebidas', 'tabelaChequesAberto', 'tabelaChequesCompensados', 'tabelaFornecedores', 'tabelaClientes', 'tabelaProdutos', 'tabelaCategorias'].forEach(id => {
+        const t = document.getElementById(id); const tb = t && t.tBodies[0];
+        if (!tb) return;
+        new MutationObserver(() => _lazyAplicar(tb)).observe(tb, { childList: true });
+        _lazyAplicar(tb);
+    });
+    ['gerarPDF', '_gerarPDFTabelaColorida', '_exportarTabelaColoridaXLSX', 'exportarTabelaPDFPro', 'exportarTabelaExcelPro', 'gerarPDFChequesAberto'].forEach(nome => {
+        const orig = window[nome];
+        if (typeof orig === 'function') window[nome] = function () { _lazyTudo(); return orig.apply(this, arguments); };
+    });
+
     // Cabeçalho fixo (só a tabela rola) nas listas de contas e cheques
     ['tabelaPagas', 'tabelaRecebidas', 'tabelaPendentesReceber', 'tabelaPendentesPagar', 'tabelaChequesAberto', 'tabelaChequesCompensados'].forEach(id => {
         const t = document.getElementById(id);
