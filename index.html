@@ -2568,6 +2568,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                             <tr>
                                 <th>Bom Para</th>
                                 <th>Fornecedor</th>
+                                <th>Categoria</th>
                                 <th>Banco</th>
                                 <th>Data Entrada</th>
                                 <th>Valor</th>
@@ -2635,6 +2636,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                             <tr>
                                 <th>Bom Para</th>
                                 <th>Fornecedor</th>
+                                <th>Categoria</th>
                                 <th>Banco</th>
                                 <th>Data Entrada</th>
                                 <th>Data Compensação</th>
@@ -4050,6 +4052,11 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 <select id="bancoCheque" required><option value="">Selecione...</option></select>
             </div>
             <div class="form-group">
+                <label>Categoria</label>
+                <select id="categoriaCheque"><option value="">Selecione...</option></select>
+                <small style="color:#888;font-size:11px;">Com categoria, o cheque entra no DRE, nas análises por categoria/grupo e nos fluxos de caixa.</small>
+            </div>
+            <div class="form-group">
                 <label>Número do Cheque</label>
                 <input type="text" id="numeroCheque" placeholder="Opcional">
             </div>
@@ -4371,7 +4378,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
     function atualizarSelectCategorias() {
         // IDs de todos os selects que recebem lista de categorias
-        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat', 'filtroCategoriaPaga'];
+        const ids = ['categoriaProduto', 'categoriaPagar', 'filtroCategoriaPagar', 'editLancCategoria', 'filtroCategoriaAnaliseCat', 'filtroCategoriaPaga', 'categoriaCheque'];
         ids.forEach(id => {
             const select = document.getElementById(id);
             if (!select) return;
@@ -7731,6 +7738,65 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         return d ? new Date(d + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
     }
 
+    // Select de categoria editável direto na tabela (Cheques em Aberto / Compensados)
+    function _selCategoriaCheque(cheque) {
+        const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+        const cats = (dadosCache.categorias || []).filter(c => c.ativo !== false || c.id === cheque.categoria_id)
+            .slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        const semCat = !cheque.categoria_id;
+        return '<select class="sel-cat-cheque" title="Alterar categoria" onchange="alterarCategoriaCheque(' + cheque.id + ', this)"' +
+            ' style="min-width:150px;max-width:220px;padding:4px 6px;font-size:12px;border-radius:6px;border:1px solid ' + (semCat ? '#f0ad4e' : '#ccc') + ';background:' + (semCat ? '#fff8e6' : '#fff') + ';">' +
+            '<option value="">— Sem categoria —</option>' +
+            cats.map(c => '<option value="' + c.id + '"' + (c.id === cheque.categoria_id ? ' selected' : '') + '>' + esc(c.nome) + '</option>').join('') +
+            '</select>';
+    }
+
+    async function alterarCategoriaCheque(id, sel) {
+        const cheque = (dadosCache.cheques || []).find(c => c.id === id);
+        const anterior = cheque ? (cheque.categoria_id || '') : '';
+        const novo = sel.value ? parseInt(sel.value) : null;
+        sel.disabled = true;
+        const resultado = await fetchSupabase('cheques', 'PATCH', { categoria_id: novo }, 'id=eq.' + id);
+        sel.disabled = false;
+        if (resultado === null) {
+            sel.value = anterior;
+            return;
+        }
+        if (cheque) cheque.categoria_id = novo;
+        sel.style.borderColor = novo ? '#ccc' : '#f0ad4e';
+        sel.style.background = novo ? '#fff' : '#fff8e6';
+        const alertId = cheque && cheque.status === 'compensado' ? 'alertChequesCompensados' : 'alertChequesAberto';
+        showAlert('Categoria do cheque atualizada!', alertId, 'success');
+    }
+
+    // Cheques COM categoria entram nos relatórios (DRE, Análise por Categoria/Grupo DRE, DFC,
+    // Fluxo Diário e Fluxo Projetado) como uma saída, no mesmo formato de uma conta a pagar:
+    // competência = data de entrada · vencimento = bom para · pagamento = data de compensação.
+    function _chequeComoContaPagar(ch) {
+        return {
+            id: ch.id, _cheque: true,
+            descricao: 'Cheque' + (ch.numero ? ' Nº ' + ch.numero : '') + (ch.observacao ? ' — ' + ch.observacao : ''),
+            fornecedor_id: ch.fornecedor_id, categoria_id: ch.categoria_id, banco_id: ch.banco_id,
+            valor: ch.valor,
+            data_competencia: ch.data_entrada || ch.bom_para,
+            data_vencimento: ch.bom_para,
+            data_pagamento: ch.status === 'compensado' ? (ch.data_compensacao || ch.bom_para) : null,
+            status: ch.status === 'compensado' ? 'pago' : 'pendente',
+            total_parcelas: 1, parcela_atual: 1
+        };
+    }
+
+    async function _fetchPagarComCheques() {
+        const [pag, chq] = await Promise.all([
+            fetchSupabase('contas_a_pagar', 'GET'),
+            fetchSupabase('cheques', 'GET', null, 'order=bom_para.asc')
+        ]);
+        if (pag === null || pag === undefined) return pag;
+        if (!Array.isArray(chq)) return pag;
+        dadosCache.cheques = chq;
+        return pag.concat(chq.filter(c => c.categoria_id).map(_chequeComoContaPagar));
+    }
+
     async function carregarCheques() {
         const cheques = await fetchSupabase('cheques', 'GET', null, 'order=bom_para.asc');
         if (!cheques) return;
@@ -7779,7 +7845,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
 
         if (lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque em aberto</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Nenhum cheque em aberto</td></tr>';
             return;
         }
 
@@ -7791,6 +7857,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             tr.innerHTML =
                 '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
                 '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + _selCategoriaCheque(cheque) + '</td>' +
                 '<td>' + (banco ? banco.nome : '-') + '</td>' +
                 '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
                 '<td>' + _fmtMoedaCheque(cheque.valor) + '</td>' +
@@ -7901,7 +7968,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         lista = lista.slice().sort((a, b) => (b.data_compensacao || '').localeCompare(a.data_compensacao || ''));
 
         if (lista.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;">Nenhum cheque compensado</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999;">Nenhum cheque compensado</td></tr>';
             return;
         }
 
@@ -7912,6 +7979,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             tr.innerHTML =
                 '<td>' + _dataFmtCheque(cheque.bom_para) + '</td>' +
                 '<td>' + (forn ? forn.nome : '-') + (cheque.numero ? ' <small style="color:#999;">(Nº ' + cheque.numero + ')</small>' : '') + '</td>' +
+                '<td>' + _selCategoriaCheque(cheque) + '</td>' +
                 '<td>' + (banco ? banco.nome : '-') + '</td>' +
                 '<td>' + _dataFmtCheque(cheque.data_entrada) + '</td>' +
                 '<td>' + _dataFmtCheque(cheque.data_compensacao) + '</td>' +
@@ -7931,6 +7999,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         atualizarSelectBancosModal('bancoCheque');
         document.getElementById('fornecedorCheque').value = '';
         document.getElementById('bancoCheque').value = '';
+        document.getElementById('categoriaCheque').value = '';
         document.getElementById('bomParaCheque').value = '';
         document.getElementById('dataEntradaCheque').value = new Date().toISOString().slice(0, 10);
         document.getElementById('valorCheque').value = '';
@@ -7947,6 +8016,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         document.getElementById('numeroCheque').value = cheque.numero || '';
         document.getElementById('fornecedorCheque').value = cheque.fornecedor_id || '';
         document.getElementById('bancoCheque').value = cheque.banco_id || '';
+        document.getElementById('categoriaCheque').value = cheque.categoria_id || '';
         document.getElementById('bomParaCheque').value = cheque.bom_para || '';
         document.getElementById('dataEntradaCheque').value = cheque.data_entrada || '';
         document.getElementById('valorCheque').value = cheque.valor || '';
@@ -7971,6 +8041,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             numero: document.getElementById('numeroCheque').value || null,
             fornecedor_id: parseInt(fornecedorId),
             banco_id: parseInt(bancoId),
+            categoria_id: document.getElementById('categoriaCheque').value ? parseInt(document.getElementById('categoriaCheque').value) : null,
             bom_para: bomPara,
             data_entrada: dataEntrada,
             valor: parseFloat(valor),
@@ -7989,6 +8060,15 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             showAlert('Cheque salvo com sucesso!', 'alertChequesAberto', 'success');
             closeModal('modalCheque');
             await carregarCheques();
+            // Se o cheque foi editado a partir do detalhe de um relatório (DRE, análises, fluxos), atualiza a tela de origem
+            const mPl = document.getElementById('modalPainelLanc');
+            const mDet = document.getElementById('modalDetalheDRE');
+            if (mPl && mPl.classList.contains('active') && typeof _plPosAcao === 'function') {
+                await _plPosAcao();
+            } else if (mDet && mDet.classList.contains('active') && typeof _detalheAnaliseReload === 'function') {
+                const fn = _detalheAnaliseReload; mDet.classList.remove('active');
+                try { await fn(); } catch (e) { console.error(e); }
+            }
         }
     }
 
@@ -8341,7 +8421,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
     async function carregarDFC() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
+        const contasPagar   = await _fetchPagarComCheques();
         if (!contasReceber || !contasPagar) return;
 
         const filtroAno = document.getElementById('filtroAnoDFC');
@@ -8849,7 +8929,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
     async function carregarFCP() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar   = await fetchSupabase('contas_a_pagar',   'GET');
+        const contasPagar   = await _fetchPagarComCheques();
         if (!contasReceber || !contasPagar) return;
 
         const filtroAno = document.getElementById('filtroAnoFCP');
@@ -9315,7 +9395,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         // Buscar lançamentos DRE diretos + contas recebidas/pagas por competência
         const lancsDRE = await fetchSupabase('lancamentos_dre', 'GET');
         const contasRec = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        const contasPag = await _fetchPagarComCheques();
         if (contasRec === null || contasPag === null) return;
 
         const filtroAno = document.getElementById('filtroAnoDRE');
@@ -9421,7 +9501,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             porGrupo[grupo].itens.push({
                 id: c.id, descricao: c.descricao, valor: c.valor, competencia: comp.substring(0,7),
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
-                catNome: cat ? cat.nome : 'Custo', fonte: 'pagar'
+                catNome: cat ? cat.nome : 'Custo', fonte: c._cheque ? 'cheque' : 'pagar'
             });
         });
 
@@ -9643,6 +9723,13 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 else if ((conta.data_vencimento || '') < hojeS) situ = '<span class="pl-badge atr">Atrasado</span>';
                 else situ = '<span class="pl-badge pend">Pendente</span>';
                 if (conta && !quit) baixa = '<button onclick="_dreDetBaixar(' + item.id + ',\'' + item.fonte + '\')" class="pl-btn pay" title="' + (item.fonte === 'receber' ? 'Confirmar recebimento' : 'Confirmar pagamento') + '">' + (item.fonte === 'receber' ? '✅ Receber' : '💳 Pagar') + '</button>';
+            } else if (item.fonte === 'cheque') {
+                const chq = (dadosCache.cheques || []).find(c => c.id === item.id);
+                const hojeS = new Date().toISOString().slice(0, 10);
+                if (!chq) situ = '<span style="color:#aaa;">—</span>';
+                else if (chq.status === 'compensado') situ = '<span class="pl-badge ok">Cheque compensado</span>';
+                else if ((chq.bom_para || '') < hojeS) situ = '<span class="pl-badge atr">Cheque vencido</span>';
+                else situ = '<span class="pl-badge pend">Cheque em aberto</span>';
             }
             let acoes = '<span style="color:#aaa;font-size:11px;">—</span>';
             if (item.id != null) {
@@ -9655,6 +9742,8 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 } else if (item.fonte === 'pagar') {
                     acoes = '<button onclick="editarLancamento(' + item.id + ', \'pagar\')" class="pl-btn">✏️ Editar</button>' + baixa +
                             '<button onclick="deletarConta(' + item.id + ', \'contas_a_pagar\')" class="pl-btn del" title="Excluir">🗑️</button>';
+                } else if (item.fonte === 'cheque') {
+                    acoes = '<button onclick="editarCheque(' + item.id + ')" class="pl-btn" title="Editar cheque">✏️ Editar</button>';
                 }
             }
             const comp = item.competencia || '';
@@ -9666,7 +9755,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 '<td>' + esc(item.catNome || '-') + '</td>' +
                 '<td>' + esc(item.parte || '-') + '</td>' +
                 '<td>' + situ + '</td>' +
-                '<td class="r pl-val" style="color:' + (val < 0 || item.fonte === 'pagar' ? '#dc3545' : '#28a745') + ';">R$ ' + Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+                '<td class="r pl-val" style="color:' + (val < 0 || item.fonte === 'pagar' || item.fonte === 'cheque' ? '#dc3545' : '#28a745') + ';">R$ ' + Math.abs(val).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
                 '<td class="r"><div class="pl-acts">' + acoes + '</div></td>' +
             '</tr>');
         });
@@ -9768,7 +9857,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 id: c.id, descricao: c.descricao, valor: c.valor, competencia: dataRef,
                 catNome: cat ? cat.nome : 'Custo',
                 parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
-                fonte: 'pagar'
+                fonte: c._cheque ? 'cheque' : 'pagar'
             });
         });
 
@@ -9827,7 +9916,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 cpvSubcats[nome].valores[m] += parseFloat(c.valor || 0);
                 cpvSubcats[nome].itens[m].push({
                     id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
-                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: c._cheque ? 'cheque' : 'pagar'
                 });
             }
         });
@@ -9863,7 +9952,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 daSubcats[nome].valores[m] += parseFloat(c.valor || 0);
                 daSubcats[nome].itens[m].push({
                     id: c.id, descricao: c.descricao, valor: c.valor, competencia: c.data_competencia, catNome: nome,
-                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: 'pagar'
+                    parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-', fonte: c._cheque ? 'cheque' : 'pagar'
                 });
             }
         });
@@ -10282,7 +10371,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     }
 
     async function carregarAnaliseCategoria() {
-        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        const contasPag = await _fetchPagarComCheques();
         if (contasPag === null) return;
 
         const anoSel = document.getElementById('filtroAnoAnaliseCat').value;
@@ -10329,7 +10418,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             pivot[nome].itens[m].push({
                 id: c.id, descricao: c.descricao, valor: c.valor, competencia: (c.data_competencia || '').substring(0, 7),
                 catNome: nome, parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
-                centro: c.centro || '-', fonte: 'pagar'
+                centro: c.centro || '-', fonte: c._cheque ? 'cheque' : 'pagar'
             });
         });
 
@@ -10536,7 +10625,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         filtrarCategoriasGrupoDRE();
 
         const contasRec = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPag = await fetchSupabase('contas_a_pagar', 'GET');
+        const contasPag = await _fetchPagarComCheques();
         if (contasRec === null || contasPag === null) return;
 
         const grupoSel = document.getElementById('filtroGrupoAnaliseDRE').value;
@@ -10574,7 +10663,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                     id: c.id, descricao: c.descricao, valor: c.valor, competencia: (c.data_competencia || '').substring(0, 7),
                     catNome: cat ? cat.nome : 'Sem Categoria',
                     parte: (dadosCache.fornecedores.find(x => x.id === c.fornecedor_id) || {}).nome || '-',
-                    centro: c.centro || '-', fonte: 'pagar'
+                    centro: c.centro || '-', fonte: c._cheque ? 'cheque' : 'pagar'
                 }
             });
         });
@@ -11559,7 +11648,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
     async function carregarFluxoDiario() {
         const contasReceber = await fetchSupabase('contas_a_receber', 'GET');
-        const contasPagar = await fetchSupabase('contas_a_pagar', 'GET');
+        const contasPagar = await _fetchPagarComCheques();
         if (contasReceber === null || contasPagar === null) return;
 
         // Na primeira abertura, posiciona no mês/ano atual
@@ -12389,12 +12478,12 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         if (!_pl) return;
         const [rec, pag] = await Promise.all([
             _pl.filtroRec ? fetchSupabase('contas_a_receber', 'GET') : Promise.resolve([]),
-            _pl.filtroPag ? fetchSupabase('contas_a_pagar', 'GET') : Promise.resolve([])
+            _pl.filtroPag ? _fetchPagarComCheques() : Promise.resolve([])
         ]);
         if (!_pl) return;
         const itens = [];
         (rec || []).filter(c => _pl.filtroRec(c)).forEach(c => itens.push(_plItem(c, 'receber')));
-        (pag || []).filter(c => _pl.filtroPag(c)).forEach(c => itens.push(_plItem(c, 'pagar')));
+        (pag || []).filter(c => _pl.filtroPag(c)).forEach(c => itens.push(_plItem(c, c._cheque ? 'cheque' : 'pagar')));
         itens.sort((a, b) => (a.ordem || '').localeCompare(b.ordem || '') || a.descricao.localeCompare(b.descricao));
         _pl.itens = itens;
         _plRender();
@@ -12433,7 +12522,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         const q = (document.getElementById('plBusca').value || '').trim().toLowerCase();
         return _pl.itens.filter(i =>
             (_pl.status === 'todos' || (_pl.status === 'ok' ? i.quitado : !i.quitado)) &&
-            (_pl.tipo === 'todos' || i.fonte === _pl.tipo) &&
+            (_pl.tipo === 'todos' || (i.fonte === 'cheque' ? 'pagar' : i.fonte) === _pl.tipo) &&
             (!q || [i.descricao, i.categoria, i.parte, i.banco].join(' ').toLowerCase().includes(q))
         );
     }
@@ -12462,7 +12551,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
                 const badge = i.quitado
                     ? '<span class="pl-badge ok">' + (ehRec ? 'Recebido' : 'Pago') + '</span>'
                     : (i.atrasado ? '<span class="pl-badge atr">Atrasado</span>' : '<span class="pl-badge pend">Pendente</span>');
-                const acaoBaixa = i.quitado
+                const acaoBaixa = i.fonte === 'cheque' ? '' : i.quitado
                     ? '<button class="pl-btn rev" onclick="_plAcao(\'estornar\',' + i.id + ',\'' + i.fonte + '\')" title="Voltar para pendente">↩ Estornar</button>'
                     : '<button class="pl-btn pay" onclick="_plAcao(\'baixar\',' + i.id + ',\'' + i.fonte + '\')" title="' + (ehRec ? 'Confirmar recebimento' : 'Confirmar pagamento') + '">' + (ehRec ? '✅ Receber' : '💳 Pagar') + '</button>';
                 return '<tr>' +
@@ -12476,9 +12565,11 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
                     '<td>' + badge + '</td>' +
                     '<td class="r pl-val" style="color:' + (ehRec ? '#28a745' : '#dc3545') + ';">' + (ehRec ? '' : '-') + _plMoeda(i.valor) + '</td>' +
                     '<td class="r"><div class="pl-acts">' +
-                        '<button class="pl-btn" onclick="_plAcao(\'editar\',' + i.id + ',\'' + i.fonte + '\')" title="Editar lançamento">✏️ Editar</button>' +
-                        acaoBaixa +
-                        '<button class="pl-btn del" onclick="_plAcao(\'excluir\',' + i.id + ',\'' + i.fonte + '\')" title="Excluir lançamento">🗑️</button>' +
+                        (i.fonte === 'cheque'
+                            ? '<button class="pl-btn" onclick="editarCheque(' + i.id + ')" title="Editar cheque">✏️ Editar</button>'
+                            : '<button class="pl-btn" onclick="_plAcao(\'editar\',' + i.id + ',\'' + i.fonte + '\')" title="Editar lançamento">✏️ Editar</button>' +
+                              acaoBaixa +
+                              '<button class="pl-btn del" onclick="_plAcao(\'excluir\',' + i.id + ',\'' + i.fonte + '\')" title="Excluir lançamento">🗑️</button>') +
                     '</div></td>' +
                 '</tr>';
             }).join('');
