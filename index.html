@@ -1030,6 +1030,24 @@ html[data-tema="escuro"] .lz-todas { background: var(--esc-sup); }
 html[data-tema="escuro"] .ap-slide-rot { color: var(--esc-muted); }
 /* ================= DASHBOARD DE CHEQUES ================= */
 #modalPainelCheques { z-index: 999; }
+/* ================= TELAS COMPACTAS (Cheques em Aberto/Compensados, Contas Pagas/Recebidas) ================= */
+.pg-compacta .dashboard-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px !important; }
+.pg-compacta .stat-card { padding: 8px 14px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; }
+.pg-compacta .stat-card .stat-label { margin: 0; font-size: 12px; white-space: nowrap; }
+.pg-compacta .stat-card .stat-value { font-size: 18px !important; line-height: 1.2; }
+.pg-compacta .stat-card .stat-change { margin: 0; font-size: 11px; }
+.pg-compacta .filter-container { padding: 8px 14px 10px; margin-bottom: 10px !important; }
+.pg-compacta .flt-head { margin: 0 0 4px; }
+.pg-compacta .flt-head .t { font-size: 12px; }
+.pg-compacta .flt-head .flt-limpar { padding: 2px 8px; font-size: 11px; }
+.pg-compacta .filter-row { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 6px; }
+.pg-compacta .filter-row:last-child { margin-bottom: 0; }
+.pg-compacta .filter-container .form-group label { font-size: 11.5px; margin-bottom: 2px; }
+.pg-compacta .filter-container .form-group input,
+.pg-compacta .filter-container .form-group select { padding: 4px 8px; font-size: 13px; height: 32px; }
+.pg-compacta .filter-container .cb-btn { min-height: 32px; padding: 4px 8px; font-size: 13px; }
+.pg-compacta .filter-container .btn-small { padding: 6px 10px; font-size: 11.5px; white-space: nowrap; }
+.pg-compacta > .card { margin-top: 0; }
 #modalPainelCheques .modal-content.pl-box { max-width: 1200px; width: 96%; padding: 0; overflow: hidden; display: flex; flex-direction: column; max-height: 92vh; border-radius: 12px; }
 .chq-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 16px; }
 .chq-kpi { background: white; border-radius: 10px; padding: 14px 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border-top: 4px solid #6c757d; cursor: pointer; transition: transform .15s, box-shadow .15s; }
@@ -2074,7 +2092,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         </div>
 
         <!-- CONTAS RECEBIDAS -->
-        <div id="contas-recebidas" class="page">
+        <div id="contas-recebidas" class="page pg-compacta">
             <div class="page-header">
                 <h1>Contas Recebidas</h1>
                 <button class="btn btn-secondary" onclick="gerarPDF('recebidas')" style="background:#e67e22;color:white;">📄 PDF</button>
@@ -2174,7 +2192,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         </div>
 
         <!-- CONTAS PAGAS -->
-        <div id="contas-pagas" class="page">
+        <div id="contas-pagas" class="page pg-compacta">
             <div class="page-header">
                 <h1>Contas Pagas</h1>
                 <button class="btn btn-secondary" onclick="gerarPDF('pagas')" style="background:#e67e22;color:white;">📄 PDF</button>
@@ -2508,7 +2526,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             </div>
         </div>
 
-        <div id="chequesAberto" class="page">
+        <div id="chequesAberto" class="page pg-compacta">
             <div class="page-header">
                 <h1>🧾 Cheques em Aberto</h1>
                 <div style="display:flex;gap:8px;">
@@ -2520,7 +2538,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             <div class="alert alert-success" id="alertChequesAberto"></div>
 
             <!-- Cards resumo -->
-            <div class="dashboard-grid" style="margin-bottom:20px;">
+            <div class="dashboard-grid">
                 <div class="stat-card" style="border-left-color:#ffc107;">
                     <div class="stat-label">🟡 Em Aberto</div>
                     <div class="stat-value" id="chequeCardAbertoValor" style="font-size:20px;">R$ 0,00</div>
@@ -2539,7 +2557,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             </div>
 
             <!-- Filtros -->
-            <div class="filter-container" style="margin-bottom:16px;">
+            <div class="filter-container">
                 <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Vencimento - Data Início</label>
@@ -2554,13 +2572,17 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                         <select id="filtroFornecedorChequeAberto" onchange="atualizarTabelaChequesAberto();"><option value="">Todos</option></select>
                     </div>
                     <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaChequeAberto" onchange="atualizarTabelaChequesAberto();"><option value="">Todas</option></select>
+                    </div>
+                    <div class="form-group">
                         <button type="button" class="btn btn-secondary btn-small" onclick="document.getElementById('filtroDataInicioChequeAberto').value='';document.getElementById('filtroDataFimChequeAberto').value='';atualizarTabelaChequesAberto();">Limpar filtro de datas</button>
                     </div>
                 </div>
             </div>
 
             <!-- Tabela -->
-            <div class="card" style="margin-top:16px;">
+            <div class="card">
                 <div class="card-title">📋 Cheques em Aberto</div>
                 <div class="table-container">
                     <table id="tabelaChequesAberto">
@@ -2583,18 +2605,22 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         </div>
 
         <!-- CHEQUES COMPENSADOS -->
-        <div id="chequesCompensados" class="page">
+        <div id="chequesCompensados" class="page pg-compacta">
             <div class="page-header">
                 <h1>✅ Cheques Compensados</h1>
             </div>
 
             <div class="alert alert-success" id="alertChequesCompensados"></div>
 
-            <div class="filter-container" style="margin-bottom:16px;">
+            <div class="filter-container">
                 <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Fornecedor</label>
                         <select id="filtroFornecedorChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todos</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoria</label>
+                        <select id="filtroCategoriaChequeComp" onchange="atualizarTabelaChequesCompensados()"><option value="">Todas</option></select>
                     </div>
                     <div class="form-group">
                         <label>Ano (Compensação)</label>
@@ -2612,8 +2638,6 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                             <option value="11">Novembro</option><option value="12">Dezembro</option>
                         </select>
                     </div>
-                </div>
-                <div class="filter-row" style="align-items:flex-end;">
                     <div class="form-group">
                         <label>Vencimento - Data Início</label>
                         <input type="date" id="filtroDataInicioChequeComp" onchange="atualizarTabelaChequesCompensados()">
@@ -4110,7 +4134,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     let editandoTipo = null;
 
     // ── PERSISTÊNCIA DE FILTROS ──────────────────────────────────────────────
-    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp", "filtroDataInicioChequeAberto", "filtroDataFimChequeAberto", "filtroDataInicioChequeComp", "filtroDataFimChequeComp"];
+    const _FILTER_IDS = ["filtroClienteReceber", "filtroBaseDataReceber", "filtroAnoReceber", "filtroMesReceber", "filtroDiaReceber", "filtroStatusReceber", "filtroFornecedorPagar", "filtroGrupoPagar", "filtroCategoriaPagar", "filtroBaseDataPagar", "filtroAnoPagar", "filtroMesPagar", "filtroStatusPagar", "filtroAnoRecebida", "filtroMesRecebida", "filtroClienteRecebida", "filtroAnoPaga", "filtroMesPaga", "filtroFornecedorPaga", "filtroCategoriaPaga", "filtroAnoRelReceber", "filtroMesRelReceber", "filtroDialRelReceber", "filtroAnoRelPagar", "filtroMesRelPagar", "filtroDialRelPagar", "filtroAnoDFC", "filtroAnoDRE", "filtroMesDRE", "modoDRE", "filtroMesCalendario", "filtroAnoCalendario", "extratoFiltrobancoId", "extratoFiltroAno", "extratoFiltroMes", "filtroAnoFCP", "dashFiltroAno", "dashFiltroMes", "filtroAnoAnaliseCat", "filtroMesAnaliseCat", "filtroCategoriaAnaliseCat", "filtroDataDeAnaliseCat", "filtroDataAteAnaliseCat", "filtroGrupoAnaliseDRE", "filtroCategoriaGrupoDRE", "filtroAnoGrupoDRE", "filtroFornecedorChequeAberto", "filtroFornecedorChequeComp", "filtroAnoChequeComp", "filtroMesChequeComp", "filtroDataInicioChequeAberto", "filtroDataFimChequeAberto", "filtroDataInicioChequeComp", "filtroDataFimChequeComp", "filtroCategoriaChequeAberto", "filtroCategoriaChequeComp"];
 
     function _filtroKey(id) {
         const user = usuarioAtual ? usuarioAtual.email : 'guest';
@@ -7797,10 +7821,33 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         return pag.concat(chq.filter(c => c.categoria_id).map(_chequeComoContaPagar));
     }
 
+    // Filtro de Categoria nas telas de cheques ('' = todas · '__sem' = sem categoria)
+    function _filtrarCategoriaCheques(lista, filtroId) {
+        const v = (document.getElementById(filtroId) || {}).value || '';
+        if (!v) return lista;
+        if (v === '__sem') return lista.filter(c => !c.categoria_id);
+        return lista.filter(c => String(c.categoria_id) === v);
+    }
+
+    function _popularFiltroCategoriaCheques() {
+        ['filtroCategoriaChequeAberto', 'filtroCategoriaChequeComp'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            let atual = sel.value;
+            if (!atual) { try { atual = localStorage.getItem(_filtroKey(id)) || ''; } catch (e) { atual = ''; } }
+            const esc = t => String(t == null ? '' : t).replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+            const cats = (dadosCache.categorias || []).filter(c => c.ativo !== false).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+            sel.innerHTML = '<option value="">Todas</option><option value="__sem">— Sem categoria —</option>' +
+                cats.map(c => '<option value="' + c.id + '">' + esc(c.nome) + '</option>').join('');
+            if (atual && Array.prototype.some.call(sel.options, o => o.value === atual)) sel.value = atual;
+        });
+    }
+
     async function carregarCheques() {
         const cheques = await fetchSupabase('cheques', 'GET', null, 'order=bom_para.asc');
         if (!cheques) return;
         dadosCache.cheques = cheques;
+        _popularFiltroCategoriaCheques();
         atualizarCardsCheques();
         atualizarTabelaChequesAberto();
         atualizarTabelaChequesCompensados();
@@ -7840,6 +7887,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
         let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
         if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        lista = _filtrarCategoriaCheques(lista, 'filtroCategoriaChequeAberto');
         if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
         if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
         lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
@@ -7905,6 +7953,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         const filtroDataFim = (document.getElementById('filtroDataFimChequeAberto') || {}).value || '';
         let lista = (dadosCache.cheques || []).filter(c => c.status === 'aberto');
         if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        lista = _filtrarCategoriaCheques(lista, 'filtroCategoriaChequeAberto');
         if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
         if (filtroDataFim) lista = lista.filter(c => (c.bom_para || '') <= filtroDataFim);
         lista = lista.slice().sort((a, b) => (a.bom_para || '').localeCompare(b.bom_para || ''));
@@ -7961,6 +8010,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
 
         let lista = (dadosCache.cheques || []).filter(c => c.status === 'compensado');
         if (filtroForn) lista = lista.filter(c => String(c.fornecedor_id) === String(filtroForn));
+        lista = _filtrarCategoriaCheques(lista, 'filtroCategoriaChequeComp');
         if (filtroAno) lista = lista.filter(c => (c.data_compensacao || '').slice(0, 4) === filtroAno);
         if (filtroMes) lista = lista.filter(c => (c.data_compensacao || '').slice(5, 7) === filtroMes);
         if (filtroDataInicio) lista = lista.filter(c => (c.bom_para || '') >= filtroDataInicio);
@@ -14489,7 +14539,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         // filtros
         'filtroFornecedorPagar', 'filtroGrupoPagar', 'filtroCategoriaPagar', 'filtroClienteReceber',
         'filtroFornecedorPaga', 'filtroCategoriaPaga', 'filtroClienteRecebida',
-        'filtroFornecedorChequeAberto', 'filtroFornecedorChequeComp', 'chqDashFornecedor',
+        'filtroFornecedorChequeAberto', 'filtroFornecedorChequeComp', 'chqDashFornecedor', 'filtroCategoriaChequeAberto', 'filtroCategoriaChequeComp',
         'filtroCategoriaAnaliseCat', 'filtroCategoriaGrupoDRE',
         // janelas de lançamento e cadastro
         'fornecedorPagar', 'categoriaPagar', 'produtoPagar', 'clienteReceber', 'categoriaProduto', 'fornecedorCheque',
