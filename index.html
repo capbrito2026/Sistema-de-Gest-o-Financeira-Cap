@@ -1363,6 +1363,91 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     border-color: var(--cor-borda) !important;
 }
 
+
+/* ===== Agrupar por dia (Contas a Receber / a Pagar / Recebidas / Pagas) ===== */
+.gd-bar { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.gd-bar .cad-switch { font-size: 12.5px; }
+table tbody tr.gd-dia td,
+table tbody tr.gd-dia:hover td { background: #fff4ec !important; color: #8a4a26; font-weight: 700; font-size: 12.5px; padding: 6px 12px !important; border-top: 2px solid #ffd8c2; border-bottom: 1px solid #ffe7d9; }
+tr.gd-dia .gd-i { margin-left: 14px; font-weight: 500; color: #9a7461; }
+tr.gd-dia .gd-v { float: right; }
+html[data-tema="escuro"] table tbody tr.gd-dia td,
+html[data-tema="escuro"] table tbody tr.gd-dia:hover td { background: #2d2520 !important; color: #ffb48f; border-top-color: #4d3628; border-bottom-color: #3a2c23; }
+html[data-tema="escuro"] tr.gd-dia .gd-i { color: #c79c85; }
+
+/* ===== Receitas por Quinzena ===== */
+.rq-status { margin: 0 0 10px; font-size: 13px; }
+.rq-status .rq-ok { display: inline-block; background: #e8f6ec; color: #166534; border: 1px solid #b7e2c3; border-radius: 8px; padding: 6px 12px; }
+.rq-status .rq-alt { display: inline-block; background: #fff8e1; color: #8a6100; border: 1px solid #ffe08a; border-radius: 8px; padding: 6px 12px; }
+.rq-status .rq-salvo { margin-left: 10px; color: #6b7280; font-size: 12px; }
+.rq-add { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; background: #fff; border: 1px solid #eceff3; border-radius: 10px; padding: 10px 14px; margin-bottom: 6px; }
+.rq-add .form-group { margin: 0; }
+.rq-dica { font-size: 12px; color: #6b7280; margin: 0 0 8px 2px; }
+.rq-wrap { overflow: auto; max-height: calc(100vh - 330px); }
+.rq-tab { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; }
+.rq-tab th, .rq-tab td { padding: 3px 2px !important; text-align: center; white-space: nowrap; font-size: 12.5px; border-bottom: 1px solid #eef0f3; }
+.rq-tab thead th { position: sticky; top: 0; z-index: 2; background: var(--cor-primaria, #FF7A42); color: #fff; font-weight: 700; line-height: 1.15; }
+.rq-tab thead th small { display: block; font-weight: 500; font-size: 10px; color: rgba(255,255,255,.85); text-transform: lowercase; }
+.rq-tab .rq-nome { position: sticky; left: 0; z-index: 1; background: #fff; text-align: left; min-width: 170px; max-width: 230px; overflow: hidden; text-overflow: ellipsis; font-weight: 600; padding-left: 10px !important; }
+.rq-tab .rq-nome small { font-weight: 500; color: #8a8f98; }
+.rq-tab thead th.rq-nome { z-index: 3; background: var(--cor-primaria, #FF7A42); }
+.rq-tab tfoot td { position: sticky; bottom: 0; background: #fff4ec; font-weight: 700; color: #8a4a26; border-top: 2px solid #ffd8c2; }
+.rq-tab tfoot td.rq-nome { z-index: 3; background: #fff4ec; }
+.rq-tab .rq-fds { background: #e8f1fb; }
+.rq-tab thead th.rq-fds { background: #6f9fd8; color: #fff; }
+.rq-tab tfoot td.rq-fds { background: #dce9f8; color: #2f5d8f; }
+.rq-tab .rq-fer { background: #fdeaee; }
+.rq-tab thead th.rq-fer { background: #d9667f; color: #fff; }
+.rq-tab tfoot td.rq-fer { background: #fadbe2; color: #a03a52; }
+.rq-tab thead th.rq-dia-cab { cursor: pointer; }
+.rq-tab thead th.rq-dia-cab:hover { filter: brightness(.93); }
+.rq-legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 12px; color: #6b7280; margin: 8px 2px 0; }
+.rq-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.rq-q { display: inline-block; width: 14px; height: 14px; border-radius: 3px; }
+.rq-q-fds { background: #6f9fd8; } .rq-q-fer { background: #d9667f; }
+.rq-legenda-dica { margin-left: auto; font-style: italic; }
+.rq-tab input { width: 40px; padding: 4px 2px; text-align: center; border: 1px solid #e3e6ea; border-radius: 5px; font-size: 12.5px; background: #fff; color: inherit; -moz-appearance: textfield; }
+.rq-tab input::-webkit-outer-spin-button, .rq-tab input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.rq-tab input:focus { outline: none; border-color: #FF7A42; box-shadow: 0 0 0 2px rgba(255,122,66,.2); }
+.rq-preco-box { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; color: #6b7280; padding: 0 4px; }
+.rq-tab input.rq-preco { width: 62px; text-align: right; padding-right: 6px; font-variant-numeric: tabular-nums; }
+.rq-tab .rq-rec { min-width: 96px; }
+.rq-rec-btn { background: #28a745; color: #fff; border: none; border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.rq-rec-btn:hover { background: #218838; }
+.rq-rec-ok { display: inline-block; background: #e8f6ec; color: #166534; border: 1px solid #b7e2c3; border-radius: 10px; padding: 2px 8px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+html[data-tema="escuro"] .rq-rec-ok { background: #173a22; color: #7ddc96; border-color: #24543a; }
+.rq-tab .rq-fds input { background: #f5f9fe; border-color: #c9dbf1; }
+.rq-tab .rq-fer input { background: #fff6f8; border-color: #f2c4cf; }
+.rq-tab .rq-tot { font-weight: 700; min-width: 64px; }
+.rq-tab .rq-val { font-weight: 700; min-width: 96px; text-align: right; padding-right: 10px !important; }
+.rq-tab .rq-acoes { white-space: nowrap; padding: 3px 8px !important; }
+.rq-btn-ed, .rq-btn-ex { border: none; border-radius: 6px; padding: 4px 9px; font-size: 11.5px; font-weight: 600; cursor: pointer; color: #fff; margin: 0 2px; }
+.rq-btn-ed { background: #6c757d; } .rq-btn-ed:hover { background: #5a6268; }
+.rq-btn-ex { background: #dc3545; } .rq-btn-ex:hover { background: #c82333; }
+.rq-tab tbody tr:hover td { background: #fffaf6; }
+.rq-tab tbody tr:hover td.rq-nome { background: #fffaf6; }
+.rq-vazio { padding: 26px !important; color: #8a8f98; font-size: 13px !important; white-space: normal !important; }
+.rq-sql { margin-top: 12px; background: #fff8e1; border: 1px solid #ffe08a; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #6b5200; }
+.rq-sql pre { margin: 8px 0 0; background: #1f2328; color: #e6edf3; padding: 10px 12px; border-radius: 8px; font-size: 12px; overflow: auto; user-select: all; }
+.rq-aviso { background: #fff8e1; border: 1px solid #ffe08a; color: #6b5200; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; margin: 6px 0 10px; }
+.rq-previa { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.rq-previa th, .rq-previa td { padding: 6px 10px; border-bottom: 1px solid #eef0f3; text-align: left; }
+.rq-previa th { background: #f6f7f9; color: #374151; position: sticky; top: 0; }
+.rq-previa tfoot td { font-weight: 700; background: #fff4ec; }
+html[data-tema="escuro"] .rq-add { background: var(--esc-sup); border-color: #30353c; }
+html[data-tema="escuro"] .rq-tab th, html[data-tema="escuro"] .rq-tab td { border-bottom-color: #30353c; }
+html[data-tema="escuro"] .rq-tab .rq-nome { background: var(--esc-sup); }
+html[data-tema="escuro"] .rq-tab .rq-fds, html[data-tema="escuro"] .rq-tab .rq-fds input { background: #1c2735; }
+html[data-tema="escuro"] .rq-tab thead th.rq-fds { background: #3b5f8c; }
+html[data-tema="escuro"] .rq-tab .rq-fer, html[data-tema="escuro"] .rq-tab .rq-fer input { background: #35202a; }
+html[data-tema="escuro"] .rq-tab thead th.rq-fer { background: #8c3b50; }
+html[data-tema="escuro"] .rq-tab tfoot td.rq-fer { background: #3a2129; color: #f2a3b5; }
+html[data-tema="escuro"] .rq-tab input { background: var(--esc-sup2); border-color: #3a4048; }
+html[data-tema="escuro"] .rq-tab tfoot td, html[data-tema="escuro"] .rq-tab tfoot td.rq-nome { background: #2d2520; color: #ffb48f; border-top-color: #4d3628; }
+html[data-tema="escuro"] .rq-tab tfoot td.rq-fds { background: #1f2a38; color: #9cc0ea; }
+html[data-tema="escuro"] .rq-tab tbody tr:hover td, html[data-tema="escuro"] .rq-tab tbody tr:hover td.rq-nome { background: #262a30; }
+html[data-tema="escuro"] .rq-previa th { background: #2a3038; color: #e5e7eb; }
+html[data-tema="escuro"] .rq-previa tfoot td { background: #2d2520; }
 </style>
 </head>
 <body>
@@ -1419,6 +1504,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             <div class="menu-section-title">Lançamentos</div>
             <div class="menu-item" onclick="showPage('lancar-receber')">📥 Lançar Contas a Receber</div>
             <div class="menu-item" onclick="showPage('lancar-pagar')">📤 Lançar Contas a Pagar</div>
+            <div class="menu-item" onclick="showPage('receitas-quinzena')">🍽️ Receitas por Quinzena</div>
         </div>
 
         <div class="menu-section">
@@ -1905,26 +1991,8 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <!-- Totais do filtro -->
-            <div style="display:flex;gap:12px;margin:0 0 12px 0;flex-wrap:wrap;">
-                <div style="background:#d4edda;border:1px solid #c3e6cb;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#155724;font-weight:600;">💰 TOTAL FILTRADO</div>
-                    <div id="totalReceberFiltro" style="font-size:20px;font-weight:700;color:#155724;">R$ 0,00</div>
-                </div>
-                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#856404;font-weight:600;">⏳ ATRASADOS</div>
-                    <div id="totalReceberAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
-                </div>
-                <div style="background:#d1ecf1;border:1px solid #17a2b8;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#0c5460;font-weight:600;">✅ RECEBIDO</div>
-                    <div id="totalReceberRecebido" style="font-size:20px;font-weight:700;color:#0c5460;">R$ 0,00</div>
-                </div>
-                <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
-                    <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
-                    <div id="countReceberFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
-                </div>
-            </div>
-            <div id="dicaBaseReceber" style="font-size:12px;color:#666;margin:-8px 0 12px 2px;"></div>
+            <div id="dicaBaseReceber" style="font-size:12px;color:#666;margin:0 0 6px 2px;"></div>
+            <div class="gd-bar"><label class="cad-switch" title="Agrupa os lançamentos por dia, com uma faixa colorida separando cada data"><input type="checkbox" id="gd_receber" checked onchange="_gdToggle('receber', this)"><span class="trilho"></span><span>📅 Agrupar por dia</span></label></div>
 
             <div class="table-container">
                 <table id="tabelaPendentesReceber">
@@ -2037,26 +2105,8 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <!-- Totais do filtro -->
-            <div style="display:flex;gap:12px;margin:0 0 12px 0;flex-wrap:wrap;">
-                <div style="background:#f8d7da;border:1px solid #f5c6cb;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#721c24;font-weight:600;">📤 TOTAL FILTRADO</div>
-                    <div id="totalPagarFiltro" style="font-size:20px;font-weight:700;color:#721c24;">R$ 0,00</div>
-                </div>
-                <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#856404;font-weight:600;">⚠️ ATRASADOS</div>
-                    <div id="totalPagarAtrasado" style="font-size:20px;font-weight:700;color:#856404;">R$ 0,00</div>
-                </div>
-                <div style="background:#d4edda;border:1px solid #28a745;border-radius:8px;padding:10px 18px;min-width:160px;">
-                    <div style="font-size:11px;color:#155724;font-weight:600;">✅ PAGO</div>
-                    <div id="totalPagarPago" style="font-size:20px;font-weight:700;color:#155724;">R$ 0,00</div>
-                </div>
-                <div style="background:#f8f9fa;border:1px solid #dee2e6;border-radius:8px;padding:10px 18px;min-width:130px;">
-                    <div style="font-size:11px;color:#555;font-weight:600;">📋 REGISTROS</div>
-                    <div id="countPagarFiltro" style="font-size:20px;font-weight:700;color:#333;">0</div>
-                </div>
-            </div>
-            <div id="dicaBasePagar" style="font-size:12px;color:#666;margin:-8px 0 12px 2px;"></div>
+            <div id="dicaBasePagar" style="font-size:12px;color:#666;margin:0 0 6px 2px;"></div>
+            <div class="gd-bar"><label class="cad-switch" title="Agrupa os lançamentos por dia, com uma faixa colorida separando cada data"><input type="checkbox" id="gd_pagar" checked onchange="_gdToggle('pagar', this)"><span class="trilho"></span><span>📅 Agrupar por dia</span></label></div>
 
             <div class="table-container">
                 <table id="tabelaPendentesPagar">
@@ -2090,6 +2140,104 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </table>
             </div>
         </div>
+
+        <!-- RECEITAS POR QUINZENA (refeições por cliente, dia a dia) -->
+        <div id="receitas-quinzena" class="page">
+            <div class="page-header">
+                <h1>🍽️ Receitas por Quinzena</h1>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary" onclick="rqSalvar(true)">💾 Salvar</button>
+                    <button class="btn btn-primary" onclick="rqAbrirLancar()">📥 Dar entrada nas receitas</button>
+                    <button class="btn btn-success" onclick="rqAbrirRecebido()">✅ Dar como recebido</button>
+                </div>
+            </div>
+            <div class="alert alert-success" id="alertRQ"></div>
+
+            <div class="filter-container">
+                <div class="filter-row">
+                    <div class="form-group">
+                        <label>Ano</label>
+                        <select id="rqAno" onchange="rqTrocarPeriodo()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Mês</label>
+                        <select id="rqMes" onchange="rqTrocarPeriodo()">
+                            <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                            <option value="3">Março</option><option value="4">Abril</option>
+                            <option value="5">Maio</option><option value="6">Junho</option>
+                            <option value="7">Julho</option><option value="8">Agosto</option>
+                            <option value="9">Setembro</option><option value="10">Outubro</option>
+                            <option value="11">Novembro</option><option value="12">Dezembro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Quinzena</label>
+                        <select id="rqQuinzena" onchange="rqTrocarPeriodo()">
+                            <option value="1">1ª quinzena (dia 01 a 15)</option>
+                            <option value="2">2ª quinzena (dia 16 ao fim do mês)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rqStatus" class="rq-status"></div>
+
+            <div class="rq-add">
+                <div class="form-group" style="min-width:220px;flex:2;">
+                    <label>Cliente</label>
+                    <select id="rqCliente"><option value="">Selecione...</option></select>
+                </div>
+                <div class="form-group" style="min-width:180px;flex:2;">
+                    <label>Item / tipo (opcional)</label>
+                    <input type="text" id="rqItem" placeholder="Ex.: sanduíche, almoço especial">
+                </div>
+                <div class="form-group" style="width:140px;">
+                    <label>Preço por refeição</label>
+                    <input type="number" id="rqValor" step="0.01" min="0" placeholder="0,00">
+                </div>
+                <div class="form-group" style="align-self:flex-end;">
+                    <button type="button" class="btn btn-success" onclick="rqAdicionarLinha()">+ Adicionar</button>
+                </div>
+                <div class="form-group" style="align-self:flex-end;margin-left:auto;">
+                    <input type="file" id="rqArquivo" accept=".xlsx,.xls,.csv" style="display:none;" onchange="rqImportarArquivo(this)">
+                    <button type="button" class="btn btn-secondary" onclick="rqAbrirReplicar()" title="Copia clientes e preços desta quinzena para as quinzenas seguintes (sem quantidades)" style="margin-right:6px;">📅 Replicar até…</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('rqArquivo').click()" title="Importa clientes, preços e quantidades de uma planilha (CLIENTE | VALOR UNITÁRIO | 1, 2, 3...)">📂 Importar planilha</button>
+                </div>
+                <div class="form-group" style="align-self:flex-end;">
+                    <button type="button" class="btn btn-secondary" id="rqBtnCopiar" onclick="rqCopiarAnterior()" title="Traz os clientes e preços da quinzena anterior, com as quantidades zeradas">📋 Copiar clientes da quinzena anterior</button>
+                </div>
+            </div>
+            <div class="rq-dica">Digite a quantidade de almoços de cada dia. <b>Enter</b> ou <b>↓ ↑</b> mudam de linha e <b>Tab</b> vai para o próximo dia. O salvamento é automático.</div>
+
+            <div class="table-container rq-wrap">
+                <table id="tabelaRQ" class="rq-tab">
+                    <thead></thead>
+                    <tbody></tbody>
+                    <tfoot></tfoot>
+                </table>
+            </div>
+
+            <div class="rq-legenda"><span><i class="rq-q rq-q-fds"></i>Sábado e domingo</span><span><i class="rq-q rq-q-fer"></i>Feriado</span><span class="rq-legenda-dica">Clique no número do dia, no cabeçalho, para marcar ou desmarcar um feriado municipal.</span></div>
+
+            <div id="rqSQL" class="rq-sql" style="display:none;">
+                <b>⚠️ A tabela <code>receitas_quinzena</code> ainda não existe no Supabase.</b>
+                Execute o SQL abaixo no <i>SQL Editor</i> do Supabase e depois clique em 🔄 Atualizar:
+                <pre>create table if not exists public.receitas_quinzena (
+  id bigserial primary key,
+  ano int not null,
+  mes int not null,
+  quinzena int not null check (quinzena in (1, 2)),
+  itens jsonb not null default '[]'::jsonb,
+  lancamento jsonb,
+  atualizado_em timestamptz default now(),
+  unique (ano, mes, quinzena)
+);
+alter table public.receitas_quinzena disable row level security;
+grant all on public.receitas_quinzena to anon, authenticated;
+grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authenticated;</pre>
+            </div>
+        </div>
+
 
         <!-- CONTAS RECEBIDAS -->
         <div id="contas-recebidas" class="page pg-compacta">
@@ -2155,20 +2303,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <div class="dashboard-grid" style="margin-bottom:16px;">
-                <div class="stat-card" style="border-left-color:#28a745;">
-                    <div class="stat-label">💰 Total recebido (filtro atual)</div>
-                    <div class="stat-value" id="totalRecebidasFiltro" style="color:#28a745;">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">🧾 Quantidade</div>
-                    <div class="stat-value" id="qtdRecebidasFiltro">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">📊 Ticket médio</div>
-                    <div class="stat-value" id="ticketRecebidasFiltro">R$ 0,00</div>
-                </div>
-            </div>
+            <div class="gd-bar"><label class="cad-switch" title="Agrupa os lançamentos por dia, com uma faixa colorida separando cada data"><input type="checkbox" id="gd_recebidas" checked onchange="_gdToggle('recebidas', this)"><span class="trilho"></span><span>📅 Agrupar por dia</span></label></div>
 
             <div class="table-container">
                 <table id="tabelaRecebidas">
@@ -2261,20 +2396,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 </div>
             </div>
 
-            <div class="dashboard-grid" style="margin-bottom:16px;">
-                <div class="stat-card" style="border-left-color:#dc3545;">
-                    <div class="stat-label">💸 Total Pago (filtro atual)</div>
-                    <div class="stat-value" id="totalPagasFiltro" style="color:#dc3545;">R$ 0,00</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">🧾 Quantidade</div>
-                    <div class="stat-value" id="qtdPagasFiltro">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">📊 Ticket Médio</div>
-                    <div class="stat-value" id="ticketPagasFiltro">R$ 0,00</div>
-                </div>
-            </div>
+            <div class="gd-bar"><label class="cad-switch" title="Agrupa os lançamentos por dia, com uma faixa colorida separando cada data"><input type="checkbox" id="gd_pagas" checked onchange="_gdToggle('pagas', this)"><span class="trilho"></span><span>📅 Agrupar por dia</span></label></div>
 
             <div class="table-container">
                 <table id="tabelaPagas">
@@ -3691,6 +3813,126 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
     </div>
 </div>
 
+<!-- MODAL: DAR ENTRADA NAS RECEITAS DA QUINZENA -->
+        <div class="modal" id="modalRQLancar">
+            <div class="modal-content cad-box" style="max-width:720px;">
+                <div class="cad-head">
+                    <div class="cad-ico">📥</div>
+                    <div><div class="cad-tit">Dar entrada nas receitas</div><div class="cad-sub" id="rqLancSub">Gera um lançamento em Contas a Receber para cada cliente</div></div>
+                    <button type="button" class="pl-x" onclick="closeModal('modalRQLancar')" title="Fechar">&times;</button>
+                </div>
+                <div class="cad-body">
+                    <div class="cad-grid">
+                        <div class="cad-field"><label>Data de competência<span class="req">*</span></label><input type="date" id="rqComp"><span class="cad-hint">Mês em que entra na DRE.</span></div>
+                        <div class="cad-field"><label>Data prevista de recebimento<span class="req">*</span></label><input type="date" id="rqVenc"><span class="cad-hint">Vencimento dos lançamentos.</span></div>
+                    </div>
+                    <div id="rqAviso" class="rq-aviso" style="display:none;"></div>
+                    <div class="cad-sec">Lançamentos que serão gerados</div>
+                    <div style="max-height:300px;overflow:auto;border:1px solid var(--cor-borda,#e5e7eb);border-radius:8px;">
+                        <table class="rq-previa"><thead><tr><th>Cliente</th><th style="text-align:right;">Refeições</th><th style="text-align:right;">Valor</th></tr></thead><tbody id="rqPrevia"></tbody></table>
+                    </div>
+                </div>
+                <div class="cad-foot">
+                    <div class="cad-hint" id="rqLancResumo"></div>
+                    <div class="btns">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalRQLancar')">Cancelar</button>
+                        <button type="button" class="btn btn-success" id="rqBtnConfirmar" onclick="rqConfirmarLancar()">✅ Confirmar entrada</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: DAR COMO RECEBIDO (receitas da quinzena) -->
+        <div class="modal" id="modalRQRecebido">
+            <div class="modal-content cad-box" style="max-width:720px;">
+                <div class="cad-head">
+                    <div class="cad-ico">✅</div>
+                    <div><div class="cad-tit">Dar como recebido</div><div class="cad-sub" id="rqRecSub"></div></div>
+                    <button type="button" class="pl-x" onclick="closeModal('modalRQRecebido')" title="Fechar">&times;</button>
+                </div>
+                <div class="cad-body">
+                    <div class="cad-grid">
+                        <div class="cad-field"><label>Data do recebimento<span class="req">*</span></label><input type="date" id="rqRecData"></div>
+                        <div class="cad-field"><label>Forma de recebimento<span class="req">*</span></label><select id="rqRecForma"><option value="">Selecione...</option>
+                            <option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option><option value="Transferência">Transferência</option>
+                            <option value="Boleto">Boleto</option><option value="Cheque">Cheque</option></select></div>
+                        <div class="cad-field"><label>Banco / conta<span class="req">*</span></label><select id="rqRecBanco"><option value="">Selecione...</option></select></div>
+                    </div>
+                    <div class="cad-sec">Lançamentos da quinzena</div>
+                    <div style="max-height:300px;overflow:auto;border:1px solid var(--cor-borda,#e5e7eb);border-radius:8px;">
+                        <table class="rq-previa"><thead><tr><th><input type="checkbox" id="rqRecTodos" checked onchange="rqRecMarcarTodos(this)" title="Marcar/desmarcar todos"></th><th>Cliente</th><th style="text-align:right;">Valor</th><th>Situação</th></tr></thead><tbody id="rqRecLista"></tbody></table>
+                    </div>
+                </div>
+                <div class="cad-foot">
+                    <div class="cad-hint" id="rqRecResumoTxt"></div>
+                    <div class="btns">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalRQRecebido')">Cancelar</button>
+                        <button type="button" class="btn btn-success" id="rqRecBtn" onclick="rqConfirmarRecebido()">✅ Confirmar recebimento</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: EDITAR LINHA DA QUINZENA -->
+        <div class="modal" id="modalRQEditar">
+            <div class="modal-content cad-box" style="max-width:560px;">
+                <div class="cad-head">
+                    <div class="cad-ico">✏️</div>
+                    <div><div class="cad-tit">Editar cliente</div><div class="cad-sub" id="rqEdSub"></div></div>
+                    <button type="button" class="pl-x" onclick="closeModal('modalRQEditar')" title="Fechar">&times;</button>
+                </div>
+                <div class="cad-body">
+                    <div class="cad-grid">
+                        <div class="cad-field full"><label>Cliente<span class="req">*</span></label><select id="rqEdCliente"><option value="">Selecione...</option></select></div>
+                        <div class="cad-field full"><label>Ou cadastrar novo cliente</label><input type="text" id="rqEdNovo" placeholder="Ex.: MIL - POUSO (deixe vazio para usar o cliente acima)"><span class="cad-hint">Se preencher, o cliente é criado no cadastro e usado nesta linha.</span></div>
+                        <div class="cad-field"><label>Item / tipo (opcional)</label><input type="text" id="rqEdItem" placeholder="Ex.: sanduíche"></div>
+                        <div class="cad-field"><label>Preço por refeição (R$)</label><input type="text" inputmode="decimal" id="rqEdPreco" placeholder="0,00" onblur="this.value=_rqFmtPreco(_rqParsePreco(this.value))"></div>
+                    </div>
+                    <div class="cad-hint" style="margin-top:6px;">As quantidades lançadas nos dias são mantidas.</div>
+                </div>
+                <div class="cad-foot">
+                    <div class="cad-hint"></div>
+                    <div class="btns">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalRQEditar')">Cancelar</button>
+                        <button type="button" class="btn btn-success" id="rqEdBtn" onclick="rqSalvarEdicao()">💾 Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: REPLICAR CLIENTES/PREÇOS PARA AS PRÓXIMAS QUINZENAS -->
+        <div class="modal" id="modalRQReplicar">
+            <div class="modal-content cad-box" style="max-width:560px;">
+                <div class="cad-head">
+                    <div class="cad-ico">📅</div>
+                    <div><div class="cad-tit">Replicar clientes e preços</div><div class="cad-sub" id="rqRepSub"></div></div>
+                    <button type="button" class="pl-x" onclick="closeModal('modalRQReplicar')" title="Fechar">&times;</button>
+                </div>
+                <div class="cad-body">
+                    <div class="cad-grid">
+                        <div class="cad-field"><label>Até o mês<span class="req">*</span></label><select id="rqRepMes">
+                            <option value="1">Janeiro</option><option value="2">Fevereiro</option><option value="3">Março</option><option value="4">Abril</option>
+                            <option value="5">Maio</option><option value="6">Junho</option><option value="7">Julho</option><option value="8">Agosto</option>
+                            <option value="9">Setembro</option><option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option></select></div>
+                        <div class="cad-field"><label>Ano<span class="req">*</span></label><select id="rqRepAno"></select></div>
+                        <div class="cad-field full">
+                            <label class="cad-switch"><input type="checkbox" id="rqRepSubst"><span class="trilho"></span><span>Substituir quinzenas que já têm clientes (apaga as quantidades delas)</span></label>
+                        </div>
+                    </div>
+                    <div class="cad-hint" style="margin-top:8px;">Copia cliente, item e preço de cada linha. As quantidades dos dias ficam em branco para você lançar depois.</div>
+                    <div id="rqRepProg" class="cad-hint" style="margin-top:8px;font-weight:600;"></div>
+                </div>
+                <div class="cad-foot">
+                    <div class="cad-hint" id="rqRepResumo"></div>
+                    <div class="btns">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('modalRQReplicar')">Cancelar</button>
+                        <button type="button" class="btn btn-success" id="rqRepBtn" onclick="rqConfirmarReplicar()">📅 Replicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
 <!-- MODAL LANÇAR PAGAR -->
 <div class="modal" id="modalLancarPagar">
     <div class="modal-content cad-box" style="max-width:720px;">
@@ -4950,7 +5192,10 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 : '📌 Ano/Mês/Dia filtrando por Vencimento. Para bater com relatórios por regime de competência (DRE/CPV), mude "Filtrar por" para Competência.';
         }
 
+        const _gd = _gdPrep('receber', filtrado, c => c[baseData], _sortReceber.campo === baseData ? _sortReceber.dir : 1);
+        filtrado = _gd.lista;
         filtrado.forEach(conta => {
+            _gd.cab(tbody, conta);
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
             const status = statusDe(conta);
@@ -5154,7 +5399,10 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
                 : '📌 Ano/Mês filtrando por Vencimento — para o total bater com o relatório de CPV/DRE (que soma por competência), mude "Filtrar por" para Competência.';
         }
 
+        const _gd = _gdPrep('pagar', filtrado, c => c[baseData], _sortPagar.campo === baseData ? _sortPagar.dir : 1);
+        filtrado = _gd.lista;
         filtrado.forEach(conta => {
+            _gd.cab(tbody, conta);
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
             const categoria = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
             const venc = new Date(conta.data_vencimento + 'T12:00:00');
@@ -5406,7 +5654,10 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         filtrado = filtrado.slice().sort((a, b) => _ref(b).localeCompare(_ref(a)));
         _resumoRecebidasFiltro(filtrado);
 
+        const _gd = _gdPrep('recebidas', filtrado, _ref, -1);
+        filtrado = _gd.lista;
         filtrado.forEach(conta => {
+            _gd.cab(tbody, conta);
             const cliente = dadosCache.clientes.find(c => c.id === conta.cliente_id);
             const banco = (dadosCache.bancos || []).find(b => b.id === conta.banco_id);
             const parcLabel = conta.total_parcelas > 1 ? conta.parcela_atual + '/' + conta.total_parcelas : '-';
@@ -5480,7 +5731,10 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         if (elQtd) elQtd.textContent = qtdFiltro;
         if (elTicket) elTicket.textContent = 'R$ ' + ticketFiltro.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 
+        const _gd = _gdPrep('pagas', filtrado, _ref, -1);
+        filtrado = _gd.lista;
         filtrado.forEach(conta => {
+            _gd.cab(tbody, conta);
             const fornecedor = dadosCache.fornecedores.find(f => f.id === conta.fornecedor_id);
             const categoria  = dadosCache.categorias.find(cat => cat.id === conta.categoria_id);
             const banco      = (dadosCache.bancos || []).find(b => b.id === conta.banco_id);
@@ -6332,6 +6586,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
             else if (pageId === 'clientes') carregarClientes();
             else if (pageId === 'lancar-receber') carregarContasReceber();
             else if (pageId === 'lancar-pagar') carregarContasPagar();
+            else if (pageId === 'receitas-quinzena') rqInit();
             else if (pageId === 'contas-recebidas') carregarContasRecebidas();
             else if (pageId === 'contas-pagas') carregarContasPagas();
             else if (pageId === 'calendario') gerarCalendario();
@@ -11171,6 +11426,7 @@ html[data-tema="escuro"] [style*="border-top: 1px solid #ddd"] {
         let totalValor = 0;
 
         linhas.forEach((linha) => {
+            if (linha.classList.contains('gd-dia')) return;
             const cells = linha.querySelectorAll('td');
             if (cells.length === 0) return;
             const row = [];
@@ -14981,6 +15237,800 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         function sync(){ if(mc&&bl) bl.style.display = mc.classList.contains('active') ? 'none' : ''; }
         sync(); if (mc && window.MutationObserver) new MutationObserver(sync).observe(mc,{attributes:true,attributeFilter:['class']});
     })();
+</script>
+<script>
+    // =====================================================================
+    // AGRUPAR POR DIA — Contas a Receber / a Pagar / Recebidas / Pagas
+    // Ligado por padrão; a escolha fica salva neste navegador.
+    // =====================================================================
+    const _GD_SEMANA = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    function _gdAtivo(t) {
+        try { const v = localStorage.getItem('cap_agrupar_dia_' + t); return v === null ? true : v === '1'; }
+        catch (e) { return true; }
+    }
+    function _gdToggle(t, el) {
+        try { localStorage.setItem('cap_agrupar_dia_' + t, el.checked ? '1' : '0'); } catch (e) {}
+        const f = { receber: atualizarTabelaPendentesReceber, pagar: atualizarTabelaPendentesPagar,
+                    recebidas: atualizarTabelaRecebidas, pagas: atualizarTabelaPagas }[t];
+        if (f) f();
+    }
+    // Ordena a lista pelo dia (mantendo a ordem atual dentro de cada dia) e devolve
+    // uma função que insere a faixa do dia antes da primeira linha de cada data.
+    function _gdPrep(t, lista, refFn, dir) {
+        const chk = document.getElementById('gd_' + t);
+        const ativo = _gdAtivo(t);
+        if (chk) chk.checked = ativo;
+        if (!ativo) return { lista: lista, cab: function () {} };
+        const dia = c => String(refFn(c) || '').slice(0, 10);
+        const ord = [...lista].sort((a, b) => { const x = dia(a), y = dia(b); return x < y ? -dir : (x > y ? dir : 0); });
+        const resumo = {};
+        ord.forEach(c => { const d = dia(c); const r = resumo[d] || (resumo[d] = { n: 0, v: 0 }); r.n++; r.v += parseFloat(c.valor || 0); });
+        let ultimo = null;
+        return {
+            lista: ord,
+            cab: function (tbody, c) {
+                const d = dia(c);
+                if (d === ultimo) return;
+                ultimo = d;
+                const r = resumo[d];
+                const tab = tbody.closest('table');
+                const ncol = (tab && tab.tHead && tab.tHead.rows[0]) ? tab.tHead.rows[0].cells.length : 1;
+                let rot = 'Sem data';
+                if (d) { const dt = new Date(d + 'T12:00:00'); rot = _GD_SEMANA[dt.getDay()] + ', ' + dt.toLocaleDateString('pt-BR'); }
+                tbody.insertAdjacentHTML('beforeend',
+                    '<tr class="gd-dia"><td colspan="' + ncol + '"><span class="gd-d">📅 ' + rot + '</span>' +
+                    '<span class="gd-i">' + r.n + ' lançamento' + (r.n > 1 ? 's' : '') + '</span>' +
+                    '<span class="gd-v">R$ ' + r.v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</span></td></tr>');
+            }
+        };
+    }
+
+    // =====================================================================
+    // RECEITAS POR QUINZENA — refeições por cliente, dia a dia
+    // Tabela Supabase: receitas_quinzena (1 registro por ano/mês/quinzena)
+    // =====================================================================
+    let rq = { id: null, ano: null, mes: null, q: null, itens: [], lancamento: null };
+    let _rqSujo = false, _rqTimer = null, _rqSalvando = null, _rqTabelaOk = true, _rqIniciado = false, _rqUltimoSalvo = null;
+
+    const _rqEsc = v => String(v == null ? '' : v).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const _rqMoeda = v => 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const _rqNum = v => (v || 0).toLocaleString('pt-BR');
+    const _rqISO = (a, m, d) => a + '-' + String(m).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+    const _rqFmtPreco = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Aceita "17,10", "17.10", "1.234,50" e "R$ 17,10"
+    function _rqParsePreco(v) {
+        let t = String(v == null ? '' : v).replace(/[R$\s]/g, '');
+        if (!t) return 0;
+        if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+        const n = parseFloat(t);
+        return isNaN(n) || n < 0 ? 0 : Math.round(n * 100) / 100;
+    }
+    const _rqUid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+    function _rqDias(a, m, q) {
+        const fim = new Date(a, m, 0).getDate();
+        const ini = q === 1 ? 1 : 16, ult = q === 1 ? 15 : fim;
+        const r = []; for (let d = ini; d <= ult; d++) r.push(d); return r;
+    }
+    function _rqNomeLinha(it) {
+        const cli = (dadosCache.clientes || []).find(c => c.id === it.cliente_id);
+        return { cliente: cli ? cli.nome : (it.cliente_nome || '(cliente removido)'), item: it.item || '' };
+    }
+    function _rqTotLinha(it) {
+        let n = 0; Object.values(it.dias || {}).forEach(v => { n += parseFloat(v) || 0; });
+        return { refeicoes: n, valor: Math.round(n * (parseFloat(it.valor_unit) || 0) * 100) / 100 };
+    }
+    // Totais por cliente (base dos lançamentos em Contas a Receber)
+    function _rqPorCliente() {
+        const map = new Map();
+        rq.itens.forEach(it => {
+            const t = _rqTotLinha(it);
+            if (!it.cliente_id) return;
+            const g = map.get(it.cliente_id) || { cliente_id: it.cliente_id, refeicoes: 0, valor: 0, linhas: [] };
+            g.refeicoes += t.refeicoes; g.valor = Math.round((g.valor + t.valor) * 100) / 100;
+            if (t.refeicoes > 0) {
+                const n = _rqNomeLinha(it);
+                g.linhas.push((n.item ? n.item : 'refeição') + ': ' + _rqNum(t.refeicoes) + ' × ' + _rqMoeda(parseFloat(it.valor_unit) || 0) + ' = ' + _rqMoeda(t.valor));
+            }
+            map.set(it.cliente_id, g);
+        });
+        return [...map.values()].filter(g => g.valor > 0)
+            .sort((a, b) => _rqNomeLinha({ cliente_id: a.cliente_id }).cliente.localeCompare(_rqNomeLinha({ cliente_id: b.cliente_id }).cliente));
+    }
+    const _rqAssinatura = () => JSON.stringify(_rqPorCliente().map(g => [g.cliente_id, g.valor]));
+
+    // ---------- Feriados (nacionais automáticos + marcados manualmente no cabeçalho) ----------
+    function _rqPascoa(a) {
+        const b = a % 19, c = Math.floor(a / 100), d = a % 100, e = Math.floor(c / 4), f = c % 4, g = Math.floor((c + 8) / 25),
+              h = Math.floor((c - g + 1) / 3), i = (19 * b + c - e - h + 15) % 30, k = Math.floor(d / 4), l = d % 4,
+              m = (32 + 2 * f + 2 * k - i - l) % 7, n = Math.floor((b + 11 * m - 22 * i) / 451),
+              mes = Math.floor((i + m - 7 * n + 114) / 31), dia = ((i + m - 7 * n + 114) % 31) + 1;
+        return new Date(a, mes - 1, dia);
+    }
+    const _rqFerCache = {};
+    function _rqFeriadosNacionais(a) {
+        if (_rqFerCache[a]) return _rqFerCache[a];
+        const f = {}, add = (dt, nome) => { f[_rqISO(dt.getFullYear(), dt.getMonth() + 1, dt.getDate())] = nome; };
+        [['01-01', 'Confraternização Universal'], ['04-21', 'Tiradentes'], ['05-01', 'Dia do Trabalho'], ['09-07', 'Independência do Brasil'],
+         ['10-12', 'Nossa Senhora Aparecida'], ['11-02', 'Finados'], ['11-15', 'Proclamação da República'], ['11-20', 'Dia da Consciência Negra'],
+         ['12-25', 'Natal']].forEach(([md, nome]) => { f[a + '-' + md] = nome; });
+        const p = _rqPascoa(a), mais = n => new Date(p.getFullYear(), p.getMonth(), p.getDate() + n);
+        add(mais(-48), 'Carnaval'); add(mais(-47), 'Carnaval'); add(mais(-2), 'Sexta-feira Santa'); add(mais(60), 'Corpus Christi');
+        return (_rqFerCache[a] = f);
+    }
+    function _rqFeriado(d) {
+        const iso = _rqISO(rq.ano, rq.mes, d);
+        const manuais = (rq.lancamento && rq.lancamento.feriados) || [];
+        if (manuais.includes(iso)) return { nome: 'Feriado', manual: true };
+        const n = _rqFeriadosNacionais(rq.ano)[iso];
+        return n ? { nome: n, manual: false } : null;
+    }
+    function _rqClasseDia(d) {
+        if (_rqFeriado(d)) return 'rq-fer';
+        const w = new Date(rq.ano, rq.mes - 1, d).getDay();
+        return (w === 0 || w === 6) ? 'rq-fds' : '';
+    }
+    function rqAlternarFeriado(d) {
+        const iso = _rqISO(rq.ano, rq.mes, d);
+        const f = _rqFeriado(d);
+        if (f && !f.manual) { showAlert(f.nome + ' é feriado nacional.', 'alertRQ', 'success'); return; }
+        const L = rq.lancamento = Object.assign({}, rq.lancamento || {});
+        L.feriados = (L.feriados || []).slice();
+        if (f) L.feriados = L.feriados.filter(x => x !== iso); else L.feriados.push(iso);
+        rqRender();
+        rqAgendarSalvar();
+    }
+
+    async function rqInit() {
+        await rqSalvar();
+        if (!_rqIniciado) {
+            const hoje = new Date(), selA = document.getElementById('rqAno');
+            selA.innerHTML = '';
+            for (let a = hoje.getFullYear() - 2; a <= hoje.getFullYear() + 1; a++) selA.insertAdjacentHTML('beforeend', '<option value="' + a + '">' + a + '</option>');
+            selA.value = hoje.getFullYear();
+            document.getElementById('rqMes').value = hoje.getMonth() + 1;
+            document.getElementById('rqQuinzena').value = hoje.getDate() <= 15 ? 1 : 2;
+            _rqIniciado = true;
+        }
+        rqPreencherClientes();
+        await rqCarregar();
+    }
+
+    function rqPreencherClientes() {
+        const sel = document.getElementById('rqCliente');
+        if (!sel) return;
+        const atual = sel.value;
+        const lista = (dadosCache.clientes || []).filter(c => c.ativo !== false).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        sel.innerHTML = '<option value="">Selecione...</option>' + lista.map(c => '<option value="' + c.id + '">' + _rqEsc(c.nome) + '</option>').join('');
+        sel.value = atual;
+    }
+
+    async function rqTrocarPeriodo() {
+        await rqSalvar();
+        await rqCarregar();
+    }
+
+    async function _rqBuscar(a, m, q) {
+        _ultimoErroSupabase = null;
+        const r = await fetchSupabase('receitas_quinzena', 'GET', null, 'ano=eq.' + a + '&mes=eq.' + m + '&quinzena=eq.' + q);
+        if (r === null) {
+            const e = _ultimoErroSupabase || {};
+            const faltaTabela = e.status === 404 || /PGRST205|does not exist|Could not find the table/i.test(e.body || '');
+            if (faltaTabela) { _rqTabelaOk = false; document.getElementById('rqSQL').style.display = 'block'; }
+            return undefined;   // erro
+        }
+        _rqTabelaOk = true; document.getElementById('rqSQL').style.display = 'none';
+        return r[0] || null;
+    }
+
+    async function rqCarregar() {
+        const a = parseInt(document.getElementById('rqAno').value), m = parseInt(document.getElementById('rqMes').value), q = parseInt(document.getElementById('rqQuinzena').value);
+        rq = { id: null, ano: a, mes: m, q: q, itens: [], lancamento: null };
+        _rqSujo = false;
+        const reg = await _rqBuscar(a, m, q);
+        if (reg) {
+            rq.id = reg.id;
+            rq.itens = Array.isArray(reg.itens) ? reg.itens : [];
+            rq.lancamento = reg.lancamento || null;
+            _rqUltimoSalvo = reg.atualizado_em ? new Date(reg.atualizado_em) : null;
+        } else _rqUltimoSalvo = null;
+        rqRender();
+    }
+
+    function rqRender() {
+        const tab = document.getElementById('tabelaRQ');
+        if (!tab) return;
+        const dias = _rqDias(rq.ano, rq.mes, rq.q);
+        const sem = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+        const fds = d => _rqClasseDia(d);
+
+        tab.tHead.innerHTML = '<tr><th class="rq-nome">Cliente</th><th>Preço<small>por refeição</small></th>' +
+            dias.map(d => { const f = _rqFeriado(d); return '<th class="rq-dia-cab ' + fds(d) + '" onclick="rqAlternarFeriado(' + d + ')" title="' + _rqEsc(f ? f.nome + (f.manual ? ' (marcado manualmente — clique para desmarcar)' : ' (feriado nacional)') : 'Clique para marcar este dia como feriado') + '">' + String(d).padStart(2, '0') + '<small>' + (f ? 'feriado' : sem[new Date(rq.ano, rq.mes - 1, d).getDay()]) + '</small></th>'; }).join('') +
+            '<th>Total<small>refeições</small></th><th class="rq-val">Valor total</th><th>Recebimento</th><th>Ações</th></tr>';
+
+        const tb = tab.tBodies[0];
+        if (!rq.itens.length) {
+            tb.innerHTML = '<tr><td class="rq-vazio" colspan="' + (dias.length + 6) + '">Nenhum cliente nesta quinzena. Adicione acima ou use <b>📋 Copiar clientes da quinzena anterior</b>.</td></tr>';
+        } else {
+            const contaDe = _rqContasPorCliente(), jaMostrou = new Set();
+            const valorCli = {}; _rqPorCliente().forEach(g => { valorCli[g.cliente_id] = g.valor; });
+            tb.innerHTML = rq.itens.map((it, r) => {
+                const n = _rqNomeLinha(it), t = _rqTotLinha(it);
+                let rec = '';
+                if (!jaMostrou.has(it.cliente_id)) {
+                    jaMostrou.add(it.cliente_id);
+                    const c = contaDe[it.cliente_id];
+                    if (c && c.status === 'recebido')
+                        rec = '<span class="rq-rec-ok" title="' + _rqEsc((c.tipo_recebimento || '') + ' — ' + _rqMoeda(parseFloat(c.valor) || 0)) + '">✅ ' + (c.data_recebimento ? new Date(c.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : 'Recebido') + '</span>';
+                    else if (c)
+                        rec = '<button type="button" class="rq-rec-btn" onclick="rqAbrirRecebido(' + it.cliente_id + ')" title="Dar como recebido o lançamento de ' + _rqEsc(n.cliente) + ' (' + _rqMoeda(parseFloat(c.valor) || 0) + ')">💰 Receber</button>';
+                    else if (valorCli[it.cliente_id] > 0)
+                        rec = '<button type="button" class="rq-rec-btn" onclick="rqAbrirRecebido(' + it.cliente_id + ')" title="Lança em Contas a Receber e já dá como recebido (' + _rqMoeda(valorCli[it.cliente_id]) + ')">💰 Receber</button>';
+                }
+                return '<tr data-uid="' + it.uid + '">' +
+                    '<td class="rq-nome" title="' + _rqEsc(n.cliente + (n.item ? ' - ' + n.item : '')) + '">' + _rqEsc(n.cliente) + (n.item ? ' <small>- ' + _rqEsc(n.item) + '</small>' : '') + '</td>' +
+                    '<td><div class="rq-preco-box"><span>R$</span><input type="text" inputmode="decimal" class="rq-preco" value="' + _rqFmtPreco(it.valor_unit) + '" data-r="' + r + '" data-c="0" oninput="rqEditar(this,\'preco\')" onblur="this.value=_rqFmtPreco(_rqParsePreco(this.value))"></div></td>' +
+                    dias.map((d, i) => {
+                        const v = it.dias && it.dias[d] != null ? it.dias[d] : '';
+                        return '<td class="' + fds(d) + '"><input type="number" min="0" step="1" value="' + v + '" data-r="' + r + '" data-c="' + (i + 1) + '" data-dia="' + d + '" oninput="rqEditar(this,\'dia\')"></td>';
+                    }).join('') +
+                    '<td class="rq-tot">' + _rqNum(t.refeicoes) + '</td><td class="rq-val">' + _rqMoeda(t.valor) + '</td>' +
+                    '<td class="rq-rec">' + rec + '</td>' +
+                    '<td class="rq-acoes"><button type="button" class="rq-btn-ed" title="Editar cliente, item e preço" onclick="rqEditarLinha(\'' + it.uid + '\')">✏️ Editar</button>' +
+                    '<button type="button" class="rq-btn-ex" title="Excluir da quinzena" onclick="rqRemoverLinha(\'' + it.uid + '\')">🗑️ Excluir</button></td></tr>';
+            }).join('');
+        }
+        rqRenderRodape();
+        rqRenderStatus();
+        const btnCp = document.getElementById('rqBtnCopiar');
+        if (btnCp) btnCp.style.display = rq.itens.length ? 'none' : '';
+    }
+
+    function rqRenderRodape() {
+        const tab = document.getElementById('tabelaRQ');
+        const dias = _rqDias(rq.ano, rq.mes, rq.q);
+        const fds = d => _rqClasseDia(d);
+        let totR = 0, totV = 0;
+        const porDia = dias.map(d => rq.itens.reduce((s, it) => s + (parseFloat(it.dias && it.dias[d]) || 0), 0));
+        rq.itens.forEach(it => { const t = _rqTotLinha(it); totR += t.refeicoes; totV += t.valor; });
+        tab.tFoot.innerHTML = rq.itens.length ? '<tr><td class="rq-nome">TOTAL DA QUINZENA</td><td></td>' +
+            porDia.map((v, i) => '<td class="' + fds(dias[i]) + '">' + (v ? _rqNum(v) : '') + '</td>').join('') +
+            '<td class="rq-tot">' + _rqNum(totR) + '</td><td class="rq-val">' + _rqMoeda(Math.round(totV * 100) / 100) + '</td><td></td><td></td></tr>' : '';
+    }
+
+    function rqRenderStatus() {
+        const el = document.getElementById('rqStatus');
+        if (!el) return;
+        let h = '';
+        const L = rq.lancamento;
+        if (L && L.ids && L.ids.length) {
+            const quando = L.em ? new Date(L.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+            const contas = (dadosCache.contasReceber || []).filter(c => L.ids.includes(c.id));
+            const rec = contas.filter(c => c.status === 'recebido').length;
+            const contaDe = _rqContasPorCliente();
+            const semConta = _rqPorCliente().filter(g => !contaDe[g.cliente_id]).length;
+            const txtRec = contas.length ? ' · <b>' + (rec === contas.length ? 'todos recebidos' : rec + ' de ' + contas.length + ' recebido' + (rec !== 1 ? 's' : '')) + '</b>' : '';
+            const txtSem = semConta ? ' · ' + semConta + ' cliente' + (semConta > 1 ? 's' : '') + ' ainda sem entrada' : '';
+            if (L.assinatura && L.assinatura !== _rqAssinatura())
+                h = '<span class="rq-alt">⚠️ Valores alterados depois da entrada de ' + quando + '. Clique em <b>📥 Dar entrada nas receitas</b> para atualizar Contas a Receber.</span>';
+            else if (!L.assinatura)
+                h = '<span class="rq-ok">✅ ' + L.ids.length + ' cliente' + (L.ids.length > 1 ? 's' : '') + ' lançado' + (L.ids.length > 1 ? 's' : '') + ' em Contas a Receber' + txtRec + txtSem + '</span>';
+            else
+                h = '<span class="rq-ok">✅ Entrada já dada em Contas a Receber em ' + quando + ' — ' + L.ids.length + ' lançamento' + (L.ids.length > 1 ? 's' : '') + ', ' + _rqMoeda(L.total || 0) + txtRec + txtSem + '</span>';
+        }
+        const salvo = _rqSujo ? 'Salvando…' : (_rqUltimoSalvo ? 'Salvo às ' + _rqUltimoSalvo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
+        el.innerHTML = h + (salvo ? '<span class="rq-salvo">' + salvo + '</span>' : '');
+    }
+
+    function rqEditar(inp, tipo) {
+        const tr = inp.closest('tr'), it = rq.itens.find(x => x.uid === tr.dataset.uid);
+        if (!it) return;
+        const v = inp.value.trim();
+        if (tipo === 'preco') it.valor_unit = _rqParsePreco(v);
+        else {
+            it.dias = it.dias || {};
+            if (v === '') delete it.dias[inp.dataset.dia];
+            else it.dias[inp.dataset.dia] = Math.max(0, parseFloat(v.replace(',', '.')) || 0);
+        }
+        const t = _rqTotLinha(it);
+        tr.querySelector('.rq-tot').textContent = _rqNum(t.refeicoes);
+        tr.querySelector('.rq-val').textContent = _rqMoeda(t.valor);
+        rqRenderRodape();
+        rqAgendarSalvar();
+    }
+
+    // Enter / ↓ / ↑ trocam de linha na mesma coluna
+    document.addEventListener('keydown', function (e) {
+        const inp = e.target;
+        if (!inp || !inp.closest || !inp.closest('#tabelaRQ') || inp.tagName !== 'INPUT') return;
+        let dr = 0;
+        if (e.key === 'Enter' || e.key === 'ArrowDown') dr = 1;
+        else if (e.key === 'ArrowUp') dr = -1;
+        else return;
+        e.preventDefault();
+        const alvo = document.querySelector('#tabelaRQ input[data-r="' + (parseInt(inp.dataset.r) + dr) + '"][data-c="' + inp.dataset.c + '"]');
+        if (alvo) { alvo.focus(); alvo.select(); }
+    });
+    // Ao entrar numa célula, seleciona o conteúdo (digitar substitui o valor)
+    let _rqAcabouFocar = null;
+    document.addEventListener('focusin', function (e) {
+        const t = e.target;
+        if (!(t && t.closest && t.closest('#tabelaRQ') && t.tagName === 'INPUT')) return;
+        try { t.select(); } catch (x) {}
+        _rqAcabouFocar = t;
+    });
+    document.addEventListener('mouseup', function (e) {
+        if (_rqAcabouFocar && e.target === _rqAcabouFocar) e.preventDefault();   // não desfaz a seleção no clique
+        _rqAcabouFocar = null;
+    });
+
+    function rqAgendarSalvar() {
+        _rqSujo = true; rqRenderStatus();
+        clearTimeout(_rqTimer);
+        _rqTimer = setTimeout(() => rqSalvar(), 1200);
+    }
+
+    async function rqSalvar(manual) {
+        clearTimeout(_rqTimer);
+        if (_rqSalvando) await _rqSalvando;
+        if (!_rqSujo && !manual) return true;
+        if (!_rqTabelaOk) { if (manual) showAlert('Crie a tabela receitas_quinzena no Supabase (SQL abaixo da grade).', 'alertRQ', 'error'); return false; }
+        if (!rq.ano) return true;
+        _rqSalvando = (async () => {
+            const dados = { ano: rq.ano, mes: rq.mes, quinzena: rq.q, itens: rq.itens, lancamento: rq.lancamento, atualizado_em: new Date().toISOString() };
+            let r;
+            if (rq.id) r = await fetchSupabase('receitas_quinzena', 'PATCH', dados, 'id=eq.' + rq.id);
+            else {
+                r = await fetchSupabase('receitas_quinzena', 'POST', dados);
+                if (r && r[0]) rq.id = r[0].id;
+            }
+            if (r === null) { if (manual) showAlert('Não foi possível salvar. Verifique a conexão.', 'alertRQ', 'error'); return false; }
+            _rqSujo = false; _rqUltimoSalvo = new Date();
+            rqRenderStatus();
+            if (manual) showAlert('Quinzena salva!', 'alertRQ', 'success');
+            return true;
+        })();
+        try { return await _rqSalvando; } finally { _rqSalvando = null; }
+    }
+    window.addEventListener('beforeunload', function (e) { if (_rqSujo) { rqSalvar(); e.preventDefault(); e.returnValue = ''; } });
+
+    function rqAdicionarLinha() {
+        const cid = parseInt(document.getElementById('rqCliente').value);
+        const item = document.getElementById('rqItem').value.trim();
+        const preco = parseFloat(String(document.getElementById('rqValor').value).replace(',', '.'));
+        if (!cid) { showAlert('Selecione o cliente.', 'alertRQ', 'error'); return; }
+        if (isNaN(preco) || preco < 0) { showAlert('Informe o preço por refeição.', 'alertRQ', 'error'); return; }
+        if (rq.itens.some(x => x.cliente_id === cid && (x.item || '').toLowerCase() === item.toLowerCase())) {
+            showAlert('Esse cliente/item já está na quinzena.', 'alertRQ', 'error'); return;
+        }
+        const cli = (dadosCache.clientes || []).find(c => c.id === cid);
+        rq.itens.push({ uid: _rqUid(), cliente_id: cid, cliente_nome: cli ? cli.nome : '', item: item, valor_unit: preco, dias: {} });
+        rq.itens.sort((a, b) => { const na = _rqNomeLinha(a), nb = _rqNomeLinha(b); return (na.cliente + ' ' + na.item).localeCompare(nb.cliente + ' ' + nb.item); });
+        document.getElementById('rqItem').value = '';
+        document.getElementById('rqValor').value = '';
+        document.getElementById('rqCliente').value = '';
+        rqRender();
+        rqAgendarSalvar();
+    }
+
+    // ---------- Editar linha (cliente, item e preço) ----------
+    let _rqEditUid = null;
+    function rqEditarLinha(uid) {
+        const it = rq.itens.find(x => x.uid === uid);
+        if (!it) return;
+        _rqEditUid = uid;
+        const sel = document.getElementById('rqEdCliente');
+        const lista = (dadosCache.clientes || []).filter(c => c.ativo !== false || c.id === it.cliente_id).slice().sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        sel.innerHTML = '<option value="">Selecione...</option>' + lista.map(c => '<option value="' + c.id + '">' + _rqEsc(c.nome) + '</option>').join('');
+        sel.value = it.cliente_id || '';
+        document.getElementById('rqEdNovo').value = '';
+        document.getElementById('rqEdItem').value = it.item || '';
+        document.getElementById('rqEdPreco').value = _rqFmtPreco(it.valor_unit);
+        const n = _rqNomeLinha(it);
+        document.getElementById('rqEdSub').textContent = n.cliente + (n.item ? ' - ' + n.item : '');
+        document.getElementById('modalRQEditar').classList.add('active');
+    }
+    async function rqSalvarEdicao() {
+        const it = rq.itens.find(x => x.uid === _rqEditUid);
+        if (!it) { closeModal('modalRQEditar'); return; }
+        const novoNome = document.getElementById('rqEdNovo').value.trim();
+        let cid = parseInt(document.getElementById('rqEdCliente').value);
+        const item = document.getElementById('rqEdItem').value.trim();
+        const preco = _rqParsePreco(document.getElementById('rqEdPreco').value);
+        if (!cid && !novoNome) { alert('Selecione o cliente ou informe o nome de um novo cliente.'); return; }
+        const btn = document.getElementById('rqEdBtn'); btn.disabled = true;
+        try {
+            if (novoNome) {
+                const existe = (dadosCache.clientes || []).find(c => _rqNorm(c.nome) === _rqNorm(novoNome));
+                if (existe) cid = existe.id;
+                else {
+                    const r = await fetchSupabase('clientes', 'POST', { nome: novoNome, ativo: true });
+                    if (!(r && r[0])) { alert('Não foi possível cadastrar o cliente.'); return; }
+                    cid = r[0].id;
+                    await carregarClientes(); rqPreencherClientes();
+                }
+            }
+            if (rq.itens.some(x => x.uid !== it.uid && x.cliente_id === cid && (x.item || '').toLowerCase() === item.toLowerCase())) {
+                alert('Já existe uma linha com esse cliente e item nesta quinzena.'); return;
+            }
+            const cli = (dadosCache.clientes || []).find(c => c.id === cid);
+            it.cliente_id = cid; it.cliente_nome = cli ? cli.nome : novoNome; it.item = item; it.valor_unit = preco;
+            closeModal('modalRQEditar');
+            rqRender();
+            rqAgendarSalvar();
+            showAlert('Linha atualizada.', 'alertRQ', 'success');
+        } finally { btn.disabled = false; }
+    }
+
+    function rqRemoverLinha(uid) {
+        const it = rq.itens.find(x => x.uid === uid);
+        if (!it) return;
+        const n = _rqNomeLinha(it), t = _rqTotLinha(it);
+        if (!confirm('Remover "' + n.cliente + (n.item ? ' - ' + n.item : '') + '" desta quinzena?' + (t.refeicoes ? '\n(' + _rqNum(t.refeicoes) + ' refeições lançadas serão apagadas)' : ''))) return;
+        rq.itens = rq.itens.filter(x => x.uid !== uid);
+        rqRender();
+        rqAgendarSalvar();
+    }
+
+    async function rqCopiarAnterior() {
+        let a = rq.ano, m = rq.mes, q = rq.q;
+        if (q === 2) q = 1; else { q = 2; m--; if (m < 1) { m = 12; a--; } }
+        const reg = await _rqBuscar(a, m, q);
+        if (reg === undefined) return;
+        if (!reg || !Array.isArray(reg.itens) || !reg.itens.length) {
+            showAlert('A quinzena anterior (' + q + 'ª de ' + String(m).padStart(2, '0') + '/' + a + ') não tem clientes.', 'alertRQ', 'error'); return;
+        }
+        rq.itens = reg.itens.map(it => ({ uid: _rqUid(), cliente_id: it.cliente_id, cliente_nome: it.cliente_nome, item: it.item || '', valor_unit: it.valor_unit, dias: {} }));
+        rqRender();
+        rqAgendarSalvar();
+        showAlert(rq.itens.length + ' clientes copiados da ' + q + 'ª quinzena de ' + String(m).padStart(2, '0') + '/' + a + '.', 'alertRQ', 'success');
+    }
+
+    // ---------- Dar entrada em Contas a Receber ----------
+    function rqAbrirLancar() {
+        const grupos = _rqPorCliente();
+        if (!grupos.length) { showAlert('Não há valores para lançar nesta quinzena.', 'alertRQ', 'error'); return; }
+        const dias = _rqDias(rq.ano, rq.mes, rq.q), fim = _rqISO(rq.ano, rq.mes, dias[dias.length - 1]);
+        const L = rq.lancamento;
+        document.getElementById('rqComp').value = (L && L.competencia) || fim;
+        document.getElementById('rqVenc').value = (L && L.vencimento) || fim;
+        document.getElementById('rqLancSub').textContent = rq.q + 'ª quinzena de ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano + ' — um lançamento por cliente em Contas a Receber';
+        let tot = 0, ref = 0;
+        document.getElementById('rqPrevia').innerHTML = grupos.map(g => {
+            tot += g.valor; ref += g.refeicoes;
+            return '<tr><td>' + _rqEsc(_rqNomeLinha({ cliente_id: g.cliente_id }).cliente) + '</td><td style="text-align:right;">' + _rqNum(g.refeicoes) + '</td><td style="text-align:right;">' + _rqMoeda(g.valor) + '</td></tr>';
+        }).join('') + '<tr style="font-weight:700;background:#fff4ec;"><td>TOTAL</td><td style="text-align:right;">' + _rqNum(ref) + '</td><td style="text-align:right;">' + _rqMoeda(Math.round(tot * 100) / 100) + '</td></tr>';
+        document.getElementById('rqLancResumo').textContent = grupos.length + ' lançamento' + (grupos.length > 1 ? 's' : '') + ' · ' + _rqMoeda(Math.round(tot * 100) / 100);
+        const av = document.getElementById('rqAviso');
+        if (L && L.ids && L.ids.length) {
+            av.innerHTML = '⚠️ Esta quinzena já teve entrada em ' + (L.em ? new Date(L.em).toLocaleDateString('pt-BR') : '') + '. Ao confirmar, os lançamentos <b>pendentes</b> gerados antes serão substituídos pelos valores atuais. Os que já foram <b>recebidos</b> não são alterados.';
+            av.style.display = 'block';
+        } else av.style.display = 'none';
+        document.getElementById('modalRQLancar').classList.add('active');
+    }
+
+    async function rqConfirmarLancar() {
+        const comp = document.getElementById('rqComp').value, venc = document.getElementById('rqVenc').value;
+        if (!comp || !venc) { alert('Informe a data de competência e a data prevista de recebimento.'); return; }
+        const btn = document.getElementById('rqBtnConfirmar');
+        btn.disabled = true;
+        try {
+            if (!(await rqSalvar(false))) { alert(_rqTabelaOk ? 'Não foi possível salvar a quinzena. Verifique a conexão e tente novamente.' : 'Crie a tabela receitas_quinzena no Supabase antes de dar entrada.'); return; }
+            const grupos = _rqPorCliente();
+            const rotulo = rq.q + 'ª quinzena ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano;
+            const mantidos = [], travados = new Set();
+            let erros = 0;
+
+            // 1) Lançamentos anteriores desta quinzena: apaga os pendentes, mantém os recebidos
+            const ant = (rq.lancamento && rq.lancamento.ids) || [];
+            if (ant.length) {
+                const existentes = await fetchSupabase('contas_a_receber', 'GET', null, 'id=in.(' + ant.join(',') + ')');
+                if (existentes === null) { alert('Não foi possível conferir os lançamentos anteriores. Tente novamente.'); return; }
+                for (const c of existentes) {
+                    if (c.status === 'recebido') { mantidos.push(c.id); travados.add(c.cliente_id); }
+                    else { const d = await fetchSupabase('contas_a_receber', 'DELETE', null, 'id=eq.' + c.id); if (d === null) { erros++; mantidos.push(c.id); travados.add(c.cliente_id); } }
+                }
+            }
+
+            // 2) Novo lançamento por cliente
+            const novos = [];
+            for (const g of grupos) {
+                if (travados.has(g.cliente_id)) continue;
+                const dados = {
+                    cliente_id: g.cliente_id,
+                    descricao: 'Refeições ' + rotulo,
+                    valor: g.valor,
+                    data_competencia: comp,
+                    data_vencimento: venc,
+                    parcela_atual: 1,
+                    total_parcelas: 1,
+                    status: 'pendente',
+                    observacoes: 'Receitas por Quinzena — ' + _rqNum(g.refeicoes) + ' refeições. ' + g.linhas.join('; '),
+                    nota_fiscal: null
+                };
+                const r = await fetchSupabase('contas_a_receber', 'POST', dados);
+                if (r && r[0]) novos.push(r[0].id); else erros++;
+            }
+
+            const ids = mantidos.concat(novos);
+            const total = grupos.reduce((s, g) => s + g.valor, 0);
+            rq.lancamento = { feriados: (rq.lancamento && rq.lancamento.feriados) || [], ids: ids, em: new Date().toISOString(), competencia: comp, vencimento: venc, total: Math.round(total * 100) / 100, assinatura: _rqAssinatura() };
+            _rqSujo = true;
+            await rqSalvar(false);
+            closeModal('modalRQLancar');
+            rqRenderStatus();
+
+            let msg = novos.length + ' lançamento' + (novos.length !== 1 ? 's' : '') + ' gerado' + (novos.length !== 1 ? 's' : '') + ' em Contas a Receber.';
+            if (travados.size) msg += ' ' + travados.size + ' cliente(s) já recebido(s) não foram alterados.';
+            if (erros) msg += ' ⚠️ ' + erros + ' erro(s) — confira em Contas a Receber.';
+            showAlert(msg, 'alertRQ', erros ? 'error' : 'success');
+            if (typeof carregarContasReceber === 'function') await carregarContasReceber();
+            rqRender();
+            if (typeof atualizarDashboard === 'function') atualizarDashboard();
+        } finally { btn.disabled = false; }
+    }
+
+    function _rqContasPorCliente() {
+        const L = rq.lancamento, m = {};
+        if (!L || !L.ids || !L.ids.length) return m;
+        (dadosCache.contasReceber || []).filter(c => L.ids.includes(c.id)).forEach(c => { m[c.cliente_id] = c; });
+        return m;
+    }
+
+    // ---------- Dar como recebido (lançamentos gerados por esta quinzena) ----------
+    let _rqRecContas = [];
+    async function rqAbrirRecebido(clienteId) {
+        const L = rq.lancamento;
+        const ids = (L && L.ids) || [];
+        let contas = [];
+        if (ids.length) {
+            contas = await fetchSupabase('contas_a_receber', 'GET', null, 'id=in.(' + ids.join(',') + ')');
+            if (contas === null) return;
+        }
+        contas = contas.map(c => Object.assign({ chave: String(c.id) }, c));
+        // Cliente desta quinzena ainda sem lançamento: entra como "a lançar e receber"
+        if (clienteId && !contas.some(c => c.cliente_id === clienteId)) {
+            const g = _rqPorCliente().find(x => x.cliente_id === clienteId);
+            if (g) contas.push({ chave: 'novo-' + clienteId, novo: true, cliente_id: clienteId, valor: g.valor, status: 'pendente' });
+        }
+        if (!clienteId && !contas.length) { showAlert('Primeiro dê entrada nas receitas desta quinzena, ou use o botão 💰 Receber de cada cliente.', 'alertRQ', 'error'); return; }
+        _rqRecContas = contas.filter(c => !clienteId || c.cliente_id === clienteId).sort((a, b) => _rqNomeLinha({ cliente_id: a.cliente_id }).cliente.localeCompare(_rqNomeLinha({ cliente_id: b.cliente_id }).cliente));
+        const pend = _rqRecContas.filter(c => c.status !== 'recebido');
+        if (!pend.length) { showAlert(clienteId ? 'Esse cliente já foi recebido.' : 'Todos os lançamentos desta quinzena já foram recebidos.', 'alertRQ', 'success'); return; }
+        { const h = new Date(); document.getElementById('rqRecData').value = _rqISO(h.getFullYear(), h.getMonth() + 1, h.getDate()); }
+        document.getElementById('rqRecForma').value = '';
+        if (typeof atualizarSelectBancosModal === 'function') atualizarSelectBancosModal('rqRecBanco');
+        document.getElementById('rqRecSub').textContent = (clienteId ? _rqNomeLinha({ cliente_id: clienteId }).cliente + ' — ' : '') + rq.q + 'ª quinzena de ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano;
+        document.getElementById('rqRecTodos').checked = true;
+        document.getElementById('rqRecLista').innerHTML = _rqRecContas.map(c => {
+            const ok = c.status === 'recebido';
+            return '<tr' + (ok ? ' style="opacity:.55;"' : '') + '><td style="width:30px;">' + (ok ? '✅' : '<input type="checkbox" class="rq-rec-chk" value="' + c.chave + '" checked onchange="rqRecResumo()">') + '</td>' +
+                '<td>' + _rqEsc(_rqNomeLinha({ cliente_id: c.cliente_id }).cliente) + '</td>' +
+                '<td style="text-align:right;">' + _rqMoeda(parseFloat(c.valor) || 0) + '</td>' +
+                '<td>' + (ok ? 'Recebido em ' + new Date(c.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR') : (c.novo ? 'Será lançado em Contas a Receber já como recebido' : 'Pendente')) + '</td></tr>';
+        }).join('');
+        rqRecResumo();
+        document.getElementById('modalRQRecebido').classList.add('active');
+    }
+    function rqRecMarcarTodos(el) { document.querySelectorAll('#rqRecLista .rq-rec-chk').forEach(c => { c.checked = el.checked; }); rqRecResumo(); }
+    function rqRecResumo() {
+        const sel = [...document.querySelectorAll('#rqRecLista .rq-rec-chk:checked')].map(c => c.value);
+        const tot = _rqRecContas.filter(c => sel.includes(c.chave)).reduce((s, c) => s + (parseFloat(c.valor) || 0), 0);
+        document.getElementById('rqRecResumoTxt').textContent = sel.length + ' selecionado' + (sel.length !== 1 ? 's' : '') + ' · ' + _rqMoeda(Math.round(tot * 100) / 100);
+    }
+    async function rqConfirmarRecebido() {
+        const data = document.getElementById('rqRecData').value, forma = document.getElementById('rqRecForma').value, banco = document.getElementById('rqRecBanco').value;
+        const sel = [...document.querySelectorAll('#rqRecLista .rq-rec-chk:checked')].map(c => c.value);
+        if (!sel.length) { alert('Selecione pelo menos um lançamento.'); return; }
+        if (!data || !forma || !banco) { alert('Preencha data, forma de recebimento e banco!'); return; }
+        const btn = document.getElementById('rqRecBtn'); btn.disabled = true;
+        let erros = 0;
+        try {
+            const baixa = { status: 'recebido', data_recebimento: data, tipo_recebimento: forma, banco_id: parseInt(banco) };
+            let criouNovo = false;
+            for (const chave of sel) {
+                if (chave.startsWith('novo-')) {
+                    // Cliente ainda sem lançamento: cria em Contas a Receber já recebido
+                    const cid = parseInt(chave.slice(5));
+                    const g = _rqPorCliente().find(x => x.cliente_id === cid);
+                    if (!g) { erros++; continue; }
+                    const dias = _rqDias(rq.ano, rq.mes, rq.q), fim = _rqISO(rq.ano, rq.mes, dias[dias.length - 1]);
+                    const L0 = rq.lancamento || {};
+                    const r = await fetchSupabase('contas_a_receber', 'POST', Object.assign({
+                        cliente_id: cid,
+                        descricao: 'Refeições ' + rq.q + 'ª quinzena ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano,
+                        valor: g.valor,
+                        data_competencia: L0.competencia || fim,
+                        data_vencimento: L0.vencimento || fim,
+                        parcela_atual: 1, total_parcelas: 1,
+                        observacoes: 'Receitas por Quinzena — ' + _rqNum(g.refeicoes) + ' refeições. ' + g.linhas.join('; '),
+                        nota_fiscal: null
+                    }, baixa));
+                    if (r && r[0]) {
+                        rq.lancamento = Object.assign({}, rq.lancamento || {});
+                        rq.lancamento.ids = (rq.lancamento.ids || []).concat(r[0].id);
+                        if (!rq.lancamento.em) rq.lancamento.em = new Date().toISOString();
+                        criouNovo = true;
+                    } else erros++;
+                } else {
+                    const r = await fetchSupabase('contas_a_receber', 'PATCH', baixa, 'id=eq.' + chave);
+                    if (r === null) erros++;
+                }
+            }
+            if (criouNovo) { _rqSujo = true; await rqSalvar(false); }
+            closeModal('modalRQRecebido');
+            showAlert((sel.length - erros) + ' lançamento(s) dado(s) como recebido(s)' + (erros ? ' — ⚠️ ' + erros + ' erro(s).' : '.'), 'alertRQ', erros ? 'error' : 'success');
+            if (typeof carregarContasReceber === 'function') await carregarContasReceber();
+            if (typeof carregarContasRecebidas === 'function') await carregarContasRecebidas();
+            if (typeof carregarBancos === 'function') await carregarBancos();
+            rqRender();
+            if (typeof atualizarDashboard === 'function') atualizarDashboard();
+        } finally { btn.disabled = false; }
+    }
+    // ---------- Replicar clientes/preços para as quinzenas seguintes ----------
+    function _rqProximas(a, m, q, ateA, ateM) {
+        const lista = [];
+        while (true) {
+            if (q === 1) q = 2; else { q = 1; m++; if (m > 12) { m = 1; a++; } }
+            if (a > ateA || (a === ateA && m > ateM)) break;
+            lista.push({ a: a, m: m, q: q });
+        }
+        return lista;
+    }
+    function rqAtualizarResumoReplicar() {
+        const ateA = parseInt(document.getElementById('rqRepAno').value), ateM = parseInt(document.getElementById('rqRepMes').value);
+        const n = _rqProximas(rq.ano, rq.mes, rq.q, ateA, ateM).length;
+        document.getElementById('rqRepResumo').textContent = n ? n + ' quinzena' + (n > 1 ? 's' : '') + ' · ' + rq.itens.length + ' linhas cada' : 'Nenhuma quinzena depois desta até o mês escolhido';
+    }
+    function rqAbrirReplicar() {
+        if (!rq.itens.length) { showAlert('Esta quinzena não tem clientes para replicar.', 'alertRQ', 'error'); return; }
+        if (!_rqTabelaOk) { showAlert('Crie a tabela receitas_quinzena no Supabase antes.', 'alertRQ', 'error'); return; }
+        const selA = document.getElementById('rqRepAno');
+        selA.innerHTML = '';
+        for (let a = rq.ano; a <= rq.ano + 3; a++) selA.insertAdjacentHTML('beforeend', '<option value="' + a + '">' + a + '</option>');
+        selA.value = Math.max(rq.ano, 2027);
+        document.getElementById('rqRepMes').value = 12;
+        document.getElementById('rqRepSubst').checked = false;
+        document.getElementById('rqRepProg').textContent = '';
+        document.getElementById('rqRepSub').textContent = 'A partir da ' + rq.q + 'ª quinzena de ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano + ' (' + rq.itens.length + ' linhas)';
+        selA.onchange = rqAtualizarResumoReplicar;
+        document.getElementById('rqRepMes').onchange = rqAtualizarResumoReplicar;
+        rqAtualizarResumoReplicar();
+        document.getElementById('modalRQReplicar').classList.add('active');
+    }
+    async function rqConfirmarReplicar() {
+        const ateA = parseInt(document.getElementById('rqRepAno').value), ateM = parseInt(document.getElementById('rqRepMes').value);
+        const subst = document.getElementById('rqRepSubst').checked;
+        const alvos = _rqProximas(rq.ano, rq.mes, rq.q, ateA, ateM);
+        if (!alvos.length) { alert('Não há quinzenas depois desta até o mês escolhido.'); return; }
+        await rqSalvar();
+        const base = rq.itens.map(it => ({ cliente_id: it.cliente_id, cliente_nome: it.cliente_nome, item: it.item || '', valor_unit: it.valor_unit }));
+        const btn = document.getElementById('rqRepBtn'), prog = document.getElementById('rqRepProg');
+        btn.disabled = true;
+        let criadas = 0, substituidas = 0, puladas = 0, erros = 0;
+        try {
+            for (let k = 0; k < alvos.length; k++) {
+                const t = alvos[k];
+                prog.textContent = 'Gravando ' + (k + 1) + ' de ' + alvos.length + ' — ' + t.q + 'ª quinzena de ' + String(t.m).padStart(2, '0') + '/' + t.a + '…';
+                const reg = await _rqBuscar(t.a, t.m, t.q);
+                if (reg === undefined) { erros++; continue; }
+                if (reg && Array.isArray(reg.itens) && reg.itens.length && !subst) { puladas++; continue; }
+                const itens = base.map(b => Object.assign({ uid: _rqUid(), dias: {} }, b));
+                const dados = { ano: t.a, mes: t.m, quinzena: t.q, itens: itens, atualizado_em: new Date().toISOString() };
+                let r;
+                if (reg) r = await fetchSupabase('receitas_quinzena', 'PATCH', dados, 'id=eq.' + reg.id);
+                else r = await fetchSupabase('receitas_quinzena', 'POST', Object.assign({ lancamento: null }, dados));
+                if (r === null) erros++; else if (reg) substituidas++; else criadas++;
+            }
+        } finally { btn.disabled = false; }
+        closeModal('modalRQReplicar');
+        showAlert('Replicado: ' + criadas + ' quinzena(s) criada(s)' + (substituidas ? ', ' + substituidas + ' substituída(s)' : '') +
+                  (puladas ? ', ' + puladas + ' já tinha(m) clientes e foi(ram) mantida(s)' : '') + (erros ? ' — ⚠️ ' + erros + ' erro(s).' : '.'),
+                  'alertRQ', erros ? 'error' : 'success');
+    }
+
+    // ---------- Importar planilha (CLIENTE | VALOR UNITÁRIO | dias 1..31) ----------
+    const _rqNorm = t => String(t == null ? '' : t).normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+    const _RQ_MESES = ['JANEIRO', 'FEVEREIRO', 'MARCO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
+
+    function _rqLerPlanilha(wb) {
+        for (const nomeAba of wb.SheetNames) {
+            const linhas = XLSX.utils.sheet_to_json(wb.Sheets[nomeAba], { header: 1, raw: true, defval: null });
+            const iCab = linhas.findIndex(r => r && r.some(c => _rqNorm(c) === 'CLIENTE'));
+            if (iCab < 0) continue;
+            const cab = linhas[iCab];
+            const cCli = cab.findIndex(c => _rqNorm(c) === 'CLIENTE');
+            const cVal = cab.findIndex(c => /VALOR UNIT|PRECO|PREÇO/.test(_rqNorm(c)));
+            const colDias = [];
+            cab.forEach((c, i) => { const n = Number(String(c == null ? '' : c).trim()); if (String(c).trim() !== '' && Number.isInteger(n) && n >= 1 && n <= 31) colDias.push({ i: i, d: n }); });
+            if (cVal < 0 || !colDias.length) continue;
+            const itens = [];
+            for (let r = iCab + 1; r < linhas.length; r++) {
+                const L = linhas[r] || [];
+                const nome = String(L[cCli] == null ? '' : L[cCli]).trim();
+                if (!nome || /^TOTA/.test(_rqNorm(nome))) continue;
+                const dias = {};
+                colDias.forEach(cd => { const v = L[cd.i]; if (v !== null && v !== '' && !isNaN(Number(v))) dias[cd.d] = Number(v); });
+                itens.push({ nome: nome, valor: Number(L[cVal]) || 0, dias: dias });
+            }
+            const mesIdx = _RQ_MESES.findIndex(m => _rqNorm(nomeAba).includes(m));
+            const q = colDias.every(cd => cd.d <= 15) ? 1 : 2;
+            return { aba: nomeAba, mes: mesIdx >= 0 ? mesIdx + 1 : null, q: q, itens: itens };
+        }
+        return null;
+    }
+
+    // "CBTEX - sanduíche" → cliente CBTEX, item "sanduíche"; "INDATEX (SEMANAL)" → cliente INDATEX
+    function _rqSepararNome(nome) {
+        const k = nome.indexOf(' - ');
+        const base = (k >= 0 ? nome.slice(0, k) : nome).trim();
+        const item = (k >= 0 ? nome.slice(k + 3) : '').trim();
+        return { base: base, semParen: base.replace(/\s*\([^)]*\)\s*/g, ' ').trim(), item: item };
+    }
+    function _rqAcharCliente(nome) {
+        const sp = _rqSepararNome(nome), lista = dadosCache.clientes || [];
+        for (const alvo of [nome, sp.base, sp.semParen]) {
+            const c = lista.find(x => _rqNorm(x.nome) === _rqNorm(alvo));
+            if (c) return { cliente: c, item: _rqNorm(alvo) === _rqNorm(nome) ? '' : sp.item };
+        }
+        return { cliente: null, item: sp.item, novoNome: sp.semParen || sp.base };
+    }
+
+    function rqImportarArquivo(input) {
+        const arq = input.files && input.files[0];
+        input.value = '';
+        if (!arq) return;
+        if (!_rqTabelaOk) { showAlert('Crie a tabela receitas_quinzena no Supabase antes de importar (SQL abaixo da grade).', 'alertRQ', 'error'); return; }
+        const leitor = new FileReader();
+        leitor.onload = () => _garantirXLSX(async () => {
+            let dadosPl;
+            try { dadosPl = _rqLerPlanilha(XLSX.read(new Uint8Array(leitor.result), { type: 'array' })); }
+            catch (e) { console.error(e); showAlert('Não foi possível ler a planilha.', 'alertRQ', 'error'); return; }
+            if (!dadosPl || !dadosPl.itens.length) { showAlert('Não encontrei as colunas CLIENTE, VALOR UNITÁRIO e os dias na planilha.', 'alertRQ', 'error'); return; }
+
+            const ano = parseInt(document.getElementById('rqAno').value);
+            const mes = dadosPl.mes || parseInt(document.getElementById('rqMes').value);
+            const q = dadosPl.q;
+            const rotulo = q + 'ª quinzena de ' + String(mes).padStart(2, '0') + '/' + ano;
+
+            const casados = dadosPl.itens.map(it => Object.assign({}, it, _rqAcharCliente(it.nome)));
+            const novos = [...new Set(casados.filter(c => !c.cliente).map(c => c.novoNome))];
+            let msg = 'Importar ' + casados.length + ' linhas da aba "' + dadosPl.aba + '" para a ' + rotulo + '?\n\n' +
+                      'As linhas que já existirem nessa quinzena serão substituídas pelas da planilha.';
+            if (novos.length) msg += '\n\n' + novos.length + ' cliente(s) não estão no cadastro e serão criados:\n• ' + novos.join('\n• ');
+            if (!confirm(msg)) return;
+
+            // Abre a quinzena de destino (salvando a atual antes)
+            await rqSalvar();
+            document.getElementById('rqMes').value = mes;
+            document.getElementById('rqQuinzena').value = q;
+            await rqCarregar();
+            if (!_rqTabelaOk) return;
+
+            // Cria os clientes que faltam
+            let erros = 0;
+            for (const nome of novos) {
+                const r = await fetchSupabase('clientes', 'POST', { nome: nome, ativo: true });
+                if (!(r && r[0])) erros++;
+            }
+            if (novos.length) { await carregarClientes(); rqPreencherClientes(); }
+
+            const itens = [];
+            casados.forEach(c => {
+                const cli = c.cliente || (dadosCache.clientes || []).find(x => _rqNorm(x.nome) === _rqNorm(c.novoNome));
+                if (!cli) { erros++; return; }
+                itens.push({ uid: _rqUid(), cliente_id: cli.id, cliente_nome: cli.nome, item: c.item || '', valor_unit: c.valor, dias: c.dias });
+            });
+            rq.itens = itens;
+            rqRender();
+            _rqSujo = true;
+            const ok = await rqSalvar(false);
+            showAlert(itens.length + ' linhas importadas para a ' + rotulo + (novos.length ? ' (' + novos.length + ' cliente(s) cadastrado(s))' : '') +
+                      (erros ? ' — ⚠️ ' + erros + ' linha(s)/cliente(s) com erro.' : '') + (ok ? '' : ' — ⚠️ não foi possível salvar.'),
+                      'alertRQ', erros || !ok ? 'error' : 'success');
+        });
+        leitor.readAsArrayBuffer(arq);
+    }
 </script>
 </body>
 </html>
