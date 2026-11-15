@@ -2147,7 +2147,7 @@ html[data-tema="escuro"] .rq-previa tfoot td { background: #2d2520; }
                 <h1>🍽️ Receitas por Quinzena</h1>
                 <div style="display:flex;gap:8px;">
                     <button class="btn btn-secondary" onclick="rqSalvar(true)">💾 Salvar</button>
-                    <button class="btn btn-primary" onclick="rqAbrirLancar()">📥 Dar entrada nas receitas</button>
+                    <button class="btn btn-primary" onclick="rqAbrirLancar()" title="Os lançamentos vão para Contas a Receber automaticamente; aqui você ajusta competência e vencimento">📅 Competência e vencimento</button>
                     <button class="btn btn-success" onclick="rqAbrirRecebido()">✅ Dar como recebido</button>
                 </div>
             </div>
@@ -3818,7 +3818,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
             <div class="modal-content cad-box" style="max-width:720px;">
                 <div class="cad-head">
                     <div class="cad-ico">📥</div>
-                    <div><div class="cad-tit">Dar entrada nas receitas</div><div class="cad-sub" id="rqLancSub">Gera um lançamento em Contas a Receber para cada cliente</div></div>
+                    <div><div class="cad-tit">Competência e vencimento</div><div class="cad-sub" id="rqLancSub">Gera um lançamento em Contas a Receber para cada cliente</div></div>
                     <button type="button" class="pl-x" onclick="closeModal('modalRQLancar')" title="Fechar">&times;</button>
                 </div>
                 <div class="cad-body">
@@ -3827,7 +3827,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                         <div class="cad-field"><label>Data prevista de recebimento<span class="req">*</span></label><input type="date" id="rqVenc"><span class="cad-hint">Vencimento dos lançamentos.</span></div>
                     </div>
                     <div id="rqAviso" class="rq-aviso" style="display:none;"></div>
-                    <div class="cad-sec">Lançamentos que serão gerados</div>
+                    <div class="cad-sec">Lançamentos da quinzena em Contas a Receber</div>
                     <div style="max-height:300px;overflow:auto;border:1px solid var(--cor-borda,#e5e7eb);border-radius:8px;">
                         <table class="rq-previa"><thead><tr><th>Cliente</th><th style="text-align:right;">Refeições</th><th style="text-align:right;">Valor</th></tr></thead><tbody id="rqPrevia"></tbody></table>
                     </div>
@@ -3836,7 +3836,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                     <div class="cad-hint" id="rqLancResumo"></div>
                     <div class="btns">
                         <button type="button" class="btn btn-secondary" onclick="closeModal('modalRQLancar')">Cancelar</button>
-                        <button type="button" class="btn btn-success" id="rqBtnConfirmar" onclick="rqConfirmarLancar()">✅ Confirmar entrada</button>
+                        <button type="button" class="btn btn-success" id="rqBtnConfirmar" onclick="rqConfirmarLancar()">💾 Aplicar datas</button>
                     </div>
                 </div>
             </div>
@@ -5208,7 +5208,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                 : '-';
             const acoes = status === 'recebido'
                 ? `<button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
-                   <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                   <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;" title="Estorno: volta o lançamento para pendente">↩ Estorno</button>
                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">Deletar</button>`
                 : `<button class="btn btn-success btn-small" onclick="receberConta(${conta.id})">✅ Recebido</button>
                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️ Editar</button>
@@ -5416,7 +5416,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                 : '-';
             const acoes = status === 'pago'
                 ? `<button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
-                   <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                   <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;" title="Estorno: volta o lançamento para pendente">↩ Estorno</button>
                    <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">Deletar</button>`
                 : `<button class="btn btn-success btn-small" onclick="pagarConta(${conta.id})">💳 Pagar</button>
                    <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️ Editar</button>
@@ -5675,7 +5675,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                 <td>${banco ? banco.nome : '-'}</td>
                 <td style="white-space:nowrap;">
                     <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'receber')">✏️</button>
-                    <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                    <button class="btn btn-warning btn-small" onclick="reverterRecebimento(${conta.id})" style="background:#ffc107;color:#333;" title="Estorno: volta o lançamento para pendente">↩ Estorno</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_receber')">🗑️</button>
                 </td>
             </tr>`);
@@ -5755,7 +5755,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                 <td>${banco ? banco.nome : '-'}</td>
                 <td style="white-space:nowrap;">
                     <button class="btn btn-secondary btn-small" onclick="editarLancamento(${conta.id}, 'pagar')">✏️</button>
-                    <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;">↩ Reverter</button>
+                    <button class="btn btn-warning btn-small" onclick="reverterPagamento(${conta.id})" style="background:#ffc107;color:#333;" title="Estorno: volta o lançamento para pendente">↩ Estorno</button>
                     <button class="btn btn-danger btn-small" onclick="deletarConta(${conta.id}, 'contas_a_pagar')">🗑️</button>
                 </td>
             </tr>`);
@@ -5851,7 +5851,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
 
     // REVERTER / EDITAR LANÇAMENTOS
     async function reverterRecebimento(id) {
-        if (!confirm('Reverter este recebimento para pendente?')) return;
+        if (!confirm('Fazer o estorno deste recebimento? O lançamento volta para pendente.')) return;
         const r = await fetchSupabase('contas_a_receber', 'PATCH', {
             status: 'pendente',
             data_recebimento: null,
@@ -5859,7 +5859,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
             banco_id: null
         }, 'id=eq.' + id);
         if (r !== null) {
-            showAlert('Recebimento revertido!', 'alertLancarReceber', 'success');
+            showAlert('Estorno do recebimento realizado!', 'alertLancarReceber', 'success');
             await carregarContasReceber();
             await carregarContasRecebidas();
             await carregarBancos();
@@ -5868,7 +5868,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
     }
 
     async function reverterPagamento(id) {
-        if (!confirm('Reverter este pagamento para pendente?')) return;
+        if (!confirm('Fazer o estorno deste pagamento? O lançamento volta para pendente.')) return;
         const r = await fetchSupabase('contas_a_pagar', 'PATCH', {
             status: 'pendente',
             data_pagamento: null,
@@ -5876,7 +5876,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
             banco_id: null
         }, 'id=eq.' + id);
         if (r !== null) {
-            showAlert('Pagamento revertido!', 'alertLancarPagar', 'success');
+            showAlert('Estorno do pagamento realizado!', 'alertLancarPagar', 'success');
             await carregarContasPagar();
             await carregarContasPagas();
             await carregarBancos();
@@ -15435,6 +15435,35 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
             _rqUltimoSalvo = reg.atualizado_em ? new Date(reg.atualizado_em) : null;
         } else _rqUltimoSalvo = null;
         rqRender();
+        // Garante que Contas a Receber esteja igual à quinzena (ex.: quinzenas lançadas antes desta versão)
+        if (rq.id && _rqTabelaOk) _rqSincronizar(rq);
+    }
+
+    // Conteúdo da coluna Recebimento (botão na 1ª linha de cada cliente)
+    function _rqRecCelulas() {
+        const out = {};
+        const contaDe = _rqContasPorCliente(), jaMostrou = new Set();
+        const valorCli = {}; _rqPorCliente().forEach(g => { valorCli[g.cliente_id] = g.valor; });
+        rq.itens.forEach(it => {
+            const n = _rqNomeLinha(it);
+            let rec = '';
+            if (!jaMostrou.has(it.cliente_id)) {
+                jaMostrou.add(it.cliente_id);
+                const c = contaDe[it.cliente_id];
+                if (c && c.status === 'recebido')
+                    rec = '<span class="rq-rec-ok" title="' + _rqEsc((c.tipo_recebimento || '') + ' — ' + _rqMoeda(parseFloat(c.valor) || 0)) + '">✅ ' + (c.data_recebimento ? new Date(c.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : 'Recebido') + '</span>';
+                else if (c || valorCli[it.cliente_id] > 0)
+                    rec = '<button type="button" class="rq-rec-btn" onclick="rqAbrirRecebido(' + it.cliente_id + ')" title="Dar como recebido — ' + _rqEsc(n.cliente) + ' (' + _rqMoeda(valorCli[it.cliente_id] || (c ? parseFloat(c.valor) || 0 : 0)) + ')">💰 Receber</button>';
+            }
+            out[it.uid] = rec;
+        });
+        return out;
+    }
+    // Atualiza só a coluna Recebimento e a situação (sem redesenhar a grade, para não perder o foco)
+    function rqRenderRecebimentos() {
+        const recHtml = _rqRecCelulas();
+        document.querySelectorAll('#tabelaRQ tbody tr[data-uid]').forEach(tr => { const td = tr.querySelector('.rq-rec'); if (td) td.innerHTML = recHtml[tr.dataset.uid] || ''; });
+        rqRenderStatus();
     }
 
     function rqRender() {
@@ -15452,21 +15481,10 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         if (!rq.itens.length) {
             tb.innerHTML = '<tr><td class="rq-vazio" colspan="' + (dias.length + 6) + '">Nenhum cliente nesta quinzena. Adicione acima ou use <b>📋 Copiar clientes da quinzena anterior</b>.</td></tr>';
         } else {
-            const contaDe = _rqContasPorCliente(), jaMostrou = new Set();
-            const valorCli = {}; _rqPorCliente().forEach(g => { valorCli[g.cliente_id] = g.valor; });
+            const recHtml = _rqRecCelulas();
             tb.innerHTML = rq.itens.map((it, r) => {
                 const n = _rqNomeLinha(it), t = _rqTotLinha(it);
-                let rec = '';
-                if (!jaMostrou.has(it.cliente_id)) {
-                    jaMostrou.add(it.cliente_id);
-                    const c = contaDe[it.cliente_id];
-                    if (c && c.status === 'recebido')
-                        rec = '<span class="rq-rec-ok" title="' + _rqEsc((c.tipo_recebimento || '') + ' — ' + _rqMoeda(parseFloat(c.valor) || 0)) + '">✅ ' + (c.data_recebimento ? new Date(c.data_recebimento + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) : 'Recebido') + '</span>';
-                    else if (c)
-                        rec = '<button type="button" class="rq-rec-btn" onclick="rqAbrirRecebido(' + it.cliente_id + ')" title="Dar como recebido o lançamento de ' + _rqEsc(n.cliente) + ' (' + _rqMoeda(parseFloat(c.valor) || 0) + ')">💰 Receber</button>';
-                    else if (valorCli[it.cliente_id] > 0)
-                        rec = '<button type="button" class="rq-rec-btn" onclick="rqAbrirRecebido(' + it.cliente_id + ')" title="Lança em Contas a Receber e já dá como recebido (' + _rqMoeda(valorCli[it.cliente_id]) + ')">💰 Receber</button>';
-                }
+                const rec = recHtml[it.uid] || '';
                 return '<tr data-uid="' + it.uid + '">' +
                     '<td class="rq-nome" title="' + _rqEsc(n.cliente + (n.item ? ' - ' + n.item : '')) + '">' + _rqEsc(n.cliente) + (n.item ? ' <small>- ' + _rqEsc(n.item) + '</small>' : '') + '</td>' +
                     '<td><div class="rq-preco-box"><span>R$</span><input type="text" inputmode="decimal" class="rq-preco" value="' + _rqFmtPreco(it.valor_unit) + '" data-r="' + r + '" data-c="0" oninput="rqEditar(this,\'preco\')" onblur="this.value=_rqFmtPreco(_rqParsePreco(this.value))"></div></td>' +
@@ -15504,19 +15522,15 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         let h = '';
         const L = rq.lancamento;
         if (L && L.ids && L.ids.length) {
-            const quando = L.em ? new Date(L.em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
             const contas = (dadosCache.contasReceber || []).filter(c => L.ids.includes(c.id));
-            const rec = contas.filter(c => c.status === 'recebido').length;
-            const contaDe = _rqContasPorCliente();
-            const semConta = _rqPorCliente().filter(g => !contaDe[g.cliente_id]).length;
-            const txtRec = contas.length ? ' · <b>' + (rec === contas.length ? 'todos recebidos' : rec + ' de ' + contas.length + ' recebido' + (rec !== 1 ? 's' : '')) + '</b>' : '';
-            const txtSem = semConta ? ' · ' + semConta + ' cliente' + (semConta > 1 ? 's' : '') + ' ainda sem entrada' : '';
-            if (L.assinatura && L.assinatura !== _rqAssinatura())
-                h = '<span class="rq-alt">⚠️ Valores alterados depois da entrada de ' + quando + '. Clique em <b>📥 Dar entrada nas receitas</b> para atualizar Contas a Receber.</span>';
-            else if (!L.assinatura)
-                h = '<span class="rq-ok">✅ ' + L.ids.length + ' cliente' + (L.ids.length > 1 ? 's' : '') + ' lançado' + (L.ids.length > 1 ? 's' : '') + ' em Contas a Receber' + txtRec + txtSem + '</span>';
-            else
-                h = '<span class="rq-ok">✅ Entrada já dada em Contas a Receber em ' + quando + ' — ' + L.ids.length + ' lançamento' + (L.ids.length > 1 ? 's' : '') + ', ' + _rqMoeda(L.total || 0) + txtRec + txtSem + '</span>';
+            const rec = contas.filter(c => c.status === 'recebido');
+            const valorCli = {}; _rqPorCliente().forEach(g => { valorCli[g.cliente_id] = g.valor; });
+            const divergentes = rec.filter(c => Math.abs((parseFloat(c.valor) || 0) - (valorCli[c.cliente_id] || 0)) > 0.004);
+            const compTxt = L.competencia ? new Date(L.competencia + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+            h = '<span class="rq-ok">✅ Em Contas a Receber: ' + contas.length + ' lançamento' + (contas.length !== 1 ? 's' : '') + ', ' + _rqMoeda(L.total || 0) +
+                (compTxt ? ' · competência ' + compTxt : '') + ' · <b>' + (rec.length === contas.length && contas.length ? 'todos recebidos' : rec.length + ' de ' + contas.length + ' recebido' + (rec.length !== 1 ? 's' : '')) + '</b></span>';
+            if (divergentes.length)
+                h += ' <span class="rq-alt">⚠️ ' + divergentes.length + ' cliente(s) já recebido(s) com valor diferente da quinzena — faça o estorno para atualizar.</span>';
         }
         const salvo = _rqSujo ? 'Salvando…' : (_rqUltimoSalvo ? 'Salvo às ' + _rqUltimoSalvo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '');
         el.innerHTML = h + (salvo ? '<span class="rq-salvo">' + salvo + '</span>' : '');
@@ -15587,6 +15601,7 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
             if (r === null) { if (manual) showAlert('Não foi possível salvar. Verifique a conexão.', 'alertRQ', 'error'); return false; }
             _rqSujo = false; _rqUltimoSalvo = new Date();
             rqRenderStatus();
+            await _rqSincronizar(rq);
             if (manual) showAlert('Quinzena salva!', 'alertRQ', 'success');
             return true;
         })();
@@ -15687,13 +15702,105 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
     }
 
     // ---------- Dar entrada em Contas a Receber ----------
+    // =====================================================================
+    // LANÇAMENTO AUTOMÁTICO EM CONTAS A RECEBER
+    // A cada gravação da quinzena, cada cliente com valor vira (ou atualiza) um
+    // lançamento PENDENTE em Contas a Receber, pela data de competência.
+    // Assim entra na DRE (competência) na hora; no fluxo de caixa realizado só
+    // entra quando for dado como recebido. Lançamentos recebidos não são alterados.
+    // =====================================================================
+    const _rqFimQuinzena = alvo => { const d = _rqDias(alvo.ano, alvo.mes, alvo.q); return _rqISO(alvo.ano, alvo.mes, d[d.length - 1]); };
+    function _rqGruposDe(alvo) {
+        const salvo = rq; rq = alvo;
+        try { return _rqPorCliente(); } finally { rq = salvo; }
+    }
+    let _rqSyncAtual = null, _rqSyncDeNovo = false;
+    async function _rqSincronizar(alvo, forcarDatas) {
+        if (!alvo || !alvo.id || !alvo.ano) return true;
+        if (_rqSyncAtual) { _rqSyncDeNovo = true; await _rqSyncAtual; if (!_rqSyncDeNovo && !forcarDatas) return true; }
+        _rqSyncDeNovo = false;
+        _rqSyncAtual = (async () => {
+            const L = Object.assign({}, alvo.lancamento || {});
+            const comp = L.competencia || _rqFimQuinzena(alvo), venc = L.vencimento || _rqFimQuinzena(alvo);
+            const rotulo = alvo.q + 'ª quinzena ' + String(alvo.mes).padStart(2, '0') + '/' + alvo.ano;
+            const grupos = _rqGruposDe(alvo);
+            let contas = [];
+            if (L.ids && L.ids.length) {
+                contas = await fetchSupabase('contas_a_receber', 'GET', null, 'id=in.(' + L.ids.join(',') + ')');
+                if (contas === null) return false;
+            }
+            const porCliente = {};
+            contas.forEach(c => { (porCliente[c.cliente_id] = porCliente[c.cliente_id] || []).push(c); });
+            const ids = [], removidos = [], atualizados = {};
+            let erros = 0;
+            // clientes sem valor (ou removidos da quinzena): apaga o pendente, mantém o recebido
+            for (const cid of Object.keys(porCliente)) {
+                if (grupos.some(g => String(g.cliente_id) === cid)) continue;
+                for (const c of porCliente[cid]) {
+                    if (c.status === 'recebido') { ids.push(c.id); continue; }
+                    const d = await fetchSupabase('contas_a_receber', 'DELETE', null, 'id=eq.' + c.id);
+                    if (d === null) { erros++; ids.push(c.id); } else removidos.push(c.id);
+                }
+            }
+            for (const g of grupos) {
+                const dados = {
+                    cliente_id: g.cliente_id, descricao: 'Refeições ' + rotulo, valor: g.valor,
+                    data_competencia: comp, data_vencimento: venc, parcela_atual: 1, total_parcelas: 1,
+                    observacoes: 'Receitas por Quinzena — ' + _rqNum(g.refeicoes) + ' refeições. ' + g.linhas.join('; ')
+                };
+                const existentes = porCliente[g.cliente_id] || [];
+                const rec = existentes.find(c => c.status === 'recebido');
+                const pend = existentes.find(c => c.status !== 'recebido');
+                // extras (duplicados pendentes) são apagados
+                for (const c of existentes) {
+                    if (c === rec || c === pend) continue;
+                    if (c.status === 'recebido') { ids.push(c.id); continue; }
+                    const d = await fetchSupabase('contas_a_receber', 'DELETE', null, 'id=eq.' + c.id);
+                    if (d === null) { erros++; ids.push(c.id); } else removidos.push(c.id);
+                }
+                if (rec) { ids.push(rec.id); if (pend) { const d = await fetchSupabase('contas_a_receber', 'DELETE', null, 'id=eq.' + pend.id); if (d === null) { erros++; ids.push(pend.id); } else removidos.push(pend.id); } continue; }
+                if (pend) {
+                    const mudou = Math.abs((parseFloat(pend.valor) || 0) - g.valor) > 0.004 || pend.observacoes !== dados.observacoes || pend.descricao !== dados.descricao ||
+                                  (forcarDatas && (pend.data_competencia !== comp || pend.data_vencimento !== venc));
+                    if (mudou) {
+                        const patch = { valor: dados.valor, observacoes: dados.observacoes, descricao: dados.descricao };
+                        if (forcarDatas) { patch.data_competencia = comp; patch.data_vencimento = venc; }
+                        const r = await fetchSupabase('contas_a_receber', 'PATCH', patch, 'id=eq.' + pend.id);
+                        if (r && r[0]) atualizados[pend.id] = r[0]; else if (r === null) erros++;
+                    }
+                    ids.push(pend.id);
+                } else {
+                    const r = await fetchSupabase('contas_a_receber', 'POST', Object.assign({ status: 'pendente', nota_fiscal: null }, dados));
+                    if (r && r[0]) { ids.push(r[0].id); atualizados[r[0].id] = r[0]; } else erros++;
+                }
+            }
+            // mantém o cache de Contas a Receber em dia (status, botões, DRE ao abrir)
+            if (Array.isArray(dadosCache.contasReceber)) {
+                let lista = dadosCache.contasReceber.filter(c => !removidos.includes(c.id));
+                Object.values(atualizados).forEach(n => { const k = lista.findIndex(c => c.id === n.id); if (k >= 0) lista[k] = n; else lista.push(n); });
+                contas.forEach(c => { if (ids.includes(c.id) && !lista.some(x => x.id === c.id)) lista.push(c); });
+                dadosCache.contasReceber = lista;
+            }
+            const total = grupos.reduce((s, g) => s + g.valor, 0);
+            const antes = JSON.stringify(alvo.lancamento || null);
+            alvo.lancamento = Object.assign(L, { ids: ids, competencia: comp, vencimento: venc, total: Math.round(total * 100) / 100, em: L.em || new Date().toISOString(), auto: true });
+            delete alvo.lancamento.assinatura;
+            if (JSON.stringify(alvo.lancamento) !== antes)
+                await fetchSupabase('receitas_quinzena', 'PATCH', { lancamento: alvo.lancamento }, 'id=eq.' + alvo.id);
+            if (alvo === rq) rqRenderRecebimentos();
+            if (erros) showAlert('⚠️ ' + erros + ' lançamento(s) não puderam ser atualizados em Contas a Receber. Clique em 🔄 Atualizar e tente de novo.', 'alertRQ', 'error');
+            return !erros;
+        })();
+        try { return await _rqSyncAtual; } finally { _rqSyncAtual = null; }
+    }
+
+    // Ajustar competência e vencimento dos lançamentos pendentes da quinzena
     function rqAbrirLancar() {
         const grupos = _rqPorCliente();
-        if (!grupos.length) { showAlert('Não há valores para lançar nesta quinzena.', 'alertRQ', 'error'); return; }
-        const dias = _rqDias(rq.ano, rq.mes, rq.q), fim = _rqISO(rq.ano, rq.mes, dias[dias.length - 1]);
-        const L = rq.lancamento;
-        document.getElementById('rqComp').value = (L && L.competencia) || fim;
-        document.getElementById('rqVenc').value = (L && L.vencimento) || fim;
+        if (!grupos.length) { showAlert('Não há valores nesta quinzena.', 'alertRQ', 'error'); return; }
+        const fim = _rqFimQuinzena(rq), L = rq.lancamento || {};
+        document.getElementById('rqComp').value = L.competencia || fim;
+        document.getElementById('rqVenc').value = L.vencimento || fim;
         document.getElementById('rqLancSub').textContent = rq.q + 'ª quinzena de ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano + ' — um lançamento por cliente em Contas a Receber';
         let tot = 0, ref = 0;
         document.getElementById('rqPrevia').innerHTML = grupos.map(g => {
@@ -15702,10 +15809,8 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         }).join('') + '<tr style="font-weight:700;background:#fff4ec;"><td>TOTAL</td><td style="text-align:right;">' + _rqNum(ref) + '</td><td style="text-align:right;">' + _rqMoeda(Math.round(tot * 100) / 100) + '</td></tr>';
         document.getElementById('rqLancResumo').textContent = grupos.length + ' lançamento' + (grupos.length > 1 ? 's' : '') + ' · ' + _rqMoeda(Math.round(tot * 100) / 100);
         const av = document.getElementById('rqAviso');
-        if (L && L.ids && L.ids.length) {
-            av.innerHTML = '⚠️ Esta quinzena já teve entrada em ' + (L.em ? new Date(L.em).toLocaleDateString('pt-BR') : '') + '. Ao confirmar, os lançamentos <b>pendentes</b> gerados antes serão substituídos pelos valores atuais. Os que já foram <b>recebidos</b> não são alterados.';
-            av.style.display = 'block';
-        } else av.style.display = 'none';
+        av.innerHTML = 'Os lançamentos já são criados e atualizados <b>automaticamente</b> em Contas a Receber a cada alteração da quinzena. Aqui você ajusta a <b>competência</b> (mês da DRE) e o <b>vencimento</b> dos que ainda estão pendentes. Os já recebidos não são alterados.';
+        av.style.display = 'block';
         document.getElementById('modalRQLancar').classList.add('active');
     }
 
@@ -15715,61 +15820,16 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon;</pre>
         const btn = document.getElementById('rqBtnConfirmar');
         btn.disabled = true;
         try {
-            if (!(await rqSalvar(false))) { alert(_rqTabelaOk ? 'Não foi possível salvar a quinzena. Verifique a conexão e tente novamente.' : 'Crie a tabela receitas_quinzena no Supabase antes de dar entrada.'); return; }
-            const grupos = _rqPorCliente();
-            const rotulo = rq.q + 'ª quinzena ' + String(rq.mes).padStart(2, '0') + '/' + rq.ano;
-            const mantidos = [], travados = new Set();
-            let erros = 0;
-
-            // 1) Lançamentos anteriores desta quinzena: apaga os pendentes, mantém os recebidos
-            const ant = (rq.lancamento && rq.lancamento.ids) || [];
-            if (ant.length) {
-                const existentes = await fetchSupabase('contas_a_receber', 'GET', null, 'id=in.(' + ant.join(',') + ')');
-                if (existentes === null) { alert('Não foi possível conferir os lançamentos anteriores. Tente novamente.'); return; }
-                for (const c of existentes) {
-                    if (c.status === 'recebido') { mantidos.push(c.id); travados.add(c.cliente_id); }
-                    else { const d = await fetchSupabase('contas_a_receber', 'DELETE', null, 'id=eq.' + c.id); if (d === null) { erros++; mantidos.push(c.id); travados.add(c.cliente_id); } }
-                }
-            }
-
-            // 2) Novo lançamento por cliente
-            const novos = [];
-            for (const g of grupos) {
-                if (travados.has(g.cliente_id)) continue;
-                const dados = {
-                    cliente_id: g.cliente_id,
-                    descricao: 'Refeições ' + rotulo,
-                    valor: g.valor,
-                    data_competencia: comp,
-                    data_vencimento: venc,
-                    parcela_atual: 1,
-                    total_parcelas: 1,
-                    status: 'pendente',
-                    observacoes: 'Receitas por Quinzena — ' + _rqNum(g.refeicoes) + ' refeições. ' + g.linhas.join('; '),
-                    nota_fiscal: null
-                };
-                const r = await fetchSupabase('contas_a_receber', 'POST', dados);
-                if (r && r[0]) novos.push(r[0].id); else erros++;
-            }
-
-            const ids = mantidos.concat(novos);
-            const total = grupos.reduce((s, g) => s + g.valor, 0);
-            rq.lancamento = { feriados: (rq.lancamento && rq.lancamento.feriados) || [], ids: ids, em: new Date().toISOString(), competencia: comp, vencimento: venc, total: Math.round(total * 100) / 100, assinatura: _rqAssinatura() };
-            _rqSujo = true;
-            await rqSalvar(false);
+            if (!(await rqSalvar(false))) { alert(_rqTabelaOk ? 'Não foi possível salvar a quinzena. Verifique a conexão e tente novamente.' : 'Crie a tabela receitas_quinzena no Supabase antes.'); return; }
+            rq.lancamento = Object.assign({}, rq.lancamento || {}, { competencia: comp, vencimento: venc });
+            const ok = await _rqSincronizar(rq, true);
             closeModal('modalRQLancar');
-            rqRenderStatus();
-
-            let msg = novos.length + ' lançamento' + (novos.length !== 1 ? 's' : '') + ' gerado' + (novos.length !== 1 ? 's' : '') + ' em Contas a Receber.';
-            if (travados.size) msg += ' ' + travados.size + ' cliente(s) já recebido(s) não foram alterados.';
-            if (erros) msg += ' ⚠️ ' + erros + ' erro(s) — confira em Contas a Receber.';
-            showAlert(msg, 'alertRQ', erros ? 'error' : 'success');
-            if (typeof carregarContasReceber === 'function') await carregarContasReceber();
-            rqRender();
+            if (ok) showAlert('Competência e vencimento atualizados nos lançamentos pendentes.', 'alertRQ', 'success');
             if (typeof atualizarDashboard === 'function') atualizarDashboard();
         } finally { btn.disabled = false; }
     }
 
+    // Lançamento em Contas a Receber de cada cliente desta quinzena
     function _rqContasPorCliente() {
         const L = rq.lancamento, m = {};
         if (!L || !L.ids || !L.ids.length) return m;
