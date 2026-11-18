@@ -4500,6 +4500,11 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
                 headers['Prefer'] = 'return=representation';
             }
 
+            // GET sem limit/offset próprio: busca paginada em blocos (Supabase devolve no máx. 1.000 linhas por consulta)
+            if (metodo === 'GET' && !/(^|&)(limit|offset)=/.test(filtros || '')) {
+                return await _fetchSupabasePaginado(tabela, filtros || '', headers);
+            }
+
             const opcoes = { method: metodo, headers: headers };
             if (dados) opcoes.body = JSON.stringify(dados);
 
@@ -4526,6 +4531,53 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
             console.error('Erro de rede:', erro);
             return null;
         }
+    }
+
+    // Busca todas as linhas de uma tabela em blocos de 1.000, com ordem estável
+    async function _fetchSupabasePaginado(tabela, filtros, headers) {
+        const BLOCO = 1000;
+        const temOrdem = /(^|&)order=/.test(filtros);
+        let base = filtros;
+        let ordemAdicionada = false;
+        if (!temOrdem) {
+            base = filtros ? filtros + '&order=id.asc' : 'order=id.asc';
+            ordemAdicionada = true;
+        } else if (!/(^|[&,=])id\.(asc|desc)/.test(filtros)) {
+            // desempate por id para a paginação não repetir/pular linhas
+            base = filtros.replace(/(^|&)order=([^&]*)/, (m, p, o) => p + 'order=' + o + ',id.asc');
+            ordemAdicionada = true;
+        }
+
+        let todos = [];
+        let offset = 0;
+        while (true) {
+            const url = API_URL + '/' + tabela + '?' + base + '&limit=' + BLOCO + '&offset=' + offset;
+            const resposta = await fetch(url, { method: 'GET', headers: headers });
+            const text = await resposta.text();
+
+            if (!resposta.ok) {
+                // Tabela sem coluna "id": refaz sem a ordem adicionada
+                if (offset === 0 && ordemAdicionada && resposta.status === 400) {
+                    base = filtros;
+                    ordemAdicionada = false;
+                    continue;
+                }
+                _ultimoErroSupabase = { status: resposta.status, body: text };
+                console.error('Erro Supabase [GET ' + tabela + '] HTTP ' + resposta.status + ':', text);
+                mostrarErroBD(tabela, 'GET', resposta.status, text);
+                return null;
+            }
+
+            let lote = [];
+            if (text && text.trim() !== '') {
+                try { lote = JSON.parse(text); } catch(e) { lote = []; }
+            }
+            if (!Array.isArray(lote)) return lote;
+            todos = todos.concat(lote);
+            if (lote.length < BLOCO) break;
+            offset += BLOCO;
+        }
+        return todos;
     }
 
     function mostrarErroBD(tabela, metodo, status, body) {
