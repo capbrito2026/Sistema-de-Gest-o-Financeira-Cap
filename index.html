@@ -4400,6 +4400,30 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
         });
     }
 
+    // Ao abrir o sistema, todos os filtros de mês e ano começam no mês/ano atual
+    function aplicarMesAnoAtualFiltros() {
+        const hoje = new Date();
+        const ano = String(hoje.getFullYear());
+        const mes = hoje.getMonth() + 1;
+        // Grava só o mês/ano alterado (não regrava os demais filtros, cujas listas ainda não carregaram)
+        const setOpt = (id, valores) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const v = valores.find(x => Array.prototype.some.call(el.options, o => o.value === x));
+            if (v === undefined) return;
+            el.value = v;
+            try { localStorage.setItem(_filtroKey(id), v); } catch (e) { /* ignora */ }
+        };
+        const anos = ['dashFiltroAno', 'extratoFiltroAno', 'filtroAnoReceber', 'filtroAnoPagar', 'filtroAnoRecebida', 'filtroAnoPaga',
+            'filtroAnoCalendario', 'filtroAnoChequeComp', 'filtroAnoRelReceber', 'filtroAnoRelPagar', 'filtroAnoCatMensal',
+            'filtroAnoAnaliseCat', 'filtroAnoGrupoDRE', 'filtroAnoDFC', 'filtroAnoFluxoDiario', 'filtroAnoFCP', 'filtroAnoDRE'];
+        const meses = ['dashFiltroMes', 'extratoFiltroMes', 'filtroMesReceber', 'filtroMesPagar', 'filtroMesRecebida', 'filtroMesPaga',
+            'filtroMesChequeComp', 'filtroMesRelReceber', 'filtroMesRelPagar', 'filtroMesAnaliseCat', 'filtroMesFluxoDiario', 'filtroMesDRE'];
+        anos.forEach(id => setOpt(id, [ano]));
+        meses.forEach(id => setOpt(id, [String(mes).padStart(2, '0'), String(mes)]));
+        setOpt('filtroMesCalendario', [String(mes - 1)]); // calendário usa meses 0–11
+    }
+
     // Sobrescreve os onchange dos filtros para salvar automaticamente
     function _bindFiltrosSave() {
         _FILTER_IDS.forEach(id => {
