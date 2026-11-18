@@ -4625,6 +4625,7 @@ grant usage, select on sequence public.receitas_quinzena_id_seq to anon, authent
         carregarDRELegendas();
         atualizarLegendaMetas();
         restaurarFiltros();
+        aplicarMesAnoAtualFiltros();
         _bindFiltrosSave();
         // Carrega dados de referência em paralelo (categorias primeiro, pois produtos
         // usa o nome da categoria ao renderizar sua tabela).
